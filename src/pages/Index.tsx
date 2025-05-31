@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Check, Calendar, Heart, Utensils, Clock, Bell, Leaf, Footprints, Droplets, Dumbbell, X, Apple, Moon } from "lucide-react";
+import { Check, Calendar, Heart, Utensils, Clock, Bell, Leaf, Footprints, Droplets, Dumbbell, Ban, Apple, Moon } from "lucide-react";
 import { MobileChallengeCard } from "@/components/MobileChallengeCard";
 import { MobileWeeklyProgress } from "@/components/MobileWeeklyProgress";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -63,7 +63,7 @@ const Index = () => {
       id: "no-sugar",
       title: "Journée sans sucre",
       description: "Évitez le sucre ajouté aujourd'hui",
-      icon: X,
+      icon: Ban,
       difficulty: "Difficile",
       points: 20,
       color: "detox",

@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Heart, Bell, Utensils, Clock, Calendar, Leaf, ChevronRight, Footprints, Droplets, Dumbbell, X, Apple, Moon } from "lucide-react";
+import { Check, Heart, Bell, Utensils, Clock, Calendar, Leaf, ChevronRight, Footprints, Droplets, Dumbbell, Ban, Apple, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -72,12 +72,6 @@ export const MobileChallengeCard = ({ challenge, isCompleted, onToggle }: Mobile
             colorClasses[challenge.color as keyof typeof colorClasses]
           )}>
             <Icon className="h-6 w-6 text-white" />
-            {/* Special overlay for no-sugar challenge */}
-            {challenge.id === "no-sugar" && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-8 h-0.5 bg-white rounded-full transform rotate-45"></div>
-              </div>
-            )}
           </div>
           <div className="flex flex-col gap-2 items-end">
             <Badge 
