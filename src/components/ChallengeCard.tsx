@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, Heart, Bell, Utensils, Clock, Calendar, Leaf } from "lucide-react";
+import { Check, Heart, Bell, Utensils, Clock, Calendar, Leaf, Footprints, Droplets, Dumbbell, X, Apple, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Challenge {
@@ -31,7 +31,13 @@ const difficultyColors = {
 const colorClasses = {
   wellness: "from-wellness-400 to-wellness-600",
   energy: "from-energy-400 to-energy-600", 
-  motivation: "from-motivation-400 to-motivation-600"
+  motivation: "from-motivation-400 to-motivation-600",
+  hydration: "from-blue-400 to-blue-600",
+  nutrition: "from-green-400 to-green-600",
+  fitness: "from-orange-400 to-orange-600",
+  detox: "from-red-400 to-red-600",
+  vitamins: "from-emerald-400 to-emerald-600",
+  rest: "from-indigo-400 to-indigo-600"
 };
 
 export const ChallengeCard = ({ challenge, isCompleted, onToggle }: ChallengeCardProps) => {
@@ -62,10 +68,16 @@ export const ChallengeCard = ({ challenge, isCompleted, onToggle }: ChallengeCar
       <CardHeader className="relative">
         <div className="flex items-start justify-between">
           <div className={cn(
-            "p-3 rounded-xl bg-gradient-to-br shadow-lg",
+            "p-3 rounded-xl bg-gradient-to-br shadow-lg relative",
             colorClasses[challenge.color as keyof typeof colorClasses]
           )}>
             <Icon className="h-6 w-6 text-white" />
+            {/* Special overlay for no-sugar challenge */}
+            {challenge.id === "no-sugar" && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-8 h-0.5 bg-white rounded-full transform rotate-45"></div>
+              </div>
+            )}
           </div>
           <div className="flex flex-col gap-2 items-end">
             <Badge 

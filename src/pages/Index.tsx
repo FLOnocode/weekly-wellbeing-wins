@@ -1,10 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { Check, Calendar, Heart, Utensils, Clock, Bell, Leaf } from "lucide-react";
+import { Check, Calendar, Heart, Utensils, Clock, Bell, Leaf, Footprints, Droplets, Dumbbell, X, Apple, Moon } from "lucide-react";
 import { MobileChallengeCard } from "@/components/MobileChallengeCard";
 import { MobileWeeklyProgress } from "@/components/MobileWeeklyProgress";
 import { MobileHeader } from "@/components/MobileHeader";
@@ -24,7 +23,7 @@ const Index = () => {
       id: "steps",
       title: "10 000 pas",
       description: "Marchez 10 000 pas aujourd'hui",
-      icon: Heart,
+      icon: Footprints,
       difficulty: "Facile",
       points: 10,
       color: "wellness",
@@ -34,10 +33,10 @@ const Index = () => {
       id: "water",
       title: "1,5L d'eau",
       description: "Buvez au moins 1,5 litres d'eau",
-      icon: Bell,
+      icon: Droplets,
       difficulty: "Facile",
       points: 8,
-      color: "motivation",
+      color: "hydration",
       tips: "Gardez une bouteille d'eau près de vous, mettez des rappels sur votre téléphone"
     },
     {
@@ -47,47 +46,47 @@ const Index = () => {
       icon: Utensils,
       difficulty: "Moyen",
       points: 15,
-      color: "energy",
+      color: "nutrition",
       tips: "Privilégiez les légumes, protéines maigres et céréales complètes. Planifiez vos repas à l'avance"
     },
     {
       id: "exercise",
       title: "10 min d'exercice",
       description: "Faites 10 minutes d'activité physique",
-      icon: Clock,
+      icon: Dumbbell,
       difficulty: "Facile",
       points: 12,
-      color: "wellness",
+      color: "fitness",
       tips: "Yoga, étirements, marche rapide ou exercices de renforcement. Commencez petit !"
     },
     {
       id: "no-sugar",
       title: "Journée sans sucre",
       description: "Évitez le sucre ajouté aujourd'hui",
-      icon: Check,
+      icon: X,
       difficulty: "Difficile",
       points: 20,
-      color: "energy",
+      color: "detox",
       tips: "Lisez les étiquettes, privilégiez les fruits frais, préparez des collations saines"
     },
     {
       id: "fruits-veggies",
       title: "5 fruits & légumes",
       description: "Consommez 5 portions de fruits et légumes",
-      icon: Leaf,
+      icon: Apple,
       difficulty: "Moyen",
       points: 15,
-      color: "wellness",
+      color: "vitamins",
       tips: "Variez les couleurs pour plus de nutriments. Ajoutez des légumes à chaque repas"
     },
     {
       id: "sleep",
       title: "8h de sommeil",
       description: "Dormez au moins 8 heures",
-      icon: Calendar,
+      icon: Moon,
       difficulty: "Moyen",
       points: 12,
-      color: "motivation",
+      color: "rest",
       tips: "Éteignez les écrans 1h avant le coucher, créez une routine relaxante"
     }
   ];
