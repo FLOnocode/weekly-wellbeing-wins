@@ -1,11 +1,183 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Check, Calendar, Heart, Utensils, Clock, Bell, Leaf } from "lucide-react";
+import { ChallengeCard } from "@/components/ChallengeCard";
+import { WeeklyProgress } from "@/components/WeeklyProgress";
+import { MotivationHeader } from "@/components/MotivationHeader";
 
 const Index = () => {
+  const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
+
+  const weeklyFocus = {
+    title: "Semaine du Bien-être",
+    description: "7 défis simples pour transformer votre quotidien",
+    progress: (completedChallenges.size / 7) * 100,
+    daysLeft: 5
+  };
+
+  const challenges = [
+    {
+      id: "steps",
+      title: "10 000 pas",
+      description: "Marchez 10 000 pas aujourd'hui",
+      icon: Heart,
+      difficulty: "Facile",
+      points: 10,
+      color: "wellness",
+      tips: "Prenez les escaliers, marchez pendant vos appels"
+    },
+    {
+      id: "water",
+      title: "1,5L d'eau",
+      description: "Buvez au moins 1,5 litres d'eau",
+      icon: Bell,
+      difficulty: "Facile",
+      points: 8,
+      color: "motivation",
+      tips: "Gardez une bouteille d'eau près de vous"
+    },
+    {
+      id: "healthy-meal",
+      title: "Repas sain",
+      description: "Préparez un repas équilibré",
+      icon: Utensils,
+      difficulty: "Moyen",
+      points: 15,
+      color: "energy",
+      tips: "Privilégiez les légumes, protéines et céréales complètes"
+    },
+    {
+      id: "exercise",
+      title: "10 min d'exercice",
+      description: "Faites 10 minutes d'activité physique",
+      icon: Clock,
+      difficulty: "Facile",
+      points: 12,
+      color: "wellness",
+      tips: "Yoga, étirements, ou simple marche rapide"
+    },
+    {
+      id: "no-sugar",
+      title: "Journée sans sucre",
+      description: "Évitez le sucre ajouté aujourd'hui",
+      icon: Check,
+      difficulty: "Difficile",
+      points: 20,
+      color: "energy",
+      tips: "Lisez les étiquettes, privilégiez les fruits frais"
+    },
+    {
+      id: "fruits-veggies",
+      title: "5 fruits & légumes",
+      description: "Consommez 5 portions de fruits et légumes",
+      icon: Leaf,
+      difficulty: "Moyen",
+      points: 15,
+      color: "wellness",
+      tips: "Variez les couleurs pour plus de nutriments"
+    },
+    {
+      id: "sleep",
+      title: "8h de sommeil",
+      description: "Dormez au moins 8 heures",
+      icon: Calendar,
+      difficulty: "Moyen",
+      points: 12,
+      color: "motivation",
+      tips: "Éteignez les écrans 1h avant le coucher"
+    }
+  ];
+
+  const toggleChallenge = (challengeId: string) => {
+    const newCompleted = new Set(completedChallenges);
+    if (newCompleted.has(challengeId)) {
+      newCompleted.delete(challengeId);
+    } else {
+      newCompleted.add(challengeId);
+    }
+    setCompletedChallenges(newCompleted);
+  };
+
+  const totalPoints = challenges
+    .filter(challenge => completedChallenges.has(challenge.id))
+    .reduce((sum, challenge) => sum + challenge.points, 0);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-to-br from-wellness-50 via-white to-motivation-50">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        {/* Header */}
+        <MotivationHeader 
+          totalPoints={totalPoints}
+          completedChallenges={completedChallenges.size}
+          totalChallenges={challenges.length}
+        />
+
+        {/* Weekly Progress */}
+        <WeeklyProgress 
+          weeklyFocus={weeklyFocus}
+          completedCount={completedChallenges.size}
+          totalCount={challenges.length}
+        />
+
+        {/* Challenges Grid */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-heading-3 font-bold text-gray-900">
+                Défis du jour
+              </h2>
+              <p className="text-body text-gray-600 mt-1">
+                Choisissez vos défis et commencez votre transformation
+              </p>
+            </div>
+            <Badge variant="secondary" className="text-body-sm">
+              {completedChallenges.size}/{challenges.length} terminés
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {challenges.map((challenge) => (
+              <ChallengeCard
+                key={challenge.id}
+                challenge={challenge}
+                isCompleted={completedChallenges.has(challenge.id)}
+                onToggle={toggleChallenge}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Daily Summary */}
+        <Card className="mt-8 border-0 shadow-lg bg-gradient-to-r from-wellness-500 to-motivation-500 text-white">
+          <CardHeader>
+            <CardTitle className="text-heading-4 flex items-center gap-2">
+              <Heart className="h-6 w-6" />
+              Résumé de la journée
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-heading-2 font-bold">{totalPoints}</div>
+                <div className="text-body opacity-90">Points gagnés</div>
+              </div>
+              <div className="text-center">
+                <div className="text-heading-2 font-bold">{completedChallenges.size}</div>
+                <div className="text-body opacity-90">Défis réalisés</div>
+              </div>
+              <div className="text-center">
+                <div className="text-heading-2 font-bold">
+                  {Math.round((completedChallenges.size / challenges.length) * 100)}%
+                </div>
+                <div className="text-body opacity-90">Progression</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
