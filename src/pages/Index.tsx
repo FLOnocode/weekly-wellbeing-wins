@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Check, Calendar, Heart, Utensils, Clock, Bell, Leaf } from "lucide-react";
-import { ChallengeCard } from "@/components/ChallengeCard";
-import { WeeklyProgress } from "@/components/WeeklyProgress";
-import { MotivationHeader } from "@/components/MotivationHeader";
+import { MobileChallengeCard } from "@/components/MobileChallengeCard";
+import { MobileWeeklyProgress } from "@/components/MobileWeeklyProgress";
+import { MobileHeader } from "@/components/MobileHeader";
 
 const Index = () => {
   const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
@@ -28,7 +28,7 @@ const Index = () => {
       difficulty: "Facile",
       points: 10,
       color: "wellness",
-      tips: "Prenez les escaliers, marchez pendant vos appels"
+      tips: "Prenez les escaliers, marchez pendant vos appels, descendez un arrêt plus tôt"
     },
     {
       id: "water",
@@ -38,7 +38,7 @@ const Index = () => {
       difficulty: "Facile",
       points: 8,
       color: "motivation",
-      tips: "Gardez une bouteille d'eau près de vous"
+      tips: "Gardez une bouteille d'eau près de vous, mettez des rappels sur votre téléphone"
     },
     {
       id: "healthy-meal",
@@ -48,7 +48,7 @@ const Index = () => {
       difficulty: "Moyen",
       points: 15,
       color: "energy",
-      tips: "Privilégiez les légumes, protéines et céréales complètes"
+      tips: "Privilégiez les légumes, protéines maigres et céréales complètes. Planifiez vos repas à l'avance"
     },
     {
       id: "exercise",
@@ -58,7 +58,7 @@ const Index = () => {
       difficulty: "Facile",
       points: 12,
       color: "wellness",
-      tips: "Yoga, étirements, ou simple marche rapide"
+      tips: "Yoga, étirements, marche rapide ou exercices de renforcement. Commencez petit !"
     },
     {
       id: "no-sugar",
@@ -68,7 +68,7 @@ const Index = () => {
       difficulty: "Difficile",
       points: 20,
       color: "energy",
-      tips: "Lisez les étiquettes, privilégiez les fruits frais"
+      tips: "Lisez les étiquettes, privilégiez les fruits frais, préparez des collations saines"
     },
     {
       id: "fruits-veggies",
@@ -78,7 +78,7 @@ const Index = () => {
       difficulty: "Moyen",
       points: 15,
       color: "wellness",
-      tips: "Variez les couleurs pour plus de nutriments"
+      tips: "Variez les couleurs pour plus de nutriments. Ajoutez des légumes à chaque repas"
     },
     {
       id: "sleep",
@@ -88,7 +88,7 @@ const Index = () => {
       difficulty: "Moyen",
       points: 12,
       color: "motivation",
-      tips: "Éteignez les écrans 1h avant le coucher"
+      tips: "Éteignez les écrans 1h avant le coucher, créez une routine relaxante"
     }
   ];
 
@@ -108,40 +108,45 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-wellness-50 via-white to-motivation-50">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Header */}
-        <MotivationHeader 
-          totalPoints={totalPoints}
-          completedChallenges={completedChallenges.size}
-          totalChallenges={challenges.length}
-        />
+      {/* Header mobile fixe */}
+      <MobileHeader 
+        totalPoints={totalPoints}
+        completedChallenges={completedChallenges.size}
+        totalChallenges={challenges.length}
+      />
 
-        {/* Weekly Progress */}
-        <WeeklyProgress 
-          weeklyFocus={weeklyFocus}
-          completedCount={completedChallenges.size}
-          totalCount={challenges.length}
-        />
-
-        {/* Challenges Grid */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-heading-3 font-bold text-gray-900">
-                Défis du jour
-              </h2>
-              <p className="text-body text-gray-600 mt-1">
-                Choisissez vos défis et commencez votre transformation
-              </p>
+      {/* Contenu principal avec padding pour le header fixe */}
+      <div className="pt-20 pb-6">
+        <div className="container mx-auto px-4 max-w-lg">
+          {/* Message de motivation */}
+          <div className="text-center mb-6 px-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-wellness-100 text-wellness-700 rounded-full text-body-sm font-medium mb-3">
+              <span className="text-lg">✨</span>
+              Votre transformation commence ici
             </div>
-            <Badge variant="secondary" className="text-body-sm">
-              {completedChallenges.size}/{challenges.length} terminés
-            </Badge>
+            
+            <h1 className="text-heading-2 font-bold text-gradient mb-2">
+              Défis du jour
+            </h1>
+            
+            <p className="text-body text-gray-600 leading-relaxed">
+              Chaque petit pas vous rapproche de vos objectifs
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Progression hebdomadaire */}
+          <div className="mb-6">
+            <MobileWeeklyProgress 
+              weeklyFocus={weeklyFocus}
+              completedCount={completedChallenges.size}
+              totalCount={challenges.length}
+            />
+          </div>
+
+          {/* Liste des défis */}
+          <div className="space-y-4 mb-6">
             {challenges.map((challenge) => (
-              <ChallengeCard
+              <MobileChallengeCard
                 key={challenge.id}
                 challenge={challenge}
                 isCompleted={completedChallenges.has(challenge.id)}
@@ -149,35 +154,35 @@ const Index = () => {
               />
             ))}
           </div>
-        </div>
 
-        {/* Daily Summary */}
-        <Card className="mt-8 border-0 shadow-lg bg-gradient-to-r from-wellness-500 to-motivation-500 text-white">
-          <CardHeader>
-            <CardTitle className="text-heading-4 flex items-center gap-2">
-              <Heart className="h-6 w-6" />
-              Résumé de la journée
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-heading-2 font-bold">{totalPoints}</div>
-                <div className="text-body opacity-90">Points gagnés</div>
-              </div>
-              <div className="text-center">
-                <div className="text-heading-2 font-bold">{completedChallenges.size}</div>
-                <div className="text-body opacity-90">Défis réalisés</div>
-              </div>
-              <div className="text-center">
-                <div className="text-heading-2 font-bold">
-                  {Math.round((completedChallenges.size / challenges.length) * 100)}%
+          {/* Résumé quotidien */}
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-wellness-500 to-motivation-500 text-white">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-heading-4 flex items-center gap-2">
+                <Heart className="h-6 w-6" />
+                Résumé de la journée
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-heading-3 font-bold">{totalPoints}</div>
+                  <div className="text-body-sm opacity-90">Points</div>
                 </div>
-                <div className="text-body opacity-90">Progression</div>
+                <div>
+                  <div className="text-heading-3 font-bold">{completedChallenges.size}</div>
+                  <div className="text-body-sm opacity-90">Défis</div>
+                </div>
+                <div>
+                  <div className="text-heading-3 font-bold">
+                    {Math.round((completedChallenges.size / challenges.length) * 100)}%
+                  </div>
+                  <div className="text-body-sm opacity-90">Progression</div>
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
