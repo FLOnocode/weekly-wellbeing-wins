@@ -28,7 +28,7 @@ const Index = () => {
       icon: Footprints,
       difficulty: "Facile",
       points: 10,
-      color: "wellness",
+      color: "pink",
       tips: "Prenez les escaliers, marchez pendant vos appels, descendez un arrêt plus tôt"
     },
     {

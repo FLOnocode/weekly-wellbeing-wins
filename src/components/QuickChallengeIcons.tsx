@@ -24,7 +24,8 @@ const colorClasses = {
   fitness: "from-orange-400 to-orange-600",
   detox: "from-red-400 to-red-600",
   vitamins: "from-emerald-400 to-emerald-600",
-  rest: "from-indigo-400 to-indigo-600"
+  rest: "from-indigo-400 to-indigo-600",
+  pink: "from-pink-400 to-pink-600"
 };
 
 const iconColors = {
@@ -36,7 +37,8 @@ const iconColors = {
   fitness: "text-orange-500",
   detox: "text-red-500",
   vitamins: "text-emerald-500",
-  rest: "text-indigo-500"
+  rest: "text-indigo-500",
+  pink: "text-pink-500"
 };
 
 export const QuickChallengeIcons = ({ challenges, completedChallenges, onToggle }: QuickChallengeIconsProps) => {

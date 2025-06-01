@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +37,8 @@ const colorClasses = {
   fitness: "from-orange-400 to-orange-600",
   detox: "from-red-400 to-red-600",
   vitamins: "from-emerald-400 to-emerald-600",
-  rest: "from-indigo-400 to-indigo-600"
+  rest: "from-indigo-400 to-indigo-600",
+  pink: "from-pink-400 to-pink-600"
 };
 
 export const MobileChallengeCard = ({ challenge, isCompleted, onToggle }: MobileChallengeCardProps) => {
