@@ -27,6 +27,18 @@ const colorClasses = {
   rest: "from-indigo-400 to-indigo-600"
 };
 
+const iconColors = {
+  wellness: "text-wellness-500",
+  energy: "text-energy-500", 
+  motivation: "text-motivation-500",
+  hydration: "text-blue-500",
+  nutrition: "text-green-500",
+  fitness: "text-orange-500",
+  detox: "text-red-500",
+  vitamins: "text-emerald-500",
+  rest: "text-indigo-500"
+};
+
 export const QuickChallengeIcons = ({ challenges, completedChallenges, onToggle }: QuickChallengeIconsProps) => {
   return (
     <div className="mb-6 px-2">
@@ -44,35 +56,25 @@ export const QuickChallengeIcons = ({ challenges, completedChallenges, onToggle 
               key={challenge.id}
               onClick={() => onToggle(challenge.id)}
               className={cn(
-                "relative p-4 rounded-2xl transition-all duration-300 active:scale-95 touch-manipulation shadow-lg",
-                isCompleted
-                  ? "bg-wellness-100 ring-2 ring-wellness-400"
-                  : "bg-gradient-to-br hover:shadow-xl active:shadow-md",
-                !isCompleted && colorClasses[challenge.color as keyof typeof colorClasses]
+                "relative p-3 rounded-xl transition-all duration-300 active:scale-95 touch-manipulation",
+                "backdrop-blur-md bg-white/70 border border-white/30 shadow-lg hover:shadow-xl active:shadow-md",
+                "h-12 w-12 flex items-center justify-center"
               )}
             >
               {/* Icône du défi */}
               <Icon 
                 className={cn(
-                  "h-6 w-6 mx-auto transition-colors",
-                  isCompleted ? "text-wellness-600" : "text-white"
+                  "h-5 w-5 transition-colors",
+                  iconColors[challenge.color as keyof typeof iconColors]
                 )} 
               />
               
               {/* Indicateur de complétion */}
               {isCompleted && (
-                <div className="absolute -top-1 -right-1 h-5 w-5 bg-wellness-500 rounded-full flex items-center justify-center animate-scale-in">
-                  <Check className="h-3 w-3 text-white" />
+                <div className="absolute -top-1 -right-1 h-4 w-4 bg-wellness-500 rounded-full flex items-center justify-center animate-scale-in">
+                  <Check className="h-2.5 w-2.5 text-white" />
                 </div>
               )}
-              
-              {/* Titre du défi (petit) */}
-              <div className={cn(
-                "text-xs font-medium mt-1 leading-tight",
-                isCompleted ? "text-wellness-700" : "text-white/90"
-              )}>
-                {challenge.title.split(' ').slice(0, 2).join(' ')}
-              </div>
             </button>
           );
         })}
