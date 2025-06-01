@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Check, Calendar, Heart, Utensils, Clock, Bell, Leaf, Footprints, Drople
 import { MobileChallengeCard } from "@/components/MobileChallengeCard";
 import { MobileWeeklyProgress } from "@/components/MobileWeeklyProgress";
 import { MobileHeader } from "@/components/MobileHeader";
+import { QuickChallengeIcons } from "@/components/QuickChallengeIcons";
 
 const Index = () => {
   const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
@@ -132,6 +134,13 @@ const Index = () => {
               Chaque petit pas vous rapproche de vos objectifs
             </p>
           </div>
+
+          {/* Accès rapide aux défis */}
+          <QuickChallengeIcons 
+            challenges={challenges}
+            completedChallenges={completedChallenges}
+            onToggle={toggleChallenge}
+          />
 
           {/* Progression hebdomadaire */}
           <div className="mb-6">
