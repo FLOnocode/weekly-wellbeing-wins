@@ -7,6 +7,7 @@ import { ChallengeCarousel } from "@/components/ChallengeCarousel";
 import { MobileWeeklyProgress } from "@/components/MobileWeeklyProgress";
 import { MobileHeader } from "@/components/MobileHeader";
 import { QuickChallengeIcons } from "@/components/QuickChallengeIcons";
+import { NutriBot } from "@/components/NutriBot";
 
 const Index = () => {
   const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
@@ -223,6 +224,9 @@ const Index = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* NutriBot - Conseiller nutrition */}
+      <NutriBot />
     </div>
   );
 };
