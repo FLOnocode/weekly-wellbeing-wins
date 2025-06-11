@@ -146,8 +146,8 @@ const Index = () => {
         />
       </div>
 
-      {/* Contenu principal */}
-      <div className="relative z-10 pt-20 pb-6">
+      {/* Contenu principal avec marge ajoutée */}
+      <div className="relative z-10 pt-24 pb-6">
         <div className="container mx-auto px-4 max-w-lg">
           {/* Message de motivation avec style glassmorphisme */}
           <motion.div 
