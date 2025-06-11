@@ -1,11 +1,9 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Check, Calendar, Heart, Utensils, Clock, Bell, Leaf, Footprints, Droplets, Dumbbell, Ban, Apple, Moon } from "lucide-react";
-import { MobileChallengeCard } from "@/components/MobileChallengeCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon } from "lucide-react";
+import { motion } from "framer-motion";
+import { ChallengeCarousel } from "@/components/ChallengeCarousel";
 import { MobileWeeklyProgress } from "@/components/MobileWeeklyProgress";
 import { MobileHeader } from "@/components/MobileHeader";
 import { QuickChallengeIcons } from "@/components/QuickChallengeIcons";
@@ -108,88 +106,121 @@ const Index = () => {
     .reduce((sum, challenge) => sum + challenge.points, 0);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header mobile fixe */}
-      <MobileHeader 
-        totalPoints={totalPoints}
-        completedChallenges={completedChallenges.size}
-        totalChallenges={challenges.length}
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Effets de fond similaires au sign-in-card */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
+      
+      {/* Texture de bruit subtile */}
+      <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundSize: '200px 200px'
+        }}
       />
 
-      {/* Contenu principal avec padding pour le header fixe */}
-      <div className="pt-20 pb-6">
+      {/* Lueur radiale du haut */}
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-wellness-400/20 blur-[80px]" />
+      <motion.div 
+        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-wellness-300/20 blur-[60px]"
+        animate={{ 
+          opacity: [0.15, 0.3, 0.15],
+          scale: [0.98, 1.02, 0.98]
+        }}
+        transition={{ 
+          duration: 8, 
+          repeat: Infinity,
+          repeatType: "mirror"
+        }}
+      />
+
+      {/* Spots lumineux animés */}
+      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40" />
+      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
+
+      {/* Header mobile avec style adapté */}
+      <div className="relative z-20">
+        <MobileHeader 
+          totalPoints={totalPoints}
+          completedChallenges={completedChallenges.size}
+          totalChallenges={challenges.length}
+        />
+      </div>
+
+      {/* Contenu principal */}
+      <div className="relative z-10 pt-20 pb-6">
         <div className="container mx-auto px-4 max-w-lg">
-          {/* Message de motivation */}
-          <div className="text-center mb-6 px-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-wellness-100 text-wellness-700 rounded-full text-body-sm font-medium mb-3">
+          {/* Message de motivation avec style glassmorphisme */}
+          <motion.div 
+            className="text-center mb-8 px-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-full text-sm font-medium mb-4">
               <span className="text-lg">✨</span>
               Votre transformation commence ici
             </div>
             
-            <h1 className="text-heading-2 font-bold text-gradient mb-2">
+            <h1 className="text-3xl font-bold text-white mb-3">
               Défis du jour
             </h1>
             
-            <p className="text-body text-gray-600 leading-relaxed">
+            <p className="text-white/70 leading-relaxed">
               Chaque petit pas vous rapproche de vos objectifs
             </p>
-          </div>
+          </motion.div>
 
-          {/* Accès rapide aux défis */}
-          <QuickChallengeIcons 
-            challenges={challenges}
-            completedChallenges={completedChallenges}
-            onToggle={toggleChallenge}
-          />
-
-          {/* Progression hebdomadaire */}
-          <div className="mb-6">
-            <MobileWeeklyProgress 
-              weeklyFocus={weeklyFocus}
-              completedCount={completedChallenges.size}
-              totalCount={challenges.length}
+          {/* Accès rapide aux défis - adapté au thème sombre */}
+          <div className="mb-8">
+            <QuickChallengeIcons 
+              challenges={challenges}
+              completedChallenges={completedChallenges}
+              onToggle={toggleChallenge}
             />
           </div>
 
-          {/* Liste des défis */}
-          <div className="space-y-4 mb-6">
-            {challenges.map((challenge) => (
-              <MobileChallengeCard
-                key={challenge.id}
-                challenge={challenge}
-                isCompleted={completedChallenges.has(challenge.id)}
-                onToggle={toggleChallenge}
-              />
-            ))}
+          {/* Nouveau carrousel de défis */}
+          <div className="mb-8">
+            <ChallengeCarousel 
+              challenges={challenges}
+              completedChallenges={completedChallenges}
+              onToggle={toggleChallenge}
+            />
           </div>
 
-          {/* Résumé quotidien */}
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-wellness-500 to-motivation-500 text-white">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-heading-4 flex items-center gap-2">
-                <Heart className="h-6 w-6" />
-                Résumé de la journée
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
-                  <div className="text-heading-3 font-bold">{totalPoints}</div>
-                  <div className="text-body-sm opacity-90">Points</div>
-                </div>
-                <div>
-                  <div className="text-heading-3 font-bold">{completedChallenges.size}</div>
-                  <div className="text-body-sm opacity-90">Défis</div>
-                </div>
-                <div>
-                  <div className="text-heading-3 font-bold">
-                    {Math.round((completedChallenges.size / challenges.length) * 100)}%
+          {/* Résumé quotidien avec style glassmorphisme */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <Card className="border-0 shadow-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg flex items-center gap-2 text-white">
+                  <Heart className="h-6 w-6" />
+                  Résumé de la journée
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className="text-2xl font-bold text-white">{totalPoints}</div>
+                    <div className="text-sm text-white/70">Points</div>
                   </div>
-                  <div className="text-body-sm opacity-90">Progression</div>
+                  <div>
+                    <div className="text-2xl font-bold text-white">{completedChallenges.size}</div>
+                    <div className="text-sm text-white/70">Défis</div>
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-white">
+                      {Math.round((completedChallenges.size / challenges.length) * 100)}%
+                    </div>
+                    <div className="text-sm text-white/70">Progression</div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </div>
     </div>
