@@ -52,36 +52,43 @@ const ExpandableChat: React.FC<ExpandableChatProps> = ({
   const toggleChat = () => setIsOpen(!isOpen);
 
   return (
-    <div
-      className={cn(`fixed ${chatConfig.positions[position]} z-50`, className)}
-      {...props}
-    >
+    <>
+      {/* Overlay avec effet de flou quand le chat est ouvert */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" />
+      )}
+      
       <div
-        ref={chatRef}
-        className={cn(
-          "flex flex-col bg-background border sm:rounded-lg shadow-md overflow-hidden transition-all duration-250 ease-out sm:absolute sm:w-[90vw] sm:h-[80vh] fixed inset-0 w-full h-full sm:inset-auto",
-          chatConfig.chatPositions[position],
-          chatConfig.dimensions[size],
-          isOpen ? chatConfig.states.open : chatConfig.states.closed,
-          className,
-        )}
+        className={cn(`fixed ${chatConfig.positions[position]} z-50`, className)}
+        {...props}
       >
-        {children}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute top-2 right-2 sm:hidden"
-          onClick={toggleChat}
+        <div
+          ref={chatRef}
+          className={cn(
+            "flex flex-col bg-background border sm:rounded-lg shadow-md overflow-hidden transition-all duration-250 ease-out sm:absolute sm:w-[90vw] sm:h-[80vh] fixed inset-0 w-full h-full sm:inset-auto",
+            chatConfig.chatPositions[position],
+            chatConfig.dimensions[size],
+            isOpen ? chatConfig.states.open : chatConfig.states.closed,
+            className,
+          )}
         >
-          <X className="h-4 w-4" />
-        </Button>
+          {children}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-2 right-2 sm:hidden"
+            onClick={toggleChat}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <ExpandableChatToggle
+          icon={icon}
+          isOpen={isOpen}
+          toggleChat={toggleChat}
+        />
       </div>
-      <ExpandableChatToggle
-        icon={icon}
-        isOpen={isOpen}
-        toggleChat={toggleChat}
-      />
-    </div>
+    </>
   );
 };
 
@@ -131,7 +138,7 @@ const ExpandableChatToggle: React.FC<ExpandableChatToggleProps> = ({
     variant="default"
     onClick={toggleChat}
     className={cn(
-      "w-14 h-14 rounded-full shadow-md flex items-center justify-center hover:shadow-lg hover:shadow-black/30 transition-all duration-300",
+      "w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 border-0",
       className,
     )}
     {...props}

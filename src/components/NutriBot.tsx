@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, FormEvent } from "react"
@@ -114,7 +113,6 @@ export function NutriBot() {
       size="lg"
       position="bottom-right"
       icon={<Bot className="h-6 w-6" />}
-      className="glass-effect"
     >
       <ExpandableChatHeader className="flex-col text-center justify-center bg-gradient-wellness text-white">
         <h1 className="text-xl font-semibold">NutriBot 🤖</h1>
