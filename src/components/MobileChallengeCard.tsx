@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -47,23 +48,16 @@ export const MobileChallengeCard = ({ challenge, isCompleted, onToggle }: Mobile
   
   return (
     <Card className={cn(
-      "relative overflow-hidden transition-all duration-300 active:scale-[0.98] touch-manipulation",
+      "relative overflow-hidden transition-all duration-300 active:scale-[0.98] touch-manipulation glassmorphism",
       isCompleted 
-        ? "ring-2 ring-wellness-400 bg-wellness-50/50 shadow-lg" 
-        : "hover:shadow-xl border-gray-200 active:shadow-lg"
+        ? "ring-2 ring-wellness-400 shadow-lg" 
+        : "hover:shadow-xl active:shadow-lg"
     )}>
       {/* Background gradient overlay */}
       <div className={cn(
         "absolute inset-0 bg-gradient-to-br opacity-5 transition-opacity",
         colorClasses[challenge.color as keyof typeof colorClasses]
       )} />
-      
-      {/* Completion indicator */}
-      {isCompleted && (
-        <div className="absolute top-3 right-3 h-8 w-8 bg-wellness-500 rounded-full flex items-center justify-center animate-scale-in shadow-lg">
-          <Check className="h-5 w-5 text-white" />
-        </div>
-      )}
 
       <CardHeader className="relative pb-3">
         <div className="flex items-start justify-between mb-3">
@@ -86,9 +80,17 @@ export const MobileChallengeCard = ({ challenge, isCompleted, onToggle }: Mobile
           </div>
         </div>
         
-        <CardTitle className="text-heading-4 font-semibold text-gray-900 leading-tight">
-          {challenge.title}
-        </CardTitle>
+        <div className="flex items-center gap-3">
+          <CardTitle className="text-heading-4 font-semibold text-gray-900 leading-tight flex-1">
+            {challenge.title}
+          </CardTitle>
+          {isCompleted && (
+            <div className="h-6 w-6 bg-wellness-500 rounded-full flex items-center justify-center animate-scale-in shadow-lg">
+              <Check className="h-4 w-4 text-white" />
+            </div>
+          )}
+        </div>
+        
         <CardDescription className="text-body text-gray-600 leading-relaxed">
           {challenge.description}
         </CardDescription>

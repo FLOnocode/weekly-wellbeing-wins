@@ -108,7 +108,7 @@ const Index = () => {
     .reduce((sum, challenge) => sum + challenge.points, 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-wellness-50 via-white to-motivation-50">
+    <div className="min-h-screen bg-white">
       {/* Header mobile fixe */}
       <MobileHeader 
         totalPoints={totalPoints}
