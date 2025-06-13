@@ -67,7 +67,7 @@ export const GlassChallengeCard = ({
                 p-3 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30
                 ${isCompleted ? 'bg-green-400/30 border-green-400/50' : ''}
               `}>
-                <Icon className={`h-6 w-6 ${isCompleted ? 'text-green-100' : iconColor}`} />
+                <Icon className={`h-6 w-6 ${isCompleted ? 'text-wellness-400' : iconColor}`} />
               </div>
               <div>
                 <CardTitle className="text-lg font-bold text-white">
