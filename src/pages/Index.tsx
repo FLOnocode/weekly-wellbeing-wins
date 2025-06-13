@@ -179,8 +179,8 @@ const Index = () => {
             />
           </div>
 
-          {/* Nouveau carrousel de défis avec bordure */}
-          <div className="mb-8 p-4 rounded-xl border border-white/20">
+          {/* Carrousel de défis - SANS marge bottom et padding réduit */}
+          <div className="mb-4">
             <ChallengeCarousel 
               challenges={challenges}
               completedChallenges={completedChallenges}

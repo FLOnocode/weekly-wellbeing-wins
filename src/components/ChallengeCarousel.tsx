@@ -67,8 +67,8 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
         </p>
       </motion.div>
 
-      {/* Carrousel avec hauteur ajustée */}
-      <Carousel className="w-full min-h-[442px]" setApi={setApi}>
+      {/* Carrousel SANS hauteur minimale - s'adapte au contenu */}
+      <Carousel className="w-full" setApi={setApi}>
         <CarouselContent className="-ml-2 md:-ml-4">
           {challenges.map((challenge, index) => (
             <CarouselItem key={challenge.id} className="pl-2 md:pl-4">
@@ -105,9 +105,9 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
         `} />
       </Carousel>
 
-      {/* Indicateurs de progression */}
+      {/* Indicateurs de progression - marge réduite */}
       <motion.div 
-        className="flex justify-center mt-3 space-x-2"
+        className="flex justify-center mt-2 space-x-2"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
