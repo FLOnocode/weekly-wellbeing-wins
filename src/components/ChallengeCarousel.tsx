@@ -67,8 +67,8 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
         </p>
       </motion.div>
 
-      {/* Carrousel */}
-      <Carousel className="w-full" setApi={setApi}>
+      {/* Carrousel avec hauteur ajustée */}
+      <Carousel className="w-full min-h-[442px]" setApi={setApi}>
         <CarouselContent className="-ml-2 md:-ml-4">
           {challenges.map((challenge, index) => (
             <CarouselItem key={challenge.id} className="pl-2 md:pl-4">
@@ -88,24 +88,24 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
           ))}
         </CarouselContent>
 
-        {/* Flèches de navigation repositionnées pour mobile */}
+        {/* Flèches repositionnées : au-dessus des dots sur mobile, côtés sur desktop */}
         <CarouselPrevious className={`
           ${isMobile 
-            ? "absolute bottom-12 left-1/4 -translate-x-1/2" 
+            ? "absolute bottom-0 left-1/4 -translate-x-1/2" 
             : "absolute -left-12 top-1/2 -translate-y-1/2"
           } 
-          bg-white/10 border-white/20 md:hover:bg-white/20 text-white backdrop-blur-sm
+          bg-white/10 border-white/20 md:hover:bg-white/20 md:active:bg-wellness-500 md:active:text-black text-white backdrop-blur-sm transition-all duration-200
         `} />
         <CarouselNext className={`
           ${isMobile 
-            ? "absolute bottom-12 right-1/4 translate-x-1/2" 
+            ? "absolute bottom-0 right-1/4 translate-x-1/2" 
             : "absolute -right-12 top-1/2 -translate-y-1/2"
           } 
-          bg-white/10 border-white/20 md:hover:bg-white/20 text-white backdrop-blur-sm
+          bg-white/10 border-white/20 md:hover:bg-white/20 md:active:bg-wellness-500 md:active:text-black text-white backdrop-blur-sm transition-all duration-200
         `} />
       </Carousel>
 
-      {/* Indicateurs de progression liés aux éléments */}
+      {/* Indicateurs de progression */}
       <motion.div 
         className="flex justify-center mt-3 space-x-2"
         initial={{ opacity: 0 }}
@@ -119,18 +119,16 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
           let dotClass = "h-1.5 w-1.5 rounded-full transition-all duration-300";
           
           if (isActive) {
-            // Point actif
             if (isCompleted) {
-              dotClass += " bg-wellness-400"; // Vert néon pour défi terminé actif
+              dotClass += " bg-wellness-400";
             } else {
-              dotClass += " bg-gray-400"; // Gris pour défi non terminé actif
+              dotClass += " bg-gray-400";
             }
           } else {
-            // Point inactif
             if (isCompleted) {
-              dotClass += " bg-wellness-200/50"; // Vert plus clair pour défi terminé inactif
+              dotClass += " bg-wellness-200/50";
             } else {
-              dotClass += " bg-white/30"; // Gris semi-transparent pour défi non terminé inactif
+              dotClass += " bg-white/30";
             }
           }
           
