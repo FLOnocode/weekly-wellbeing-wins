@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,17 +28,21 @@ export const GlassChallengeCard = ({
 }: GlassChallengeCardProps) => {
   const { icon: Icon } = challenge;
 
-  const colorClasses = {
-    pink: "from-pink-400/20 to-pink-600/20 border-pink-400/30",
-    hydration: "from-blue-400/20 to-blue-600/20 border-blue-400/30",
-    nutrition: "from-green-400/20 to-green-600/20 border-green-400/30",
-    fitness: "from-orange-400/20 to-orange-600/20 border-orange-400/30",
-    detox: "from-purple-400/20 to-purple-600/20 border-purple-400/30",
-    vitamins: "from-yellow-400/20 to-yellow-600/20 border-yellow-400/30",
-    rest: "from-indigo-400/20 to-indigo-600/20 border-indigo-400/30"
+  // Mapping des couleurs pour les icônes (identique à QuickChallengeIcons)
+  const iconColorsMap = {
+    wellness: "text-wellness-400",
+    energy: "text-energy-400",
+    motivation: "text-motivation-400",
+    hydration: "text-blue-400",
+    nutrition: "text-green-400",
+    fitness: "text-orange-400",
+    detox: "text-red-400",
+    vitamins: "text-emerald-400",
+    rest: "text-indigo-400",
+    pink: "text-pink-400",
   };
 
-  const colorClass = colorClasses[challenge.color as keyof typeof colorClasses] || colorClasses.pink;
+  const iconColor = iconColorsMap[challenge.color as keyof typeof iconColorsMap] || iconColorsMap.pink;
 
   return (
     <motion.div
@@ -50,7 +53,7 @@ export const GlassChallengeCard = ({
       whileTap={{ scale: 0.98 }}
     >
       <Card className={`
-        relative overflow-hidden backdrop-blur-xl bg-gradient-to-br ${colorClass}
+        relative overflow-hidden glassmorphism
         shadow-xl border transition-all duration-300 hover:shadow-2xl
         ${isCompleted ? 'ring-2 ring-green-400/50' : ''}
       `}>
@@ -64,7 +67,7 @@ export const GlassChallengeCard = ({
                 p-3 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30
                 ${isCompleted ? 'bg-green-400/30 border-green-400/50' : ''}
               `}>
-                <Icon className={`h-6 w-6 ${isCompleted ? 'text-green-100' : 'text-white'}`} />
+                <Icon className={`h-6 w-6 ${isCompleted ? 'text-green-100' : iconColor}`} />
               </div>
               <div>
                 <CardTitle className="text-lg font-bold text-white">

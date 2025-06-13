@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon } from "lucide-react";
@@ -180,8 +179,8 @@ const Index = () => {
             />
           </div>
 
-          {/* Nouveau carrousel de défis */}
-          <div className="mb-8">
+          {/* Nouveau carrousel de défis avec bordure */}
+          <div className="mb-8 p-4 rounded-xl border border-white/20">
             <ChallengeCarousel 
               challenges={challenges}
               completedChallenges={completedChallenges}
