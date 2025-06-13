@@ -57,7 +57,7 @@ export const GlassChallengeCard = ({
       <Card className={`
         relative overflow-hidden glassmorphism
         shadow-xl border transition-all duration-300 md:hover:shadow-2xl
-        ${isCompleted ? 'ring-2 ring-green-400/50' : ''}
+        ${isCompleted ? 'border border-wellness-400' : ''}
       `}>
         {/* Effet de brillance glassmorphisme */}
         <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-white/5 pointer-events-none" />
@@ -134,8 +134,8 @@ export const GlassChallengeCard = ({
               className={`
                 w-full relative overflow-hidden font-medium transition-all duration-300
                 ${isCompleted 
-                  ? 'bg-green-500/80 md:hover:bg-green-500/90 text-white border-green-400/50' 
-                  : 'bg-white/20 md:hover:bg-white/30 text-white border-white/30 backdrop-blur-sm'
+                  ? 'bg-wellness-500 md:hover:bg-wellness-600 text-white border border-wellness-400' 
+                  : 'bg-motivation-500 md:hover:bg-motivation-600 text-white border border-motivation-500'
                 }
               `}
               onClick={(e) => {
