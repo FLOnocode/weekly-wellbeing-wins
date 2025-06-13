@@ -53,7 +53,7 @@ export const GlassChallengeCard = ({
       whileTap={{ scale: 0.98 }}
     >
       <Card className={`
-        relative overflow-hidden glassmorphism
+        relative overflow-visible glassmorphism
         shadow-xl border transition-all duration-300 hover:shadow-2xl
         ${isCompleted ? 'ring-2 ring-green-400/50' : ''}
       `}>
