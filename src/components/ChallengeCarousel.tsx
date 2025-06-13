@@ -87,23 +87,23 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
             </CarouselItem>
           ))}
         </CarouselContent>
-      </Carousel>
 
-      {/* Flèches de navigation repositionnées pour mobile */}
-      <CarouselPrevious className={`
-        ${isMobile 
-          ? "absolute bottom-12 left-1/4 -translate-x-1/2" 
-          : "absolute -left-12 top-1/2 -translate-y-1/2"
-        } 
-        bg-white/10 border-white/20 md:hover:bg-white/20 text-white backdrop-blur-sm
-      `} />
-      <CarouselNext className={`
-        ${isMobile 
-          ? "absolute bottom-12 right-1/4 translate-x-1/2" 
-          : "absolute -right-12 top-1/2 -translate-y-1/2"
-        } 
-        bg-white/10 border-white/20 md:hover:bg-white/20 text-white backdrop-blur-sm
-      `} />
+        {/* Flèches de navigation repositionnées pour mobile */}
+        <CarouselPrevious className={`
+          ${isMobile 
+            ? "absolute bottom-12 left-1/4 -translate-x-1/2" 
+            : "absolute -left-12 top-1/2 -translate-y-1/2"
+          } 
+          bg-white/10 border-white/20 md:hover:bg-white/20 text-white backdrop-blur-sm
+        `} />
+        <CarouselNext className={`
+          ${isMobile 
+            ? "absolute bottom-12 right-1/4 translate-x-1/2" 
+            : "absolute -right-12 top-1/2 -translate-y-1/2"
+          } 
+          bg-white/10 border-white/20 md:hover:bg-white/20 text-white backdrop-blur-sm
+        `} />
+      </Carousel>
 
       {/* Indicateurs de progression liés aux éléments */}
       <motion.div 
