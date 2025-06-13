@@ -105,40 +105,32 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
         `} />
       </Carousel>
 
-      {/* Indicateurs de progression - marge réduite */}
+      {/* Flèches en position relative sous le carrousel - en flexbox vertical */}
       <motion.div 
-        className="flex justify-center mt-2 space-x-2"
+        className="flex flex-col items-center mt-4 space-y-3"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
       >
-        {challenges.map((challenge, index) => {
-          const isActive = index === current;
-          const isCompleted = completedChallenges.has(challenge.id);
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => api?.scrollPrev()}
+            className="p-3 bg-white/10 border border-white/20 rounded-full text-white backdrop-blur-sm transition-all duration-200 md:hover:bg-white/20 active:bg-wellness-500 active:text-black"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
           
-          let dotClass = "h-1.5 w-1.5 rounded-full transition-all duration-300";
+          <span className="text-white/70 text-sm font-medium">
+            {current + 1} / {challenges.length}
+          </span>
           
-          if (isActive) {
-            if (isCompleted) {
-              dotClass += " bg-wellness-400";
-            } else {
-              dotClass += " bg-gray-400";
-            }
-          } else {
-            if (isCompleted) {
-              dotClass += " bg-wellness-200/50";
-            } else {
-              dotClass += " bg-white/30";
-            }
-          }
-          
-          return (
-            <div
-              key={challenge.id}
-              className={dotClass}
-            />
-          );
-        })}
+          <button
+            onClick={() => api?.scrollNext()}
+            className="p-3 bg-white/10 border border-white/20 rounded-full text-white backdrop-blur-sm transition-all duration-200 md:hover:bg-white/20 active:bg-wellness-500 active:text-black"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
       </motion.div>
     </div>
   );
