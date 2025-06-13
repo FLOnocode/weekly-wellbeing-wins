@@ -134,8 +134,8 @@ export const GlassChallengeCard = ({
               className={`
                 w-full relative overflow-hidden font-medium transition-all duration-300
                 ${isCompleted 
-                  ? 'bg-wellness-500 md:hover:bg-wellness-600 text-white border border-wellness-400' 
-                  : 'bg-motivation-500 md:hover:bg-motivation-600 text-white border border-motivation-500'
+                  ? 'bg-wellness-500 text-white border border-wellness-400' 
+                  : 'bg-motivation-500 text-white border border-motivation-500'
                 }
               `}
               onClick={(e) => {
