@@ -4,8 +4,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import { GlassChallengeCard } from './GlassChallengeCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -87,22 +85,8 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
             </CarouselItem>
           ))}
         </CarouselContent>
-
-        {/* Flèches repositionnées : au-dessus des dots sur mobile, côtés sur desktop */}
-        <CarouselPrevious className={`
-          ${isMobile 
-            ? "absolute bottom-0 left-1/4 -translate-x-1/2" 
-            : "absolute -left-12 top-1/2 -translate-y-1/2"
-          } 
-          bg-white/10 border-white/20 md:hover:bg-white/20 md:active:bg-wellness-500 md:active:text-black text-white backdrop-blur-sm transition-all duration-200
-        `} />
-        <CarouselNext className={`
-          ${isMobile 
-            ? "absolute bottom-0 right-1/4 translate-x-1/2" 
-            : "absolute -right-12 top-1/2 -translate-y-1/2"
-          } 
-          bg-white/10 border-white/20 md:hover:bg-white/20 md:active:bg-wellness-500 md:active:text-black text-white backdrop-blur-sm transition-all duration-200
-        `} />
+        
+        {/* Les flèches par défaut ont été supprimées - plus de CarouselPrevious et CarouselNext */}
       </Carousel>
 
       {/* Flèches en position relative sous le carrousel - en flexbox vertical */}
