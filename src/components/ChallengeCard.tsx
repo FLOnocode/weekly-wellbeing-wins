@@ -45,7 +45,7 @@ export const ChallengeCard = ({ challenge, isCompleted, onToggle }: ChallengeCar
   
   return (
     <Card className={cn(
-      "relative overflow-hidden transition-all duration-300 hover-lift cursor-pointer group",
+      "relative overflow-visible transition-all duration-300 hover-lift cursor-pointer group",
       isCompleted 
         ? "ring-2 ring-wellness-400 bg-wellness-50/50" 
         : "hover:shadow-xl border-gray-200"
@@ -60,15 +60,15 @@ export const ChallengeCard = ({ challenge, isCompleted, onToggle }: ChallengeCar
       
       {/* Completion indicator */}
       {isCompleted && (
-        <div className="absolute top-4 right-4 h-6 w-6 bg-wellness-500 rounded-full flex items-center justify-center animate-scale-in">
+        <div className="absolute top-4 right-4 h-6 w-6 bg-wellness-500 rounded-full flex items-center justify-center animate-scale-in z-10">
           <Check className="h-4 w-4 text-white" />
         </div>
       )}
 
-      <CardHeader className="relative">
+      <CardHeader className="relative z-10">
         <div className="flex items-start justify-between">
           <div className={cn(
-            "p-3 rounded-xl bg-gradient-to-br shadow-lg relative",
+            "p-3 rounded-xl bg-gradient-to-br shadow-lg relative z-10",
             colorClasses[challenge.color as keyof typeof colorClasses]
           )}>
             <Icon className="h-6 w-6 text-white" />
@@ -94,7 +94,7 @@ export const ChallengeCard = ({ challenge, isCompleted, onToggle }: ChallengeCar
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="relative">
+      <CardContent className="relative z-10">
         <div className="space-y-4">
           <div className="p-3 bg-gray-50 rounded-lg">
             <p className="text-body-sm text-gray-700 font-medium mb-1">💡 Conseil</p>
@@ -105,7 +105,7 @@ export const ChallengeCard = ({ challenge, isCompleted, onToggle }: ChallengeCar
             variant={isCompleted ? "secondary" : "default"}
             size="sm"
             className={cn(
-              "w-full transition-all duration-200",
+              "w-full transition-all duration-200 relative z-10",
               isCompleted 
                 ? "bg-wellness-100 text-wellness-700 hover:bg-wellness-200" 
                 : "bg-gradient-to-r hover:shadow-md",
