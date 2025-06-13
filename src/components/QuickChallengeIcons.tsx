@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import {
@@ -11,6 +10,7 @@ import {
   Apple,
   Moon,
 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Challenge {
   id: string;
@@ -43,6 +43,8 @@ export const QuickChallengeIcons = ({
   completedChallenges,
   onToggle,
 }: QuickChallengeIconsProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <motion.div 
       className="mb-6 px-2"
@@ -69,10 +71,10 @@ export const QuickChallengeIcons = ({
               }}
               className={cn(
                 "relative p-3 rounded-xl transition-all duration-300 touch-manipulation group",
-                "bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl active:shadow-md",
+                "bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg md:hover:shadow-xl active:shadow-md",
                 "h-12 w-12 flex items-center justify-center cursor-pointer select-none",
                 "focus:outline-none focus:ring-2 focus:ring-wellness-400/50 focus:ring-offset-2 focus:ring-offset-black",
-                "hover:bg-white/20 active:scale-95 hover:border-white/30",
+                "md:hover:bg-white/20 active:scale-95 md:hover:border-white/30",
                 isCompleted && "bg-wellness-500/20 border-wellness-400/50",
               )}
               type="button"
@@ -80,8 +82,8 @@ export const QuickChallengeIcons = ({
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={!isMobile ? { scale: 1.05 } : {}}
+              whileTap={!isMobile ? { scale: 0.95 } : {}}
             >
               {/* Effet de lueur sur hover */}
               <motion.div 

@@ -10,6 +10,7 @@ import {
 import { GlassChallengeCard } from './GlassChallengeCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { CarouselApi } from "@/components/ui/carousel";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Challenge {
   id: string;
@@ -31,6 +32,7 @@ interface ChallengeCarouselProps {
 export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }: ChallengeCarouselProps) => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
+  const isMobile = useIsMobile();
 
   const onSelect = useCallback(() => {
     if (!api) return;
@@ -49,7 +51,7 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
   }, [api, onSelect]);
 
   return (
-    <div className="relative w-full max-w-sm mx-auto px-4">
+    <div className="relative w-full max-w-sm mx-auto">
       {/* Titre du carrousel */}
       <motion.div 
         className="text-center mb-6"
@@ -85,11 +87,23 @@ export const ChallengeCarousel = ({ challenges, completedChallenges, onToggle }:
             </CarouselItem>
           ))}
         </CarouselContent>
-        
-        {/* Boutons de navigation personnalisés */}
-        <CarouselPrevious className="absolute -left-12 top-1/2 -translate-y-1/2 bg-white/10 border-white/20 hover:bg-white/20 text-white backdrop-blur-sm" />
-        <CarouselNext className="absolute -right-12 top-1/2 -translate-y-1/2 bg-white/10 border-white/20 hover:bg-white/20 text-white backdrop-blur-sm" />
       </Carousel>
+
+      {/* Flèches de navigation repositionnées pour mobile */}
+      <CarouselPrevious className={`
+        ${isMobile 
+          ? "absolute bottom-12 left-1/4 -translate-x-1/2" 
+          : "absolute -left-12 top-1/2 -translate-y-1/2"
+        } 
+        bg-white/10 border-white/20 md:hover:bg-white/20 text-white backdrop-blur-sm
+      `} />
+      <CarouselNext className={`
+        ${isMobile 
+          ? "absolute bottom-12 right-1/4 translate-x-1/2" 
+          : "absolute -right-12 top-1/2 -translate-y-1/2"
+        } 
+        bg-white/10 border-white/20 md:hover:bg-white/20 text-white backdrop-blur-sm
+      `} />
 
       {/* Indicateurs de progression liés aux éléments */}
       <motion.div 

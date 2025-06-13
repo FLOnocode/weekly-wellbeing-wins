@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Heart, CheckCircle, Circle } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Challenge {
   id: string;
@@ -27,6 +28,7 @@ export const GlassChallengeCard = ({
   onToggle 
 }: GlassChallengeCardProps) => {
   const { icon: Icon } = challenge;
+  const isMobile = useIsMobile();
 
   // Mapping des couleurs pour les icônes (identique à QuickChallengeIcons)
   const iconColorsMap = {
@@ -49,12 +51,12 @@ export const GlassChallengeCard = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={!isMobile ? { scale: 1.02 } : {}}
+      whileTap={!isMobile ? { scale: 0.98 } : {}}
     >
       <Card className={`
         relative overflow-hidden glassmorphism
-        shadow-xl border transition-all duration-300 hover:shadow-2xl
+        shadow-xl border transition-all duration-300 md:hover:shadow-2xl
         ${isCompleted ? 'ring-2 ring-green-400/50' : ''}
       `}>
         {/* Effet de brillance glassmorphisme */}
@@ -123,8 +125,8 @@ export const GlassChallengeCard = ({
           </div>
 
           <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={!isMobile ? { scale: 1.02 } : {}}
+            whileTap={!isMobile ? { scale: 0.98 } : {}}
           >
             <Button
               variant={isCompleted ? "secondary" : "default"}
@@ -132,8 +134,8 @@ export const GlassChallengeCard = ({
               className={`
                 w-full relative overflow-hidden font-medium transition-all duration-300
                 ${isCompleted 
-                  ? 'bg-green-500/80 hover:bg-green-500/90 text-white border-green-400/50' 
-                  : 'bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm'
+                  ? 'bg-green-500/80 md:hover:bg-green-500/90 text-white border-green-400/50' 
+                  : 'bg-white/20 md:hover:bg-white/30 text-white border-white/30 backdrop-blur-sm'
                 }
               `}
               onClick={(e) => {
