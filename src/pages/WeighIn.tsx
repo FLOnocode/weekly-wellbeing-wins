@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,73 +10,223 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase, WeightEntry } from "@/lib/supabase";
+import { toast } from "@/components/ui/sonner";
 
 const WeighIn = () => {
-  const { profile, updateProfile } = useAuth();
+  const { profile, updateProfile, user, refreshProfile } = useAuth();
   const [weight, setWeight] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recentWeighIns, setRecentWeighIns] = useState<WeightEntry[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+
+  // Charger l'historique des pesées
+  useEffect(() => {
+    const fetchWeightHistory = async () => {
+      if (!user) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('weight_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (error) {
+          console.error('Erreur lors du chargement de l\'historique:', error);
+        } else {
+          setRecentWeighIns(data || []);
+        }
+      } catch (error) {
+        console.error('Exception lors du chargement de l\'historique:', error);
+      } finally {
+        setLoadingHistory(false);
+      }
+    };
+
+    fetchWeightHistory();
+  }, [user]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setPhoto(e.target.files[0]);
+      const file = e.target.files[0];
+      
+      // Vérifier la taille du fichier (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("La photo ne doit pas dépasser 5MB");
+        return;
+      }
+
+      // Vérifier le type de fichier
+      if (!file.type.startsWith('image/')) {
+        toast.error("Veuillez sélectionner une image valide");
+        return;
+      }
+
+      setPhoto(file);
+    }
+  };
+
+  const uploadPhoto = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+
+    try {
+      // Générer un nom de fichier unique
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+      console.log('📸 Upload de la photo:', fileName);
+
+      // Uploader le fichier vers Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('weight-photos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('❌ Erreur upload photo:', error);
+        throw error;
+      }
+
+      console.log('✅ Photo uploadée:', data);
+
+      // Récupérer l'URL publique
+      const { data: { publicUrl } } = supabase.storage
+        .from('weight-photos')
+        .getPublicUrl(fileName);
+
+      console.log('🔗 URL publique:', publicUrl);
+      return publicUrl;
+    } catch (error) {
+      console.error('💥 Exception upload photo:', error);
+      throw error;
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast.error("Vous devez être connecté pour enregistrer une pesée");
+      return;
+    }
+
+    if (!weight || parseFloat(weight) <= 0) {
+      toast.error("Veuillez entrer un poids valide");
+      return;
+    }
+
+    if (!photo) {
+      toast.error("Une photo de preuve est obligatoire");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // Mettre à jour le poids actuel dans le profil
-      if (weight && parseFloat(weight) > 0) {
-        await updateProfile({
-          current_weight: parseFloat(weight)
-        });
+      const weightValue = parseFloat(weight);
+      let photoUrl: string | null = null;
+
+      // 1. Uploader la photo si elle existe
+      if (photo) {
+        toast.loading("Upload de la photo en cours...");
+        photoUrl = await uploadPhoto(photo);
+        
+        if (!photoUrl) {
+          throw new Error("Échec de l'upload de la photo");
+        }
       }
 
-      // Ici on pourrait aussi enregistrer l'entrée de poids dans weight_entries
-      // TODO: Implémenter l'enregistrement dans weight_entries
+      // 2. Mettre à jour le poids actuel dans le profil
+      toast.loading("Mise à jour du profil...");
+      const { error: profileError } = await updateProfile({
+        current_weight: weightValue
+      });
 
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setWeight("");
-        setPhoto(null);
-        setNotes("");
-        alert("Pesée enregistrée avec succès !");
-      }, 1500);
-    } catch (error) {
-      console.error('Erreur lors de l\'enregistrement:', error);
+      if (profileError) {
+        throw profileError;
+      }
+
+      // 3. Enregistrer l'entrée de poids dans weight_entries
+      toast.loading("Enregistrement de la pesée...");
+      const { data: weightEntry, error: weightError } = await supabase
+        .from('weight_entries')
+        .insert({
+          user_id: user.id,
+          weight: weightValue,
+          photo_url: photoUrl,
+          notes: notes.trim() || null,
+        })
+        .select()
+        .single();
+
+      if (weightError) {
+        throw weightError;
+      }
+
+      console.log('✅ Pesée enregistrée:', weightEntry);
+
+      // 4. Rafraîchir le profil et l'historique
+      await refreshProfile();
+      
+      // Recharger l'historique
+      const { data: updatedHistory } = await supabase
+        .from('weight_entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (updatedHistory) {
+        setRecentWeighIns(updatedHistory);
+      }
+
+      // 5. Réinitialiser le formulaire
+      setWeight("");
+      setPhoto(null);
+      setNotes("");
+
+      toast.success("Pesée enregistrée avec succès ! 🎉");
+
+    } catch (error: any) {
+      console.error('❌ Erreur lors de l\'enregistrement:', error);
+      
+      let errorMessage = "Erreur lors de l'enregistrement de la pesée";
+      
+      if (error.message?.includes('storage')) {
+        errorMessage = "Erreur lors de l'upload de la photo";
+      } else if (error.message?.includes('profiles')) {
+        errorMessage = "Erreur lors de la mise à jour du profil";
+      } else if (error.message?.includes('weight_entries')) {
+        errorMessage = "Erreur lors de l'enregistrement de la pesée";
+      }
+
+      toast.error(errorMessage);
+    } finally {
       setIsSubmitting(false);
-      alert("Erreur lors de l'enregistrement de la pesée");
     }
   };
 
   const nextWeighInDate = new Date();
   nextWeighInDate.setDate(nextWeighInDate.getDate() + ((1 - nextWeighInDate.getDay() + 7) % 7));
 
-  // Données de pesées récentes (simulées pour l'instant)
-  const recentWeighIns = [
-    { 
-      date: "2025-01-20", 
-      weight: profile?.current_weight || 72.5, 
-      change: -0.8, 
-      points: 15 
-    },
-    { 
-      date: "2025-01-13", 
-      weight: (profile?.current_weight || 72.5) + 0.8, 
-      change: -1.2, 
-      points: 20 
-    },
-    { 
-      date: "2025-01-06", 
-      weight: (profile?.current_weight || 72.5) + 2.0, 
-      change: -0.5, 
-      points: 10 
-    },
-  ];
+  const calculateWeightChange = (currentWeight: number, previousWeight?: number) => {
+    if (!previousWeight) return 0;
+    return currentWeight - previousWeight;
+  };
+
+  const calculatePoints = (weightChange: number) => {
+    // 15 points par kg perdu
+    if (weightChange < 0) {
+      return Math.round(Math.abs(weightChange) * 15);
+    }
+    return 0;
+  };
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -140,7 +290,7 @@ const WeighIn = () => {
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                     <Scale className="h-5 w-5 text-wellness-500" />
-                    <span>Votre profil</span>
+                    <span>Votre profil - {profile.nickname}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -158,6 +308,15 @@ const WeighIn = () => {
                       <div className="text-body-sm text-white/70">Objectif</div>
                     </div>
                   </div>
+                  
+                  {profile.current_weight > 0 && profile.goal_weight > 0 && (
+                    <div className="mt-4 p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-center">
+                      <div className="text-body-sm text-white/70 mb-1">Reste à perdre</div>
+                      <div className="text-heading-4 font-bold text-white">
+                        {Math.max(0, profile.current_weight - profile.goal_weight).toFixed(1)}kg
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -216,11 +375,12 @@ const WeighIn = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="photo" className="text-body font-medium text-white">Photo de preuve</Label>
+                    <Label htmlFor="photo" className="text-body font-medium text-white">Photo de preuve *</Label>
                     <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center">
                       {photo ? (
                         <div className="space-y-2">
                           <div className="text-body-sm text-wellness-300 font-medium">Photo sélectionnée : {photo.name}</div>
+                          <div className="text-xs text-white/60">Taille: {(photo.size / 1024 / 1024).toFixed(2)} MB</div>
                           <Button type="button" variant="outline" size="sm" onClick={() => setPhoto(null)} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                             Supprimer la photo
                           </Button>
@@ -229,6 +389,7 @@ const WeighIn = () => {
                         <div className="space-y-2">
                           <Camera className="h-8 w-8 text-white/60 mx-auto" />
                           <div className="text-body-sm text-white/70">Prenez une photo de votre balance</div>
+                          <div className="text-xs text-white/50">Max 5MB - JPG, PNG acceptés</div>
                           <label htmlFor="photo-input" className="cursor-pointer">
                             <Button type="button" variant="outline" size="sm" asChild className="bg-white/10 border-white/20 text-white hover:bg-white/20">
                               <span>
@@ -268,7 +429,7 @@ const WeighIn = () => {
                     className="w-full bg-gradient-to-r from-wellness-500 to-motivation-500 hover:from-wellness-600 hover:to-motivation-600 text-white"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? "Envoi en cours..." : "Enregistrer la pesée"}
+                    {isSubmitting ? "Enregistrement en cours..." : "Enregistrer la pesée"}
                   </Button>
                 </form>
               </CardContent>
@@ -280,23 +441,53 @@ const WeighIn = () => {
                 <CardTitle className="text-heading-4 text-white">Pesées récentes</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {recentWeighIns.map((entry, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
-                      <div>
-                        <div className="text-body font-medium text-white">{entry.weight}kg</div>
-                        <div className="text-body-sm text-white/70">{new Date(entry.date).toLocaleDateString("fr-FR")}</div>
-                      </div>
-                      <div className="text-right">
-                        <div className={`text-body font-medium ${entry.change < 0 ? "text-wellness-300" : "text-red-300"}`}>
-                          {entry.change > 0 ? "+" : ""}
-                          {entry.change}kg
+                {loadingHistory ? (
+                  <div className="text-center text-white/70 py-4">
+                    Chargement de l'historique...
+                  </div>
+                ) : recentWeighIns.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentWeighIns.map((entry, index) => {
+                      const previousWeight = index < recentWeighIns.length - 1 ? recentWeighIns[index + 1].weight : undefined;
+                      const weightChange = calculateWeightChange(entry.weight, previousWeight);
+                      const points = calculatePoints(weightChange);
+
+                      return (
+                        <div key={entry.id} className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
+                          <div>
+                            <div className="text-body font-medium text-white">{entry.weight}kg</div>
+                            <div className="text-body-sm text-white/70">
+                              {new Date(entry.created_at).toLocaleDateString("fr-FR")}
+                            </div>
+                            {entry.notes && (
+                              <div className="text-xs text-white/60 mt-1 max-w-40 truncate">
+                                {entry.notes}
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            {previousWeight && (
+                              <div className={`text-body font-medium ${weightChange < 0 ? "text-wellness-300" : weightChange > 0 ? "text-red-300" : "text-white/70"}`}>
+                                {weightChange > 0 ? "+" : ""}
+                                {weightChange.toFixed(1)}kg
+                              </div>
+                            )}
+                            {points > 0 && (
+                              <div className="text-body-sm text-motivation-300">+{points} pts</div>
+                            )}
+                            {entry.photo_url && (
+                              <div className="text-xs text-wellness-300 mt-1">📸 Photo</div>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-body-sm text-motivation-300">+{entry.points} pts</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center text-white/70 py-4">
+                    Aucune pesée enregistrée pour le moment
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
