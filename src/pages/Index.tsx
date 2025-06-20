@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon } from "lucide-react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { ChallengeCarousel } from "@/components/ChallengeCarousel";
 import { MobileWeeklyProgress } from "@/components/MobileWeeklyProgress";
 import { MobileHeader } from "@/components/MobileHeader";
 import { QuickChallengeIcons } from "@/components/QuickChallengeIcons";
 import { NutriBot } from "@/components/NutriBot";
+import { FeyButton } from "@/components/ui/fey-button";
 import { useAuth } from "@/contexts/AuthContext";
 import { challengeService } from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
@@ -327,6 +329,20 @@ const Index = () => {
                 )}
               </CardContent>
             </Card>
+          </motion.div>
+
+          {/* Bouton d'analyse */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="mt-4 flex justify-center"
+          >
+            <Link to="/analytics">
+              <FeyButton className="text-white">
+                + d'infos
+              </FeyButton>
+            </Link>
           </motion.div>
         </div>
       </div>
