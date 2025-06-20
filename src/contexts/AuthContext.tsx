@@ -31,13 +31,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    console.log('🔄 AuthContext: Initialisation du useEffect principal')
+    
     // Récupérer la session actuelle
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('📋 AuthContext: Session récupérée:', session ? 'Utilisateur connecté' : 'Pas de session')
       setSession(session)
       setUser(session?.user ?? null)
+      
       if (session?.user) {
+        console.log('👤 AuthContext: Utilisateur trouvé, récupération du profil...')
         fetchProfile(session.user.id)
       } else {
+        console.log('❌ AuthContext: Pas d\'utilisateur, arrêt du chargement')
         setLoading(false)
       }
     })
@@ -46,12 +52,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔔 AuthContext: Changement d\'état d\'auth:', event, session ? 'Session présente' : 'Pas de session')
       setSession(session)
       setUser(session?.user ?? null)
       
       if (session?.user) {
+        console.log('👤 AuthContext: Nouvel utilisateur, récupération du profil...')
         await fetchProfile(session.user.id)
       } else {
+        console.log('❌ AuthContext: Pas d\'utilisateur, nettoyage du profil')
         setProfile(null)
         setLoading(false)
       }
@@ -61,6 +70,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const fetchProfile = async (userId: string) => {
+    console.log('🔍 AuthContext: Début de fetchProfile pour userId:', userId)
+    console.log('⏳ AuthContext: État loading avant fetchProfile:', loading)
+    
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -68,40 +80,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('user_id', userId)
         .single()
 
+      console.log('📊 AuthContext: Réponse de la requête profil:', { data, error })
+
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error)
+        console.error('❌ AuthContext: Erreur lors de la récupération du profil:', error)
       } else {
+        console.log('✅ AuthContext: Profil récupéré avec succès:', data)
         setProfile(data)
       }
     } catch (error) {
-      console.error('Error fetching profile:', error)
+      console.error('💥 AuthContext: Exception lors de fetchProfile:', error)
     } finally {
+      console.log('🏁 AuthContext: Fin de fetchProfile, setLoading(false)')
       setLoading(false)
     }
   }
 
   const signUp = async (email: string, password: string) => {
+    console.log('📝 AuthContext: Tentative d\'inscription pour:', email)
     const { error } = await supabase.auth.signUp({
       email,
       password,
     })
+    console.log('📝 AuthContext: Résultat inscription:', error ? 'Erreur' : 'Succès')
     return { error }
   }
 
   const signIn = async (email: string, password: string) => {
+    console.log('🔐 AuthContext: Tentative de connexion pour:', email)
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
+    console.log('🔐 AuthContext: Résultat connexion:', error ? 'Erreur' : 'Succès')
     return { error }
   }
 
   const signOut = async () => {
+    console.log('🚪 AuthContext: Déconnexion')
     await supabase.auth.signOut()
   }
 
   const updateProfile = async (profileData: Partial<Profile>) => {
-    if (!user) return { error: new Error('No user logged in') }
+    console.log('💾 AuthContext: Début updateProfile avec données:', profileData)
+    
+    if (!user) {
+      console.log('❌ AuthContext: Pas d\'utilisateur connecté pour updateProfile')
+      return { error: new Error('No user logged in') }
+    }
 
     const { data, error } = await supabase
       .from('profiles')
@@ -113,21 +139,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .select()
       .single()
 
+    console.log('💾 AuthContext: Résultat updateProfile:', { data, error })
+
     if (!error && data) {
+      console.log('✅ AuthContext: Mise à jour du profil local avec:', data)
       // Mettre à jour immédiatement l'état local avec les données retournées
       setProfile(data)
-      // Puis rafraîchir depuis la base de données pour assurer la cohérence
-      await fetchProfile(user.id)
+      // SUPPRESSION: Plus besoin de refetch, les données sont déjà à jour
     }
 
     return { error }
   }
 
   const refreshProfile = async () => {
+    console.log('🔄 AuthContext: Rafraîchissement du profil demandé')
     if (user) {
       await fetchProfile(user.id)
     }
   }
+
+  // Log de l'état actuel à chaque rendu
+  console.log('🎯 AuthContext: État actuel - loading:', loading, 'user:', !!user, 'profile:', !!profile)
 
   const value = {
     user,
