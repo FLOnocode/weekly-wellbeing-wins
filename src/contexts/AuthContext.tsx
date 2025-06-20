@@ -34,34 +34,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     console.log('🔍 AuthContext: Début de fetchProfile pour userId:', userId);
     
     try {
-      const { data, error } = await supabase
+      // Use maybeSingle() instead of single() to handle cases where no profile exists
+      const { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
-        .single();
+        .eq('user_id', userId)
+        .maybeSingle();
 
       if (error) {
-        console.error('❌ AuthContext: Erreur:', error);
-        
-        // Si le profil n'existe pas, le créer
-        if (error.code === 'PGRST116') {
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert([{ id: userId }])
-            .select()
-            .single();
+        console.error('❌ AuthContext: Erreur lors de la récupération du profil:', error);
+        setProfile(null);
+        return;
+      }
 
-          if (!createError) {
-            setProfile(newProfile);
-          }
+      // If no profile exists, create one
+      if (!profileData) {
+        console.log('📝 AuthContext: Aucun profil trouvé, création d\'un nouveau profil...');
+        
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert([{ 
+            user_id: userId,
+            nickname: '',
+            goal_weight: 0,
+            current_weight: 0
+          }])
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('❌ AuthContext: Erreur lors de la création du profil:', createError);
+          setProfile(null);
+        } else {
+          console.log('✅ AuthContext: Nouveau profil créé:', newProfile);
+          setProfile(newProfile);
         }
       } else {
-        setProfile(data);
+        console.log('✅ AuthContext: Profil trouvé:', profileData);
+        setProfile(profileData);
       }
     } catch (err) {
       console.error('💥 AuthContext: Erreur inattendue:', err);
+      setProfile(null);
     } finally {
-      // CRITIQUE : Toujours arrêter le loading
       setLoading(false);
       console.log('🏁 AuthContext: fetchProfile terminé, loading: false');
     }
@@ -247,7 +262,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase
         .from('profiles')
         .upsert({
-          id: user.id,
           user_id: user.id,
           ...profileData,
           updated_at: new Date().toISOString(),
