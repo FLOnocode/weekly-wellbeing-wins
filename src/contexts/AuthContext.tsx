@@ -30,6 +30,53 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
+  const fetchProfile = async (userId: string) => {
+    console.log('🔍 AuthContext: Début de fetchProfile pour userId:', userId);
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('❌ AuthContext: Erreur:', error);
+        
+        // Si le profil n'existe pas, le créer
+        if (error.code === 'PGRST116') {
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert([{ id: userId }])
+            .select()
+            .single();
+
+          if (!createError) {
+            setProfile(newProfile);
+          }
+        }
+      } else {
+        setProfile(data);
+      }
+    } catch (err) {
+      console.error('💥 AuthContext: Erreur inattendue:', err);
+    } finally {
+      // CRITIQUE : Toujours arrêter le loading
+      setLoading(false);
+      console.log('🏁 AuthContext: fetchProfile terminé, loading: false');
+    }
+  };
+
+  // Fonction avec timeout de sécurité
+  const fetchProfileWithTimeout = async (userId: string, timeout = 10000) => {
+    return Promise.race([
+      fetchProfile(userId),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), timeout)
+      )
+    ]);
+  };
+
   useEffect(() => {
     console.log('🔄 AuthContext: Initialisation du useEffect principal')
     console.log('🔧 AuthContext: Supabase URL:', import.meta.env.VITE_SUPABASE_URL ? 'Défini' : 'MANQUANT')
@@ -62,7 +109,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('👤 AuthContext: Utilisateur trouvé, récupération du profil...')
         console.log('👤 AuthContext: User ID:', session.user.id)
         console.log('👤 AuthContext: User email:', session.user.email)
-        fetchProfile(session.user.id)
+        
+        // Utiliser fetchProfileWithTimeout au lieu de fetchProfile
+        fetchProfileWithTimeout(session.user.id).catch((error) => {
+          console.error('⏰ AuthContext: Timeout ou erreur:', error);
+          setLoading(false);
+          setProfile(null);
+        });
       } else {
         console.log('❌ AuthContext: Pas d\'utilisateur, arrêt du chargement')
         setLoading(false)
@@ -89,7 +142,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (session?.user) {
         console.log('👤 AuthContext: Nouvel utilisateur, récupération du profil...')
-        await fetchProfile(session.user.id)
+        
+        try {
+          await fetchProfileWithTimeout(session.user.id);
+        } catch (error) {
+          console.error('⏰ AuthContext: Timeout ou erreur:', error);
+          setLoading(false);
+          setProfile(null);
+        }
       } else {
         console.log('❌ AuthContext: Pas d\'utilisateur, nettoyage du profil')
         setProfile(null)
@@ -102,81 +162,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscription.unsubscribe()
     }
   }, [])
-
-  const fetchProfile = async (userId: string) => {
-    console.log('🔍 AuthContext: Début de fetchProfile pour userId:', userId)
-    console.log('⏳ AuthContext: État loading avant fetchProfile:', loading)
-    
-    try {
-      console.log('📡 AuthContext: Tentative de requête vers la table profiles...')
-      
-      // Test de connectivité de base
-      const { data: testData, error: testError } = await supabase
-        .from('profiles')
-        .select('count')
-        .limit(1)
-      
-      console.log('🧪 AuthContext: Test de connectivité table profiles:', {
-        success: !testError,
-        error: testError,
-        canAccessTable: !!testData
-      })
-      
-      if (testError) {
-        console.error('❌ AuthContext: Erreur de connectivité table profiles:', testError)
-        console.error('❌ AuthContext: Code d\'erreur:', testError.code)
-        console.error('❌ AuthContext: Message:', testError.message)
-        console.error('❌ AuthContext: Détails:', testError.details)
-        console.error('❌ AuthContext: Hint:', testError.hint)
-      }
-
-      // Requête principale pour le profil
-      console.log('📊 AuthContext: Exécution de la requête principale...')
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .single()
-
-      console.log('📊 AuthContext: Réponse de la requête profil:', {
-        hasData: !!data,
-        hasError: !!error,
-        errorCode: error?.code,
-        errorMessage: error?.message,
-        dataKeys: data ? Object.keys(data) : null
-      })
-
-      if (error) {
-        console.error('❌ AuthContext: Erreur détaillée lors de la récupération du profil:')
-        console.error('   - Code:', error.code)
-        console.error('   - Message:', error.message)
-        console.error('   - Détails:', error.details)
-        console.error('   - Hint:', error.hint)
-        console.error('   - User ID recherché:', userId)
-        
-        if (error.code === 'PGRST116') {
-          console.log('ℹ️ AuthContext: Aucun profil trouvé (normal pour un nouvel utilisateur)')
-        } else {
-          console.error('💥 AuthContext: Erreur inattendue lors de la récupération du profil')
-        }
-      } else {
-        console.log('✅ AuthContext: Profil récupéré avec succès:', {
-          id: data?.id,
-          nickname: data?.nickname,
-          hasGoalWeight: !!data?.goal_weight,
-          hasCurrentWeight: !!data?.current_weight
-        })
-        setProfile(data)
-      }
-    } catch (error) {
-      console.error('💥 AuthContext: Exception lors de fetchProfile:', error)
-      console.error('💥 AuthContext: Type d\'erreur:', typeof error)
-      console.error('💥 AuthContext: Stack trace:', error instanceof Error ? error.stack : 'Pas de stack trace')
-    } finally {
-      console.log('🏁 AuthContext: Fin de fetchProfile, setLoading(false)')
-      setLoading(false)
-    }
-  }
 
   const signUp = async (email: string, password: string) => {
     console.log('📝 AuthContext: Tentative d\'inscription pour:', email)
@@ -262,6 +247,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data, error } = await supabase
         .from('profiles')
         .upsert({
+          id: user.id,
           user_id: user.id,
           ...profileData,
           updated_at: new Date().toISOString(),
@@ -299,7 +285,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshProfile = async () => {
     console.log('🔄 AuthContext: Rafraîchissement du profil demandé')
     if (user) {
-      await fetchProfile(user.id)
+      try {
+        await fetchProfileWithTimeout(user.id);
+      } catch (error) {
+        console.error('⏰ AuthContext: Timeout lors du refresh:', error);
+        setLoading(false);
+        setProfile(null);
+      }
     } else {
       console.log('❌ AuthContext: Pas d\'utilisateur pour refreshProfile')
     }
