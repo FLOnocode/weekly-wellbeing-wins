@@ -279,6 +279,20 @@ const Index = () => {
             />
           </div>
 
+          {/* Bouton d'analyse - DÉPLACÉ ICI, au-dessus du carrousel */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="mb-4 flex justify-center"
+          >
+            <Link to="/analytics">
+              <FeyButton className="text-white">
+                + d'infos
+              </FeyButton>
+            </Link>
+          </motion.div>
+
           {/* Carrousel de défis - SANS marge bottom et padding réduit */}
           <div className="mb-4">
             <ChallengeCarousel 
@@ -329,20 +343,6 @@ const Index = () => {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
-
-          {/* Bouton d'analyse */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="mt-4 flex justify-center"
-          >
-            <Link to="/analytics">
-              <FeyButton className="text-white">
-                + d'infos
-              </FeyButton>
-            </Link>
           </motion.div>
         </div>
       </div>
