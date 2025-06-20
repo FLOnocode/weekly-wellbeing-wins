@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/contexts/AuthContext'
-import { User, Target, Scale, ArrowRight, ArrowLeft } from 'lucide-react'
+import { User, Target, Scale, ArrowRight, ArrowLeft, Heart } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export const OnboardingForm = () => {
@@ -15,10 +15,19 @@ export const OnboardingForm = () => {
   const [currentWeight, setCurrentWeight] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const { updateProfile } = useAuth()
+  const { updateProfile, profile } = useAuth()
 
   const totalSteps = 3
   const progress = (currentStep / totalSteps) * 100
+
+  // Pré-remplir les champs si le profil existe déjà partiellement
+  useState(() => {
+    if (profile) {
+      if (profile.nickname) setNickname(profile.nickname)
+      if (profile.goal_weight > 0) setGoalWeight(profile.goal_weight.toString())
+      if (profile.current_weight > 0) setCurrentWeight(profile.current_weight.toString())
+    }
+  })
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
@@ -37,15 +46,16 @@ export const OnboardingForm = () => {
     setError('')
 
     const { error } = await updateProfile({
-      nickname,
+      nickname: nickname.trim(),
       goal_weight: parseFloat(goalWeight),
       current_weight: parseFloat(currentWeight),
     })
 
     if (error) {
       setError(error.message)
+      setLoading(false)
     }
-    setLoading(false)
+    // Si pas d'erreur, l'utilisateur sera automatiquement redirigé vers l'app
   }
 
   const canProceed = () => {
@@ -53,9 +63,9 @@ export const OnboardingForm = () => {
       case 1:
         return nickname.trim().length >= 2
       case 2:
-        return goalWeight && parseFloat(goalWeight) > 0
+        return goalWeight && parseFloat(goalWeight) > 0 && parseFloat(goalWeight) < 300
       case 3:
-        return currentWeight && parseFloat(currentWeight) > 0
+        return currentWeight && parseFloat(currentWeight) > 0 && parseFloat(currentWeight) < 300
       default:
         return false
     }
@@ -103,12 +113,17 @@ export const OnboardingForm = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-8"
         >
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-full text-sm font-medium mb-4">
+            <Heart className="h-4 w-4 text-wellness-400" />
+            Challenge Wellness Weekly
+          </div>
+          
           <h1 className="text-3xl font-bold text-white mb-3">
             Configuration de votre profil
           </h1>
           
           <p className="text-white/70 leading-relaxed mb-6">
-            Quelques informations pour personnaliser votre expérience
+            Quelques informations pour personnaliser votre expérience de transformation
           </p>
 
           <div className="space-y-2">
@@ -187,11 +202,16 @@ export const OnboardingForm = () => {
                       id="goalWeight"
                       type="number"
                       step="0.1"
+                      min="30"
+                      max="300"
                       placeholder="Ex: 70.5"
                       value={goalWeight}
                       onChange={(e) => setGoalWeight(e.target.value)}
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     />
+                    <p className="text-xs text-white/50">
+                      Entre 30 et 300 kg
+                    </p>
                   </div>
                 </motion.div>
               )}
@@ -222,12 +242,25 @@ export const OnboardingForm = () => {
                       id="currentWeight"
                       type="number"
                       step="0.1"
+                      min="30"
+                      max="300"
                       placeholder="Ex: 75.2"
                       value={currentWeight}
                       onChange={(e) => setCurrentWeight(e.target.value)}
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     />
+                    <p className="text-xs text-white/50">
+                      Entre 30 et 300 kg
+                    </p>
                   </div>
+
+                  {goalWeight && currentWeight && parseFloat(currentWeight) <= parseFloat(goalWeight) && (
+                    <div className="p-3 bg-yellow-500/10 border border-yellow-400/30 rounded-lg">
+                      <p className="text-yellow-200 text-sm text-center">
+                        ⚠️ Votre poids actuel est inférieur ou égal à votre objectif. Assurez-vous que vos valeurs sont correctes.
+                      </p>
+                    </div>
+                  )}
 
                   {error && (
                     <div className="text-red-300 text-sm text-center p-2 bg-red-500/10 rounded-lg border border-red-500/20">
@@ -264,7 +297,7 @@ export const OnboardingForm = () => {
                   disabled={!canProceed() || loading}
                   className="bg-gradient-to-r from-wellness-500 to-motivation-500 text-white"
                 >
-                  {loading ? 'Finalisation...' : 'Terminer'}
+                  {loading ? 'Finalisation...' : 'Commencer le défi !'}
                 </Button>
               )}
             </div>

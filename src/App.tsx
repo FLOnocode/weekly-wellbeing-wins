@@ -30,12 +30,12 @@ const AppContent = () => {
     return <AuthForm />;
   }
 
-  // Si l'utilisateur est connecté mais n'a pas de profil, afficher l'onboarding
-  if (!profile) {
+  // Si l'utilisateur est connecté mais n'a pas de profil complet, afficher l'onboarding
+  if (!profile || !profile.nickname || profile.goal_weight === 0 || profile.current_weight === 0) {
     return <OnboardingForm />;
   }
 
-  // Si l'utilisateur est connecté et a un profil, afficher l'application
+  // Si l'utilisateur est connecté et a un profil complet, afficher l'application
   return (
     <BrowserRouter>
       <Routes>

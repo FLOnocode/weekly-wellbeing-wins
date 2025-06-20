@@ -13,6 +13,7 @@ export const AuthForm = () => {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [activeTab, setActiveTab] = useState('signin')
   const { signIn, signUp } = useAuth()
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -36,7 +37,9 @@ export const AuthForm = () => {
     if (error) {
       setError(error.message)
     } else {
-      setError('Vérifiez votre email pour confirmer votre compte')
+      // Après inscription réussie, l'utilisateur sera automatiquement connecté
+      // et redirigé vers l'onboarding grâce à la logique dans App.tsx
+      console.log('✅ Inscription réussie, redirection vers onboarding...')
     }
     setLoading(false)
   }
@@ -87,7 +90,10 @@ export const AuthForm = () => {
           </h1>
           
           <p className="text-white/70 leading-relaxed">
-            Connectez-vous pour commencer votre transformation
+            {activeTab === 'signin' 
+              ? 'Connectez-vous pour continuer votre transformation'
+              : 'Créez votre compte et commencez votre transformation'
+            }
           </p>
         </motion.div>
 
@@ -98,19 +104,24 @@ export const AuthForm = () => {
         >
           <Card className="glassmorphism">
             <CardHeader className="text-center">
-              <CardTitle className="text-white">Authentification</CardTitle>
+              <CardTitle className="text-white">
+                {activeTab === 'signin' ? 'Connexion' : 'Créer un compte'}
+              </CardTitle>
               <CardDescription className="text-white/70">
-                Connectez-vous ou créez votre compte
+                {activeTab === 'signin' 
+                  ? 'Accédez à votre espace personnel'
+                  : 'Rejoignez le défi et transformez-vous'
+                }
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="signin" className="w-full">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 bg-white/10">
                   <TabsTrigger value="signin" className="text-white data-[state=active]:bg-white/20">
-                    Connexion
+                    Se connecter
                   </TabsTrigger>
                   <TabsTrigger value="signup" className="text-white data-[state=active]:bg-white/20">
-                    Inscription
+                    S'inscrire
                   </TabsTrigger>
                 </TabsList>
 
@@ -161,6 +172,19 @@ export const AuthForm = () => {
                     >
                       {loading ? 'Connexion...' : 'Se connecter'}
                     </Button>
+
+                    <div className="text-center">
+                      <p className="text-white/60 text-sm">
+                        Pas encore de compte ?{' '}
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('signup')}
+                          className="text-wellness-300 hover:text-wellness-200 underline"
+                        >
+                          Créez-en un
+                        </button>
+                      </p>
+                    </div>
                   </form>
                 </TabsContent>
 
@@ -197,14 +221,13 @@ export const AuthForm = () => {
                           className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
+                      <p className="text-xs text-white/50">
+                        Minimum 6 caractères
+                      </p>
                     </div>
 
                     {error && (
-                      <div className={`text-sm text-center p-2 rounded-lg border ${
-                        error.includes('Vérifiez') 
-                          ? 'text-green-300 bg-green-500/10 border-green-500/20' 
-                          : 'text-red-300 bg-red-500/10 border-red-500/20'
-                      }`}>
+                      <div className="text-red-300 text-sm text-center p-2 bg-red-500/10 rounded-lg border border-red-500/20">
                         {error}
                       </div>
                     )}
@@ -214,8 +237,27 @@ export const AuthForm = () => {
                       disabled={loading}
                       className="w-full bg-gradient-to-r from-wellness-500 to-motivation-500 text-white"
                     >
-                      {loading ? 'Création...' : 'Créer un compte'}
+                      {loading ? 'Création...' : 'Créer mon compte'}
                     </Button>
+
+                    <div className="text-center">
+                      <p className="text-white/60 text-sm">
+                        Déjà un compte ?{' '}
+                        <button
+                          type="button"
+                          onClick={() => setActiveTab('signin')}
+                          className="text-wellness-300 hover:text-wellness-200 underline"
+                        >
+                          Connectez-vous
+                        </button>
+                      </p>
+                    </div>
+
+                    <div className="p-3 bg-wellness-500/10 border border-wellness-400/30 rounded-lg">
+                      <p className="text-xs text-wellness-200 text-center">
+                        En créant un compte, vous rejoignez le Challenge Wellness Weekly et acceptez de participer au défi de transformation.
+                      </p>
+                    </div>
                   </form>
                 </TabsContent>
               </Tabs>
