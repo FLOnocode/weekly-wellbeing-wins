@@ -3,12 +3,28 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { User, Scale, Trophy, TrendingDown, Calendar, ArrowLeft, Medal, Target } from "lucide-react";
+import { User, Scale, Trophy, TrendingDown, Calendar, ArrowLeft, Medal, Target, LogOut, Settings } from "lucide-react";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 
 const Profile = () => {
+  const { signOut } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      // La redirection vers AuthForm se fera automatiquement via AuthContext
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+      setIsLoggingOut(false);
+    }
+  };
+
   const userStats = {
     name: "Votre Profil",
     currentWeight: 72.5,
@@ -227,6 +243,36 @@ const Profile = () => {
                     <span className="text-body text-white/70">Progression</span>
                     <span className="text-body font-bold text-white">{Math.round(weightLossProgress)}%</span>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Gestion du compte */}
+            <Card className="glassmorphism border-red-400/30">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-heading-4 flex items-center gap-2 text-white">
+                  <Settings className="h-6 w-6 text-red-400" />
+                  Gestion du compte
+                </CardTitle>
+                <CardDescription className="text-white/70">
+                  Options de compte et déconnexion
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <Button
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    variant="outline"
+                    className="w-full bg-red-500/10 border-red-400/30 text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-colors"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
+                  </Button>
+                  
+                  <p className="text-body-sm text-white/60 text-center">
+                    Vous serez redirigé vers la page de connexion
+                  </p>
                 </div>
               </CardContent>
             </Card>
