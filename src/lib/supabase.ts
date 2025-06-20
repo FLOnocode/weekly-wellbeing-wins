@@ -142,5 +142,62 @@ export const challengeService = {
     });
 
     return countByDate;
+  },
+
+  // Nouvelle fonction : Récupérer le nombre de défis complétés par jour pour des défis spécifiques
+  async getFilteredDailyChallengeCount(userId: string, startDate: string, endDate: string, challengeIds?: string[]) {
+    let query = supabase
+      .from('daily_challenges')
+      .select('date, challenge_id')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .eq('is_completed', true);
+
+    // Appliquer le filtre par challenge_id si fourni
+    if (challengeIds && challengeIds.length > 0) {
+      query = query.in('challenge_id', challengeIds);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Erreur lors du comptage des défis filtrés:', error);
+      return {};
+    }
+
+    // Grouper par date et compter
+    const countByDate: { [key: string]: number } = {};
+    data?.forEach(item => {
+      countByDate[item.date] = (countByDate[item.date] || 0) + 1;
+    });
+
+    return countByDate;
+  },
+
+  // Nouvelle fonction : Récupérer les statistiques détaillées par défi
+  async getChallengeStatsDetailed(userId: string, startDate: string, endDate: string, challengeIds?: string[]) {
+    let query = supabase
+      .from('daily_challenges')
+      .select('challenge_id, date, is_completed')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .eq('is_completed', true)
+      .order('date', { ascending: true });
+
+    // Appliquer le filtre par challenge_id si fourni
+    if (challengeIds && challengeIds.length > 0) {
+      query = query.in('challenge_id', challengeIds);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Erreur lors de la récupération des statistiques détaillées:', error);
+      return [];
+    }
+
+    return data || [];
   }
 };

@@ -1,26 +1,47 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, BarChart, TrendingUp, Calendar, Target } from "lucide-react";
+import { ArrowLeft, BarChart, TrendingUp, Calendar, Target, LineChart as LineChartIcon, PieChart } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AnalyticsFilter } from "@/components/AnalyticsFilter";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer, BarChart as RechartsBarChart, Bar } from "recharts";
+import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Legend, 
+  ResponsiveContainer, 
+  BarChart as RechartsBarChart, 
+  Bar,
+  PieChart as RechartsPieChart,
+  Cell,
+  Pie
+} from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { challengeService, supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon } from "lucide-react";
+
+// Types de graphiques disponibles
+type ChartType = 'bar' | 'line' | 'pie';
 
 const Analytics = () => {
   const { user, profile } = useAuth();
   const [dailyChallengeData, setDailyChallengeData] = useState([]);
   const [weightData, setWeightData] = useState([]);
+  const [pieChartData, setPieChartData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [chartType, setChartType] = useState<ChartType>('bar');
+  const [selectedChallenges, setSelectedChallenges] = useState<string[]>([]);
   const [stats, setStats] = useState({
     totalChallenges: 0,
     totalPoints: 0,
@@ -28,83 +49,297 @@ const Analytics = () => {
     bestDay: 0
   });
 
-  useEffect(() => {
-    const fetchAnalyticsData = async () => {
-      if (!user) return;
+  // Définition des défis disponibles
+  const challenges = [
+    {
+      id: "steps",
+      title: "10 000 pas",
+      icon: Footprints,
+      color: "pink",
+    },
+    {
+      id: "water",
+      title: "1,5L d'eau",
+      icon: Droplets,
+      color: "hydration",
+    },
+    {
+      id: "healthy-meal",
+      title: "Repas sain",
+      icon: Utensils,
+      color: "nutrition",
+    },
+    {
+      id: "exercise",
+      title: "10 min d'exercice",
+      icon: Dumbbell,
+      color: "fitness",
+    },
+    {
+      id: "no-sugar",
+      title: "Journée sans sucre",
+      icon: Ban,
+      color: "detox",
+    },
+    {
+      id: "fruits-veggies",
+      title: "5 fruits & légumes",
+      icon: Apple,
+      color: "vitamins",
+    },
+    {
+      id: "sleep",
+      title: "8h de sommeil",
+      icon: Moon,
+      color: "rest",
+    }
+  ];
 
-      setLoading(true);
-      try {
-        const today = new Date();
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(today.getDate() - 6); // Last 7 days including today
+  // Couleurs pour le graphique en camembert
+  const pieColors = ['#4ade80', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#10b981'];
 
-        const startDate = format(sevenDaysAgo, 'yyyy-MM-dd');
-        const endDate = format(today, 'yyyy-MM-dd');
+  const fetchAnalyticsData = async () => {
+    if (!user) return;
 
-        // Récupérer les données des défis quotidiens
-        const dailyCounts = await challengeService.getDailyChallengeCount(user.id, startDate, endDate);
+    setLoading(true);
+    try {
+      const today = new Date();
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(today.getDate() - 6); // Last 7 days including today
+
+      const startDate = format(sevenDaysAgo, 'yyyy-MM-dd');
+      const endDate = format(today, 'yyyy-MM-dd');
+
+      // Récupérer les données des défis quotidiens avec filtre
+      const dailyCounts = await challengeService.getFilteredDailyChallengeCount(
+        user.id, 
+        startDate, 
+        endDate, 
+        selectedChallenges.length > 0 ? selectedChallenges : undefined
+      );
+      
+      const challengeData = [];
+      let totalChallenges = 0;
+      let maxChallenges = 0;
+      
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(sevenDaysAgo);
+        date.setDate(sevenDaysAgo.getDate() + i);
+        const formattedDate = format(date, 'yyyy-MM-dd');
+        const displayDate = format(date, 'dd/MM', { locale: fr });
+        const challengeCount = dailyCounts[formattedDate] || 0;
         
-        const challengeData = [];
-        let totalChallenges = 0;
-        let maxChallenges = 0;
+        challengeData.push({
+          date: displayDate,
+          challenges: challengeCount,
+        });
         
-        for (let i = 0; i < 7; i++) {
-          const date = new Date(sevenDaysAgo);
-          date.setDate(sevenDaysAgo.getDate() + i);
-          const formattedDate = format(date, 'yyyy-MM-dd');
-          const displayDate = format(date, 'dd/MM', { locale: fr });
-          const challengeCount = dailyCounts[formattedDate] || 0;
-          
-          challengeData.push({
-            date: displayDate,
-            challenges: challengeCount,
-          });
-          
-          totalChallenges += challengeCount;
-          maxChallenges = Math.max(maxChallenges, challengeCount);
-        }
-        
-        setDailyChallengeData(challengeData);
+        totalChallenges += challengeCount;
+        maxChallenges = Math.max(maxChallenges, challengeCount);
+      }
+      
+      setDailyChallengeData(challengeData);
 
-        // Récupérer les données de poids des 30 derniers jours
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(today.getDate() - 30);
-        
-        const { data: weightEntries, error: weightError } = await supabase
-          .from('weight_entries')
-          .select('weight, created_at')
-          .eq('user_id', user.id)
-          .gte('created_at', thirtyDaysAgo.toISOString())
-          .order('created_at', { ascending: true });
+      // Données pour le graphique en camembert (répartition par type de défi)
+      if (selectedChallenges.length > 0) {
+        const detailedStats = await challengeService.getChallengeStatsDetailed(
+          user.id, 
+          startDate, 
+          endDate, 
+          selectedChallenges
+        );
 
-        if (!weightError && weightEntries) {
-          const weightChartData = weightEntries.map(entry => ({
-            date: format(new Date(entry.created_at), 'dd/MM', { locale: fr }),
-            weight: entry.weight
-          }));
-          setWeightData(weightChartData);
-        }
-
-        // Calculer les statistiques
-        const averageDaily = totalChallenges / 7;
-        const totalPoints = totalChallenges * 10; // Estimation: 10 points par défi en moyenne
-
-        setStats({
-          totalChallenges,
-          totalPoints,
-          averageDaily: Math.round(averageDaily * 10) / 10,
-          bestDay: maxChallenges
+        const challengeCountMap: { [key: string]: number } = {};
+        detailedStats.forEach(stat => {
+          challengeCountMap[stat.challenge_id] = (challengeCountMap[stat.challenge_id] || 0) + 1;
         });
 
-      } catch (error) {
-        console.error("Erreur lors de la récupération des données d'analyse:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+        const pieData = Object.entries(challengeCountMap).map(([challengeId, count]) => {
+          const challenge = challenges.find(c => c.id === challengeId);
+          return {
+            name: challenge?.title || challengeId,
+            value: count,
+            challengeId
+          };
+        });
 
+        setPieChartData(pieData);
+      } else {
+        // Si aucun filtre, afficher tous les défis
+        const allStats = await challengeService.getChallengeStatsDetailed(user.id, startDate, endDate);
+        const challengeCountMap: { [key: string]: number } = {};
+        allStats.forEach(stat => {
+          challengeCountMap[stat.challenge_id] = (challengeCountMap[stat.challenge_id] || 0) + 1;
+        });
+
+        const pieData = Object.entries(challengeCountMap).map(([challengeId, count]) => {
+          const challenge = challenges.find(c => c.id === challengeId);
+          return {
+            name: challenge?.title || challengeId,
+            value: count,
+            challengeId
+          };
+        });
+
+        setPieChartData(pieData);
+      }
+
+      // Récupérer les données de poids des 30 derniers jours
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(today.getDate() - 30);
+      
+      const { data: weightEntries, error: weightError } = await supabase
+        .from('weight_entries')
+        .select('weight, created_at')
+        .eq('user_id', user.id)
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
+
+      if (!weightError && weightEntries) {
+        const weightChartData = weightEntries.map(entry => ({
+          date: format(new Date(entry.created_at), 'dd/MM', { locale: fr }),
+          weight: entry.weight
+        }));
+        setWeightData(weightChartData);
+      }
+
+      // Calculer les statistiques
+      const averageDaily = totalChallenges / 7;
+      const totalPoints = totalChallenges * 10; // Estimation: 10 points par défi en moyenne
+
+      setStats({
+        totalChallenges,
+        totalPoints,
+        averageDaily: Math.round(averageDaily * 10) / 10,
+        bestDay: maxChallenges
+      });
+
+    } catch (error) {
+      console.error("Erreur lors de la récupération des données d'analyse:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchAnalyticsData();
-  }, [user]);
+  }, [user, selectedChallenges]);
+
+  const handleChallengeToggle = (challengeId: string) => {
+    setSelectedChallenges(prev => 
+      prev.includes(challengeId)
+        ? prev.filter(id => id !== challengeId)
+        : [...prev, challengeId]
+    );
+  };
+
+  const handleClearAll = () => {
+    setSelectedChallenges([]);
+  };
+
+  const handleSelectAll = () => {
+    setSelectedChallenges(challenges.map(c => c.id));
+  };
+
+  const renderChart = () => {
+    if (loading) {
+      return <div className="text-center text-white/70 py-8">Chargement des données...</div>;
+    }
+
+    switch (chartType) {
+      case 'bar':
+        return (
+          <ResponsiveContainer width="100%" height={250}>
+            <RechartsBarChart data={dailyChallengeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+              <XAxis dataKey="date" stroke="#ccc" fontSize={12} />
+              <YAxis stroke="#ccc" fontSize={12} />
+              <ChartTooltip 
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-black/80 border border-white/20 rounded-lg p-2 backdrop-blur-sm">
+                        <p className="text-white text-sm">{`${label}: ${payload[0].value} défis`}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar dataKey="challenges" fill="#4ade80" radius={[4, 4, 0, 0]} />
+            </RechartsBarChart>
+          </ResponsiveContainer>
+        );
+
+      case 'line':
+        return (
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={dailyChallengeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+              <XAxis dataKey="date" stroke="#ccc" fontSize={12} />
+              <YAxis stroke="#ccc" fontSize={12} />
+              <ChartTooltip 
+                content={({ active, payload, label }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-black/80 border border-white/20 rounded-lg p-2 backdrop-blur-sm">
+                        <p className="text-white text-sm">{`${label}: ${payload[0].value} défis`}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="challenges" 
+                stroke="#4ade80" 
+                strokeWidth={2}
+                dot={{ fill: '#4ade80', strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: '#4ade80', strokeWidth: 2 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        );
+
+      case 'pie':
+        return (
+          <ResponsiveContainer width="100%" height={250}>
+            <RechartsPieChart>
+              <Pie
+                data={pieChartData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {pieChartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                ))}
+              </Pie>
+              <ChartTooltip 
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-black/80 border border-white/20 rounded-lg p-2 backdrop-blur-sm">
+                        <p className="text-white text-sm">{`${payload[0].name}: ${payload[0].value} fois`}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+            </RechartsPieChart>
+          </ResponsiveContainer>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -156,6 +391,45 @@ const Analytics = () => {
           </div>
 
           <div className="space-y-4">
+            {/* Filtres et contrôles */}
+            <div className="flex flex-wrap gap-3 items-center">
+              <AnalyticsFilter
+                challenges={challenges}
+                selectedChallenges={selectedChallenges}
+                onChallengeToggle={handleChallengeToggle}
+                onClearAll={handleClearAll}
+                onSelectAll={handleSelectAll}
+              />
+              
+              {/* Sélecteur de type de graphique */}
+              <div className="flex gap-1 bg-white/10 rounded-lg p-1">
+                <Button
+                  size="sm"
+                  variant={chartType === 'bar' ? 'default' : 'ghost'}
+                  onClick={() => setChartType('bar')}
+                  className={`h-8 px-2 ${chartType === 'bar' ? 'bg-wellness-500' : 'text-white hover:bg-white/20'}`}
+                >
+                  <BarChart className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant={chartType === 'line' ? 'default' : 'ghost'}
+                  onClick={() => setChartType('line')}
+                  className={`h-8 px-2 ${chartType === 'line' ? 'bg-wellness-500' : 'text-white hover:bg-white/20'}`}
+                >
+                  <LineChartIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant={chartType === 'pie' ? 'default' : 'ghost'}
+                  onClick={() => setChartType('pie')}
+                  className={`h-8 px-2 ${chartType === 'pie' ? 'bg-wellness-500' : 'text-white hover:bg-white/20'}`}
+                >
+                  <PieChart className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
             {/* Statistiques rapides */}
             <div className="grid grid-cols-2 gap-4">
               <Card className="glassmorphism">
@@ -195,35 +469,24 @@ const Analytics = () => {
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
-                  <BarChart className="h-5 w-5 text-wellness-500" />
-                  <span>Défis complétés par jour</span>
+                  {chartType === 'bar' && <BarChart className="h-5 w-5 text-wellness-500" />}
+                  {chartType === 'line' && <LineChartIcon className="h-5 w-5 text-wellness-500" />}
+                  {chartType === 'pie' && <PieChart className="h-5 w-5 text-wellness-500" />}
+                  <span>
+                    {chartType === 'pie' 
+                      ? 'Répartition des défis' 
+                      : 'Défis complétés par jour'
+                    }
+                  </span>
                 </CardTitle>
+                {selectedChallenges.length > 0 && (
+                  <p className="text-sm text-white/60">
+                    Filtré sur {selectedChallenges.length} défi{selectedChallenges.length > 1 ? 's' : ''}
+                  </p>
+                )}
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="text-center text-white/70 py-8">Chargement des données...</div>
-                ) : (
-                  <ResponsiveContainer width="100%" height={250}>
-                    <RechartsBarChart data={dailyChallengeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                      <XAxis dataKey="date" stroke="#ccc" fontSize={12} />
-                      <YAxis stroke="#ccc" fontSize={12} />
-                      <ChartTooltip 
-                        content={({ active, payload, label }) => {
-                          if (active && payload && payload.length) {
-                            return (
-                              <div className="bg-black/80 border border-white/20 rounded-lg p-2 backdrop-blur-sm">
-                                <p className="text-white text-sm">{`${label}: ${payload[0].value} défis`}</p>
-                              </div>
-                            );
-                          }
-                          return null;
-                        }}
-                      />
-                      <Bar dataKey="challenges" fill="#4ade80" radius={[4, 4, 0, 0]} />
-                    </RechartsBarChart>
-                  </ResponsiveContainer>
-                )}
+                {renderChart()}
               </CardContent>
             </Card>
 
@@ -314,6 +577,11 @@ const Analytics = () => {
                     : "Commencez à compléter des défis pour voir vos statistiques ici !"
                   }
                 </p>
+                {selectedChallenges.length > 0 && (
+                  <p className="text-wellness-300 text-xs mt-2">
+                    Données filtrées sur {selectedChallenges.length} défi{selectedChallenges.length > 1 ? 's' : ''} sélectionné{selectedChallenges.length > 1 ? 's' : ''}
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
