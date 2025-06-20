@@ -234,11 +234,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { error: new Error('No user logged in') };
     }
 
+    if (!profile) {
+      console.log('❌ Pas de profil existant');
+      return { error: new Error('No existing profile found') };
+    }
+
     try {
-      // Préparer les données avec les valeurs par défaut si nécessaire
+      // Merge the partial update with existing profile data to preserve all required fields
       const updateData = {
-        user_id: user.id,
-        ...profileData,
+        ...profile, // Start with existing profile data
+        ...profileData, // Override with new data
+        user_id: user.id, // Ensure user_id is always set
         updated_at: new Date().toISOString(),
       };
 
