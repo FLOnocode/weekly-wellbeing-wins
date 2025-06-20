@@ -121,24 +121,21 @@ const WeighIn = () => {
       return;
     }
 
-    if (!photo) {
-      toast.error("Une photo de preuve est obligatoire");
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
       const weightValue = parseFloat(weight);
       let photoUrl: string | null = null;
 
-      // 1. Uploader la photo si elle existe
+      // 1. Uploader la photo si elle existe (optionnel maintenant)
       if (photo) {
         toast.loading("Upload de la photo en cours...");
-        photoUrl = await uploadPhoto(photo);
-        
-        if (!photoUrl) {
-          throw new Error("Échec de l'upload de la photo");
+        try {
+          photoUrl = await uploadPhoto(photo);
+        } catch (photoError) {
+          console.error('Erreur upload photo:', photoError);
+          toast.error("Erreur lors de l'upload de la photo, mais la pesée sera enregistrée sans photo");
+          // On continue même si l'upload de la photo échoue
         }
       }
 
@@ -159,7 +156,7 @@ const WeighIn = () => {
         .insert({
           user_id: user.id,
           weight: weightValue,
-          photo_url: photoUrl,
+          photo_url: photoUrl, // Peut être null maintenant
           notes: notes.trim() || null,
         })
         .select()
@@ -198,9 +195,7 @@ const WeighIn = () => {
       
       let errorMessage = "Erreur lors de l'enregistrement de la pesée";
       
-      if (error.message?.includes('storage')) {
-        errorMessage = "Erreur lors de l'upload de la photo";
-      } else if (error.message?.includes('profiles')) {
+      if (error.message?.includes('profiles')) {
         errorMessage = "Erreur lors de la mise à jour du profil";
       } else if (error.message?.includes('weight_entries')) {
         errorMessage = "Erreur lors de l'enregistrement de la pesée";
@@ -343,7 +338,7 @@ const WeighIn = () => {
                     Pesées le lundi
                   </Badge>
                   <Badge className="bg-motivation-500/20 text-motivation-200 border-motivation-400/30">
-                    Photo obligatoire
+                    Photo optionnelle
                   </Badge>
                 </div>
               </CardContent>
@@ -356,12 +351,12 @@ const WeighIn = () => {
                   <Scale className="h-5 w-5 text-wellness-500" />
                   <span>Enregistrer votre poids</span>
                 </CardTitle>
-                <CardDescription className="text-white/70">Soumettez votre pesée hebdomadaire avec photo</CardDescription>
+                <CardDescription className="text-white/70">Soumettez votre pesée hebdomadaire</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="weight" className="text-body font-medium text-white">Poids actuel (kg)</Label>
+                    <Label htmlFor="weight" className="text-body font-medium text-white">Poids actuel (kg) *</Label>
                     <Input
                       id="weight"
                       type="number"
@@ -375,7 +370,7 @@ const WeighIn = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="photo" className="text-body font-medium text-white">Photo de preuve *</Label>
+                    <Label htmlFor="photo" className="text-body font-medium text-white">Photo de preuve (optionnel)</Label>
                     <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center">
                       {photo ? (
                         <div className="space-y-2">
@@ -388,7 +383,7 @@ const WeighIn = () => {
                       ) : (
                         <div className="space-y-2">
                           <Camera className="h-8 w-8 text-white/60 mx-auto" />
-                          <div className="text-body-sm text-white/70">Prenez une photo de votre balance</div>
+                          <div className="text-body-sm text-white/70">Prenez une photo de votre balance (optionnel)</div>
                           <div className="text-xs text-white/50">Max 5MB - JPG, PNG acceptés</div>
                           <label htmlFor="photo-input" className="cursor-pointer">
                             <Button type="button" variant="outline" size="sm" asChild className="bg-white/10 border-white/20 text-white hover:bg-white/20">
@@ -407,7 +402,6 @@ const WeighIn = () => {
                         capture="environment"
                         onChange={handlePhotoChange}
                         className="hidden"
-                        required
                       />
                     </div>
                   </div>
