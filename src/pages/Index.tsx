@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon } from "lucide-react";
 import { motion } from "framer-motion";
@@ -7,9 +7,19 @@ import { MobileWeeklyProgress } from "@/components/MobileWeeklyProgress";
 import { MobileHeader } from "@/components/MobileHeader";
 import { QuickChallengeIcons } from "@/components/QuickChallengeIcons";
 import { NutriBot } from "@/components/NutriBot";
+import { useAuth } from "@/contexts/AuthContext";
+import { challengeService } from "@/lib/supabase";
+import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
+  const { user } = useAuth();
   const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Obtenir la date du jour au format YYYY-MM-DD
+  const getTodayDate = () => {
+    return new Date().toISOString().split('T')[0];
+  };
 
   const weeklyFocus = {
     title: "Semaine du Bien-être",
@@ -91,19 +101,97 @@ const Index = () => {
     }
   ];
 
-  const toggleChallenge = (challengeId: string) => {
+  // Charger les défis complétés pour aujourd'hui
+  useEffect(() => {
+    const loadTodaysChallenges = async () => {
+      if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        console.log('🔄 Chargement des défis pour aujourd\'hui...');
+        const todayDate = getTodayDate();
+        const completedChallengeIds = await challengeService.getCompletedChallenges(user.id, todayDate);
+        
+        console.log('✅ Défis complétés aujourd\'hui:', completedChallengeIds);
+        setCompletedChallenges(new Set(completedChallengeIds));
+      } catch (error) {
+        console.error('❌ Erreur lors du chargement des défis:', error);
+        toast.error("Erreur lors du chargement des défis");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTodaysChallenges();
+  }, [user]);
+
+  const toggleChallenge = async (challengeId: string) => {
+    if (!user) {
+      toast.error("Vous devez être connecté pour enregistrer vos défis");
+      return;
+    }
+
+    const todayDate = getTodayDate();
+    const isCurrentlyCompleted = completedChallenges.has(challengeId);
+    const newCompletionStatus = !isCurrentlyCompleted;
+
+    // Mise à jour optimiste de l'UI
     const newCompleted = new Set(completedChallenges);
-    if (newCompleted.has(challengeId)) {
-      newCompleted.delete(challengeId);
-    } else {
+    if (newCompletionStatus) {
       newCompleted.add(challengeId);
+    } else {
+      newCompleted.delete(challengeId);
     }
     setCompletedChallenges(newCompleted);
+
+    try {
+      console.log(`🎯 ${newCompletionStatus ? 'Complétion' : 'Annulation'} du défi:`, challengeId);
+      
+      const success = await challengeService.toggleChallenge(
+        user.id, 
+        challengeId, 
+        todayDate, 
+        newCompletionStatus
+      );
+
+      if (!success) {
+        // Revenir à l'état précédent en cas d'erreur
+        setCompletedChallenges(completedChallenges);
+        toast.error("Erreur lors de la sauvegarde du défi");
+        return;
+      }
+
+      // Afficher un message de succès
+      const challenge = challenges.find(c => c.id === challengeId);
+      if (newCompletionStatus) {
+        toast.success(`✅ Défi "${challenge?.title}" complété ! +${challenge?.points} points`);
+      } else {
+        toast.success(`↩️ Défi "${challenge?.title}" annulé`);
+      }
+
+      console.log('✅ Défi sauvegardé avec succès');
+    } catch (error) {
+      console.error('❌ Erreur lors de la sauvegarde du défi:', error);
+      
+      // Revenir à l'état précédent
+      setCompletedChallenges(completedChallenges);
+      toast.error("Erreur lors de la sauvegarde du défi");
+    }
   };
 
   const totalPoints = challenges
     .filter(challenge => completedChallenges.has(challenge.id))
     .reduce((sum, challenge) => sum + challenge.points, 0);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Chargement des défis...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -168,6 +256,16 @@ const Index = () => {
             <p className="text-white/70 leading-relaxed">
               Chaque petit pas vous rapproche de vos objectifs
             </p>
+            
+            {/* Affichage de la date */}
+            <div className="mt-2 text-white/60 text-sm">
+              {new Date().toLocaleDateString('fr-FR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+              })}
+            </div>
           </motion.div>
 
           {/* Accès rapide aux défis - adapté au thème sombre */}
@@ -218,6 +316,15 @@ const Index = () => {
                     <div className="text-sm text-white/70">Progression</div>
                   </div>
                 </div>
+                
+                {/* Message de motivation basé sur la progression */}
+                {completedChallenges.size === challenges.length && (
+                  <div className="mt-4 p-3 bg-wellness-500/20 border border-wellness-400/30 rounded-lg text-center">
+                    <p className="text-wellness-200 text-sm font-medium">
+                      🎉 Félicitations ! Vous avez complété tous les défis d'aujourd'hui !
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
