@@ -30,153 +30,145 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Fonction de test simple
+  const testSupabaseConnection = async () => {
+    try {
+      console.log('🌐 Test de base Supabase...');
+      
+      // Test simple avec une requête minimale
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('count')
+        .limit(1);
+      
+      console.log('📊 Résultat test:', { data, error });
+      return !error;
+    } catch (err) {
+      console.error('💥 Erreur test connexion:', err);
+      return false;
+    }
+  };
+
   const fetchProfile = async (userId: string) => {
-    console.log('🔍 AuthContext: Début de fetchProfile pour userId:', userId);
+    console.log('🔍 Début fetchProfile pour:', userId);
     
     try {
-      // Use maybeSingle() instead of single() to handle cases where no profile exists
-      const { data: profileData, error } = await supabase
+      // Test de connectivité d'abord
+      const isConnected = await testSupabaseConnection();
+      if (!isConnected) {
+        console.error('❌ Pas de connexion Supabase');
+        throw new Error('Connexion Supabase échouée');
+      }
+
+      console.log('📡 Requête profile pour userId:', userId);
+      
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .maybeSingle();
+        .maybeSingle(); // Utilise maybeSingle() au lieu de single()
+
+      console.log('📋 Réponse profiles:', { data, error });
 
       if (error) {
-        console.error('❌ AuthContext: Erreur lors de la récupération du profil:', error);
-        setProfile(null);
-        return;
-      }
-
-      // If no profile exists, create one
-      if (!profileData) {
-        console.log('📝 AuthContext: Aucun profil trouvé, création d\'un nouveau profil...');
+        console.error('❌ Erreur requête profiles:', error);
         
-        const { data: newProfile, error: createError } = await supabase
+        // Si la table n'existe pas ou autre erreur, créer un profil par défaut
+        console.log('📝 Tentative création profil...');
+        const { data: newProfile, error: insertError } = await supabase
           .from('profiles')
-          .insert([{ 
+          .upsert({ 
             user_id: userId,
             nickname: '',
             goal_weight: 0,
-            current_weight: 0
-          }])
+            current_weight: 0,
+            created_at: new Date().toISOString()
+          })
           .select()
           .single();
 
-        if (createError) {
-          console.error('❌ AuthContext: Erreur lors de la création du profil:', createError);
+        if (insertError) {
+          console.error('❌ Erreur création profil:', insertError);
+          // Même si la création échoue, on continue avec un profil null
           setProfile(null);
         } else {
-          console.log('✅ AuthContext: Nouveau profil créé:', newProfile);
+          console.log('✅ Profil créé:', newProfile);
           setProfile(newProfile);
         }
       } else {
-        console.log('✅ AuthContext: Profil trouvé:', profileData);
-        setProfile(profileData);
+        console.log('✅ Profil trouvé:', data);
+        setProfile(data);
       }
-    } catch (err) {
-      console.error('💥 AuthContext: Erreur inattendue:', err);
-      setProfile(null);
-    } finally {
-      setLoading(false);
-      console.log('🏁 AuthContext: fetchProfile terminé, loading: false');
-    }
-  };
 
-  // Fonction avec timeout de sécurité
-  const fetchProfileWithTimeout = async (userId: string, timeout = 10000) => {
-    return Promise.race([
-      fetchProfile(userId),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), timeout)
-      )
-    ]);
+    } catch (err) {
+      console.error('💥 Erreur fetchProfile:', err);
+      setProfile(null);
+    }
   };
 
   useEffect(() => {
-    console.log('🔄 AuthContext: Initialisation du useEffect principal')
-    console.log('🔧 AuthContext: Supabase URL:', import.meta.env.VITE_SUPABASE_URL ? 'Défini' : 'MANQUANT')
-    console.log('🔧 AuthContext: Supabase Anon Key:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'Défini' : 'MANQUANT')
+    console.log('🔄 AuthContext: Initialisation...');
     
-    // Test de connectivité Supabase
-    console.log('🌐 AuthContext: Test de connectivité Supabase...')
-    
-    // Récupérer la session actuelle
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      console.log('📋 AuthContext: Résultat getSession:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userId: session?.user?.id,
-        error: error
-      })
-      
-      if (error) {
-        console.error('❌ AuthContext: Erreur lors de getSession:', error)
-        console.error('❌ AuthContext: Code d\'erreur:', error.code)
-        console.error('❌ AuthContext: Message d\'erreur:', error.message)
-        setLoading(false)
-        return
-      }
-      
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        console.log('👤 AuthContext: Utilisateur trouvé, récupération du profil...')
-        console.log('👤 AuthContext: User ID:', session.user.id)
-        console.log('👤 AuthContext: User email:', session.user.email)
-        
-        // Utiliser fetchProfileWithTimeout au lieu de fetchProfile
-        fetchProfileWithTimeout(session.user.id).catch((error) => {
-          console.error('⏰ AuthContext: Timeout ou erreur:', error);
-          setLoading(false);
-          setProfile(null);
-        });
-      } else {
-        console.log('❌ AuthContext: Pas d\'utilisateur, arrêt du chargement')
-        setLoading(false)
-      }
-    }).catch((error) => {
-      console.error('💥 AuthContext: Exception lors de getSession:', error)
-      setLoading(false)
-    })
+    // Timeout de sécurité global
+    const safetyTimeout = setTimeout(() => {
+      console.warn('⚠️ TIMEOUT SÉCURITÉ - Arrêt forcé du loading');
+      setLoading(false);
+    }, 8000); // 8 secondes max
 
-    // Écouter les changements d'authentification
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔔 AuthContext: Changement d\'état d\'auth:', event)
-      console.log('🔔 AuthContext: Session dans onAuthStateChange:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        userId: session?.user?.id,
-        event: event
-      })
-      
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        console.log('👤 AuthContext: Nouvel utilisateur, récupération du profil...')
+    const initAuth = async () => {
+      try {
+        // Récupérer la session actuelle
+        const { data: { session }, error } = await supabase.auth.getSession();
         
-        try {
-          await fetchProfileWithTimeout(session.user.id);
-        } catch (error) {
-          console.error('⏰ AuthContext: Timeout ou erreur:', error);
-          setLoading(false);
+        console.log('📱 Session actuelle:', { session: !!session, error });
+
+        if (session?.user) {
+          console.log('👤 Utilisateur connecté:', session.user.id);
+          setUser(session.user);
+          setSession(session);
+          
+          // Essayer de récupérer le profil
+          await fetchProfile(session.user.id);
+        } else {
+          console.log('👤 Pas d\'utilisateur connecté');
+          setUser(null);
+          setSession(null);
           setProfile(null);
         }
-      } else {
-        console.log('❌ AuthContext: Pas d\'utilisateur, nettoyage du profil')
-        setProfile(null)
-        setLoading(false)
+      } catch (err) {
+        console.error('💥 Erreur initialisation auth:', err);
+      } finally {
+        setLoading(false);
+        clearTimeout(safetyTimeout);
       }
-    })
+    };
+
+    // Écouter les changements d'auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('🔔 Auth state change:', event, !!session);
+        
+        if (session?.user) {
+          setUser(session.user);
+          setSession(session);
+          await fetchProfile(session.user.id);
+        } else {
+          setUser(null);
+          setSession(null);
+          setProfile(null);
+        }
+        
+        setLoading(false);
+      }
+    );
+
+    initAuth();
 
     return () => {
-      console.log('🧹 AuthContext: Nettoyage de la subscription')
-      subscription.unsubscribe()
-    }
-  }, [])
+      clearTimeout(safetyTimeout);
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const signUp = async (email: string, password: string) => {
     console.log('📝 AuthContext: Tentative d\'inscription pour:', email)
@@ -299,13 +291,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshProfile = async () => {
     console.log('🔄 AuthContext: Rafraîchissement du profil demandé')
     if (user) {
-      try {
-        await fetchProfileWithTimeout(user.id);
-      } catch (error) {
-        console.error('⏰ AuthContext: Timeout lors du refresh:', error);
-        setLoading(false);
-        setProfile(null);
-      }
+      await fetchProfile(user.id)
     } else {
       console.log('❌ AuthContext: Pas d\'utilisateur pour refreshProfile')
     }
