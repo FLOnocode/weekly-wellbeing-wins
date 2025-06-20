@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 
 const Profile = () => {
-  const { signOut } = useAuth();
+  const { signOut, profile, user } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -25,23 +25,42 @@ const Profile = () => {
     }
   };
 
+  // Utiliser les données du profil ou des valeurs par défaut
   const userStats = {
-    name: "Votre Profil",
-    currentWeight: 72.5,
-    previousWeight: 73.3,
-    startWeight: 76.0,
-    goalWeight: 68.0,
+    name: profile?.nickname || "Votre Profil",
+    currentWeight: profile?.current_weight || 0,
+    previousWeight: (profile?.current_weight || 0) + 0.8, // Simulation semaine précédente
+    startWeight: (profile?.current_weight || 0) + 3.5, // Simulation poids de départ
+    goalWeight: profile?.goal_weight || 0,
     rank: 4,
     totalPoints: 240,
     weeklyPoints: 35,
-    weightLost: 3.5,
-    joinDate: "2025-01-01",
+    weightLost: profile?.current_weight && profile?.goal_weight 
+      ? ((profile.current_weight + 3.5) - profile.current_weight) 
+      : 3.5,
+    joinDate: profile?.created_at || "2025-01-01",
     perfectWeeks: 2,
     totalWeeks: 4
   };
 
-  const weightLossProgress = ((userStats.startWeight - userStats.currentWeight) / (userStats.startWeight - userStats.goalWeight)) * 100;
+  const weightLossProgress = profile?.current_weight && profile?.goal_weight 
+    ? ((userStats.startWeight - userStats.currentWeight) / (userStats.startWeight - userStats.goalWeight)) * 100
+    : 0;
+  
   const weeklyChange = userStats.previousWeight - userStats.currentWeight;
+
+  // Générer les initiales du profil
+  const getInitials = () => {
+    if (profile?.nickname) {
+      return profile.nickname
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return user?.email?.slice(0, 2).toUpperCase() || 'VP';
+  };
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -106,12 +125,14 @@ const Profile = () => {
                   <Avatar className="h-16 w-16 border-2 border-wellness-300">
                     <AvatarImage src="/placeholder.svg" />
                     <AvatarFallback className="bg-wellness-500/20 text-wellness-300 text-heading-4">
-                      VP
+                      {getInitials()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
                     <CardTitle className="text-heading-4 text-white">{userStats.name}</CardTitle>
-                    <CardDescription className="text-white/70">Membre depuis le {new Date(userStats.joinDate).toLocaleDateString("fr-FR")}</CardDescription>
+                    <CardDescription className="text-white/70">
+                      Membre depuis le {new Date(userStats.joinDate).toLocaleDateString("fr-FR")}
+                    </CardDescription>
                     <div className="flex items-center gap-2 mt-2">
                       <Badge className="bg-wellness-500/20 text-wellness-200 border-wellness-400/30">#{userStats.rank} au classement</Badge>
                       <Badge className="bg-motivation-500/20 text-motivation-200 border-motivation-400/30">{userStats.totalPoints} pts</Badge>
@@ -132,36 +153,52 @@ const Profile = () => {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-wellness-400/30 rounded-lg">
-                    <div className="text-heading-3 font-bold text-wellness-300">{userStats.currentWeight}kg</div>
+                    <div className="text-heading-3 font-bold text-wellness-300">
+                      {userStats.currentWeight > 0 ? `${userStats.currentWeight}kg` : 'Non défini'}
+                    </div>
                     <div className="text-body-sm text-white/70">Poids actuel</div>
                   </div>
                   <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-motivation-400/30 rounded-lg">
-                    <div className="text-heading-3 font-bold text-motivation-300">{userStats.previousWeight}kg</div>
-                    <div className="text-body-sm text-white/70">Semaine passée</div>
+                    <div className="text-heading-3 font-bold text-motivation-300">
+                      {userStats.goalWeight > 0 ? `${userStats.goalWeight}kg` : 'Non défini'}
+                    </div>
+                    <div className="text-body-sm text-white/70">Poids objectif</div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex justify-between text-body-sm">
-                    <span className="text-white/70">Progression vers l'objectif</span>
-                    <span className="font-medium text-white">{Math.round(weightLossProgress)}%</span>
-                  </div>
-                  <Progress value={weightLossProgress} className="h-2 bg-white/20" />
-                  <div className="flex justify-between text-body-sm text-white/70">
-                    <span>Départ: {userStats.startWeight}kg</span>
-                    <span>Objectif: {userStats.goalWeight}kg</span>
-                  </div>
-                </div>
+                {userStats.currentWeight > 0 && userStats.goalWeight > 0 && (
+                  <>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-body-sm">
+                        <span className="text-white/70">Progression vers l'objectif</span>
+                        <span className="font-medium text-white">{Math.round(weightLossProgress)}%</span>
+                      </div>
+                      <Progress value={weightLossProgress} className="h-2 bg-white/20" />
+                      <div className="flex justify-between text-body-sm text-white/70">
+                        <span>Départ: {userStats.startWeight}kg</span>
+                        <span>Objectif: {userStats.goalWeight}kg</span>
+                      </div>
+                    </div>
 
-                <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <TrendingDown className="h-5 w-5 text-wellness-500" />
-                    <span className="text-body font-medium text-white">Changement cette semaine</span>
+                    <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <TrendingDown className="h-5 w-5 text-wellness-500" />
+                        <span className="text-body font-medium text-white">Changement cette semaine</span>
+                      </div>
+                      <div className={`text-body font-bold ${weeklyChange > 0 ? "text-wellness-300" : "text-red-300"}`}>
+                        {weeklyChange > 0 ? "-" : "+"}{Math.abs(weeklyChange)}kg
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {(userStats.currentWeight === 0 || userStats.goalWeight === 0) && (
+                  <div className="p-4 bg-yellow-500/10 border border-yellow-400/30 rounded-lg text-center">
+                    <p className="text-yellow-200 text-sm">
+                      Complétez votre profil pour voir votre progression
+                    </p>
                   </div>
-                  <div className={`text-body font-bold ${weeklyChange > 0 ? "text-wellness-300" : "text-red-300"}`}>
-                    {weeklyChange > 0 ? "-" : "+"}{Math.abs(weeklyChange)}kg
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
 
@@ -233,16 +270,24 @@ const Profile = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-body text-white/70">Poids objectif</span>
-                    <span className="text-body font-bold text-white">{userStats.goalWeight}kg</span>
+                    <span className="text-body font-bold text-white">
+                      {userStats.goalWeight > 0 ? `${userStats.goalWeight}kg` : 'Non défini'}
+                    </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-body text-white/70">Reste à perdre</span>
-                    <span className="text-body font-bold text-white">{userStats.currentWeight - userStats.goalWeight}kg</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-body text-white/70">Progression</span>
-                    <span className="text-body font-bold text-white">{Math.round(weightLossProgress)}%</span>
-                  </div>
+                  {userStats.currentWeight > 0 && userStats.goalWeight > 0 && (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="text-body text-white/70">Reste à perdre</span>
+                        <span className="text-body font-bold text-white">
+                          {Math.max(0, userStats.currentWeight - userStats.goalWeight).toFixed(1)}kg
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-body text-white/70">Progression</span>
+                        <span className="text-body font-bold text-white">{Math.round(weightLossProgress)}%</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>

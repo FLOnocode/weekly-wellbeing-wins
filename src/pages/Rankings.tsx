@@ -6,6 +6,7 @@ import { Trophy, Flame, Crown, Medal, Award, ArrowLeft } from "lucide-react";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface LeaderboardEntry {
   id: string;
@@ -16,9 +17,25 @@ interface LeaderboardEntry {
   weightLost: number;
   rank: number;
   isBurnerOfWeek?: boolean;
+  isCurrentUser?: boolean;
 }
 
 const Rankings = () => {
+  const { profile, user } = useAuth();
+
+  // Générer les initiales du profil utilisateur
+  const getUserInitials = () => {
+    if (profile?.nickname) {
+      return profile.nickname
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+    }
+    return user?.email?.slice(0, 2).toUpperCase() || 'VP';
+  };
+
   const leaderboardData: LeaderboardEntry[] = [
     {
       id: "1",
@@ -47,11 +64,14 @@ const Rankings = () => {
     },
     {
       id: "4",
-      name: "Vous",
+      name: profile?.nickname || "Vous",
       totalScore: 240,
       weeklyScore: 35,
-      weightLost: 2.2,
+      weightLost: profile?.current_weight && profile?.goal_weight 
+        ? Math.max(0, (profile.current_weight + 3.5) - profile.current_weight)
+        : 2.2,
       rank: 4,
+      isCurrentUser: true,
     },
     {
       id: "5",
@@ -188,7 +208,7 @@ const Rankings = () => {
                     <div
                       key={entry.id}
                       className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${
-                        entry.name === "Vous" 
+                        entry.isCurrentUser 
                           ? "bg-white/20 backdrop-blur-sm border border-motivation-400/30" 
                           : "bg-white/10 backdrop-blur-sm border border-white/20 md:hover:bg-white/15"
                       }`}
@@ -198,17 +218,20 @@ const Rankings = () => {
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={entry.avatar || "/placeholder.svg"} />
                         <AvatarFallback className="bg-wellness-500/20 text-wellness-300">
-                          {entry.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
+                          {entry.isCurrentUser 
+                            ? getUserInitials()
+                            : entry.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")
+                          }
                         </AvatarFallback>
                       </Avatar>
 
                       <div className="flex-1">
-                        <div className={`font-medium ${entry.name === "Vous" ? "text-motivation-200" : "text-white"}`}>
+                        <div className={`font-medium ${entry.isCurrentUser ? "text-motivation-200" : "text-white"}`}>
                           {entry.name}
-                          {entry.name === "Vous" && (
+                          {entry.isCurrentUser && (
                             <Badge variant="outline" className="ml-2 text-xs border-motivation-400/30 text-motivation-200">
                               Vous
                             </Badge>

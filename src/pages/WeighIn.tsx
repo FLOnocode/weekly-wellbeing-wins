@@ -9,8 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 const WeighIn = () => {
+  const { profile, updateProfile } = useAuth();
   const [weight, setWeight] = useState("");
   const [photo, setPhoto] = useState<File | null>(null);
   const [notes, setNotes] = useState("");
@@ -26,17 +28,55 @@ const WeighIn = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    setTimeout(() => {
+    try {
+      // Mettre à jour le poids actuel dans le profil
+      if (weight && parseFloat(weight) > 0) {
+        await updateProfile({
+          current_weight: parseFloat(weight)
+        });
+      }
+
+      // Ici on pourrait aussi enregistrer l'entrée de poids dans weight_entries
+      // TODO: Implémenter l'enregistrement dans weight_entries
+
+      setTimeout(() => {
+        setIsSubmitting(false);
+        setWeight("");
+        setPhoto(null);
+        setNotes("");
+        alert("Pesée enregistrée avec succès !");
+      }, 1500);
+    } catch (error) {
+      console.error('Erreur lors de l\'enregistrement:', error);
       setIsSubmitting(false);
-      setWeight("");
-      setPhoto(null);
-      setNotes("");
-      alert("Pesée enregistrée avec succès !");
-    }, 1500);
+      alert("Erreur lors de l'enregistrement de la pesée");
+    }
   };
 
   const nextWeighInDate = new Date();
   nextWeighInDate.setDate(nextWeighInDate.getDate() + ((1 - nextWeighInDate.getDay() + 7) % 7));
+
+  // Données de pesées récentes (simulées pour l'instant)
+  const recentWeighIns = [
+    { 
+      date: "2025-01-20", 
+      weight: profile?.current_weight || 72.5, 
+      change: -0.8, 
+      points: 15 
+    },
+    { 
+      date: "2025-01-13", 
+      weight: (profile?.current_weight || 72.5) + 0.8, 
+      change: -1.2, 
+      points: 20 
+    },
+    { 
+      date: "2025-01-06", 
+      weight: (profile?.current_weight || 72.5) + 2.0, 
+      change: -0.5, 
+      points: 10 
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -94,6 +134,34 @@ const WeighIn = () => {
           </div>
 
           <div className="space-y-4">
+            {/* Informations du profil */}
+            {profile && (
+              <Card className="glassmorphism border-wellness-400/30">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
+                    <Scale className="h-5 w-5 text-wellness-500" />
+                    <span>Votre profil</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-wellness-400/30 rounded-lg">
+                      <div className="text-heading-3 font-bold text-wellness-300">
+                        {profile.current_weight > 0 ? `${profile.current_weight}kg` : 'Non défini'}
+                      </div>
+                      <div className="text-body-sm text-white/70">Poids actuel</div>
+                    </div>
+                    <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-motivation-400/30 rounded-lg">
+                      <div className="text-heading-3 font-bold text-motivation-300">
+                        {profile.goal_weight > 0 ? `${profile.goal_weight}kg` : 'Non défini'}
+                      </div>
+                      <div className="text-body-sm text-white/70">Objectif</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Prochaine pesée */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
@@ -139,7 +207,7 @@ const WeighIn = () => {
                       id="weight"
                       type="number"
                       step="0.1"
-                      placeholder="Entrez votre poids"
+                      placeholder={profile?.current_weight ? `Actuel: ${profile.current_weight}kg` : "Entrez votre poids"}
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
                       required
@@ -213,11 +281,7 @@ const WeighIn = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {[
-                    { date: "2025-01-20", weight: 72.5, change: -0.8, points: 15 },
-                    { date: "2025-01-13", weight: 73.3, change: -1.2, points: 20 },
-                    { date: "2025-01-06", weight: 74.5, change: -0.5, points: 10 },
-                  ].map((entry, index) => (
+                  {recentWeighIns.map((entry, index) => (
                     <div key={index} className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                       <div>
                         <div className="text-body font-medium text-white">{entry.weight}kg</div>
