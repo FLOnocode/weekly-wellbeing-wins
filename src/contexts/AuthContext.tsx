@@ -79,8 +79,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Premier useEffect : Gestion de l'état d'authentification uniquement
   useEffect(() => {
-    console.log('🔄 AuthContext: Initialisation...');
+    console.log('🔄 AuthContext: Initialisation de l\'authentification...');
     
     const initAuth = async () => {
       try {
@@ -90,12 +91,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('📱 Session actuelle:', { session: !!session, error });
 
         if (session?.user) {
-          console.log('👤 Utilisateur connecté:', session.user.id);
+          console.log('👤 Utilisateur connecté trouvé:', session.user.id);
           setUser(session.user);
           setSession(session);
-          
-          // Récupérer le profil
-          await fetchProfile(session.user.id);
         } else {
           console.log('👤 Pas d\'utilisateur connecté');
           setUser(null);
@@ -104,7 +102,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (err) {
         console.error('💥 Erreur initialisation auth:', err);
+        setUser(null);
+        setSession(null);
+        setProfile(null);
       } finally {
+        console.log('✅ Initialisation auth terminée');
         setLoading(false);
       }
     };
@@ -115,10 +117,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('🔔 Auth state change:', event, !!session);
         
         if (session?.user) {
+          console.log('👤 Utilisateur connecté via auth change:', session.user.id);
           setUser(session.user);
           setSession(session);
-          await fetchProfile(session.user.id);
         } else {
+          console.log('👤 Utilisateur déconnecté via auth change');
           setUser(null);
           setSession(null);
           setProfile(null);
@@ -134,6 +137,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscription.unsubscribe();
     };
   }, []);
+
+  // Deuxième useEffect : Gestion du profil uniquement quand un utilisateur est connecté
+  useEffect(() => {
+    if (!user) {
+      console.log('⏹ Aucun utilisateur connecté, profil non chargé.');
+      setProfile(null);
+      return;
+    }
+
+    console.log('🔍 Chargement du profil pour utilisateur connecté:', user.id);
+    setLoading(true);
+    
+    fetchProfile(user.id)
+      .finally(() => {
+        console.log('✅ Chargement du profil terminé');
+        setLoading(false);
+      });
+  }, [user]);
 
   const signUp = async (email: string, password: string) => {
     console.log('📝 Inscription pour:', email);
@@ -247,12 +268,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     console.log('🔄 Rafraîchissement profil');
-    if (user) {
+    
+    if (!user) {
+      console.log('⏹ Aucun utilisateur connecté, pas de rafraîchissement du profil');
+      return;
+    }
+
+    setLoading(true);
+    try {
       await fetchProfile(user.id);
+    } finally {
+      setLoading(false);
     }
   };
 
-  console.log('🎯 État AuthContext:', { loading, user: !!user, profile: !!profile });
+  console.log('🎯 État AuthContext:', { 
+    loading, 
+    user: !!user, 
+    profile: !!profile,
+    userId: user?.id || 'none'
+  });
 
   const value = {
     user,
