@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import WeighIn from "./pages/WeighIn";
 import Rankings from "./pages/Rankings";
 import Profile from "./pages/Profile";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const AppContent = () => {
         <Route path="/weigh-in" element={<WeighIn />} />
         <Route path="/rankings" element={<Rankings />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

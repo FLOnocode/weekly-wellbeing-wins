@@ -1,7 +1,6 @@
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, Star, Trophy, Scale, Medal, User } from "lucide-react";
+import { Heart, Menu, Star, Trophy, Scale, Medal, User, BarChart } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -111,6 +110,15 @@ export const MobileHeader = ({
                     >
                       <User className="h-5 w-5 text-white/70" />
                       <span className="text-body font-medium">Profil</span>
+                    </Link>
+
+                    <Link 
+                      to="/analytics" 
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-energy-500/20 transition-colors text-white"
+                    >
+                      <BarChart className="h-5 w-5 text-energy-400" />
+                      <span className="text-body font-medium">Analyse</span>
                     </Link>
                   </div>
 
