@@ -28,6 +28,8 @@ const WeighIn = () => {
       if (!user) return;
 
       try {
+        console.log('🔍 Chargement historique pour utilisateur:', user.id);
+        
         const { data, error } = await supabase
           .from('weight_entries')
           .select('*')
@@ -36,12 +38,13 @@ const WeighIn = () => {
           .limit(5);
 
         if (error) {
-          console.error('Erreur lors du chargement de l\'historique:', error);
+          console.error('❌ Erreur lors du chargement de l\'historique:', error);
         } else {
+          console.log('✅ Historique chargé:', data);
           setRecentWeighIns(data || []);
         }
       } catch (error) {
-        console.error('Exception lors du chargement de l\'historique:', error);
+        console.error('💥 Exception lors du chargement de l\'historique:', error);
       } finally {
         setLoadingHistory(false);
       }
@@ -66,19 +69,23 @@ const WeighIn = () => {
         return;
       }
 
+      console.log('📸 Photo sélectionnée:', file.name, file.type, file.size);
       setPhoto(file);
     }
   };
 
   const uploadPhoto = async (file: File): Promise<string | null> => {
-    if (!user) return null;
+    if (!user) {
+      console.error('❌ Pas d\'utilisateur pour upload photo');
+      return null;
+    }
 
     try {
       // Générer un nom de fichier unique
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
-      console.log('📸 Upload de la photo:', fileName);
+      console.log('📸 Début upload photo:', fileName);
 
       // Uploader le fichier vers Supabase Storage
       const { data, error } = await supabase.storage
@@ -100,7 +107,7 @@ const WeighIn = () => {
         .from('weight-photos')
         .getPublicUrl(fileName);
 
-      console.log('🔗 URL publique:', publicUrl);
+      console.log('🔗 URL publique générée:', publicUrl);
       return publicUrl;
     } catch (error) {
       console.error('💥 Exception upload photo:', error);
@@ -111,12 +118,20 @@ const WeighIn = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🚀 Début soumission formulaire');
+    console.log('👤 Utilisateur:', user?.id);
+    console.log('⚖️ Poids saisi:', weight);
+    console.log('📸 Photo:', photo?.name || 'Aucune');
+    console.log('📝 Notes:', notes);
+    
     if (!user) {
+      console.error('❌ Pas d\'utilisateur connecté');
       toast.error("Vous devez être connecté pour enregistrer une pesée");
       return;
     }
 
     if (!weight || parseFloat(weight) <= 0) {
+      console.error('❌ Poids invalide:', weight);
       toast.error("Veuillez entrer un poids valide");
       return;
     }
@@ -125,73 +140,100 @@ const WeighIn = () => {
 
     try {
       const weightValue = parseFloat(weight);
+      console.log('📊 Valeur poids convertie:', weightValue);
+      
       let photoUrl: string | null = null;
 
       // 1. Uploader la photo si elle existe (optionnel maintenant)
       if (photo) {
+        console.log('📸 Upload de la photo en cours...');
         toast.loading("Upload de la photo en cours...");
         try {
           photoUrl = await uploadPhoto(photo);
+          console.log('✅ Photo uploadée avec succès:', photoUrl);
         } catch (photoError) {
-          console.error('Erreur upload photo:', photoError);
+          console.error('❌ Erreur upload photo:', photoError);
           toast.error("Erreur lors de l'upload de la photo, mais la pesée sera enregistrée sans photo");
           // On continue même si l'upload de la photo échoue
         }
       }
 
       // 2. Mettre à jour le poids actuel dans le profil
+      console.log('💾 Mise à jour du profil...');
       toast.loading("Mise à jour du profil...");
+      
       const { error: profileError } = await updateProfile({
         current_weight: weightValue
       });
 
       if (profileError) {
+        console.error('❌ Erreur mise à jour profil:', profileError);
         throw profileError;
       }
+      
+      console.log('✅ Profil mis à jour avec succès');
 
       // 3. Enregistrer l'entrée de poids dans weight_entries
+      console.log('📝 Enregistrement de la pesée...');
       toast.loading("Enregistrement de la pesée...");
+      
+      const weightEntryData = {
+        user_id: user.id,
+        weight: weightValue,
+        photo_url: photoUrl,
+        notes: notes.trim() || null,
+      };
+      
+      console.log('📋 Données à insérer:', weightEntryData);
+      
       const { data: weightEntry, error: weightError } = await supabase
         .from('weight_entries')
-        .insert({
-          user_id: user.id,
-          weight: weightValue,
-          photo_url: photoUrl, // Peut être null maintenant
-          notes: notes.trim() || null,
-        })
+        .insert(weightEntryData)
         .select()
         .single();
 
       if (weightError) {
+        console.error('❌ Erreur enregistrement pesée:', weightError);
         throw weightError;
       }
 
-      console.log('✅ Pesée enregistrée:', weightEntry);
+      console.log('✅ Pesée enregistrée avec succès:', weightEntry);
 
       // 4. Rafraîchir le profil et l'historique
+      console.log('🔄 Rafraîchissement des données...');
       await refreshProfile();
       
       // Recharger l'historique
-      const { data: updatedHistory } = await supabase
+      const { data: updatedHistory, error: historyError } = await supabase
         .from('weight_entries')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (updatedHistory) {
-        setRecentWeighIns(updatedHistory);
+      if (historyError) {
+        console.error('❌ Erreur rechargement historique:', historyError);
+      } else {
+        console.log('✅ Historique rechargé:', updatedHistory);
+        setRecentWeighIns(updatedHistory || []);
       }
 
       // 5. Réinitialiser le formulaire
+      console.log('🧹 Réinitialisation du formulaire');
       setWeight("");
       setPhoto(null);
       setNotes("");
 
+      // Réinitialiser l'input file
+      const fileInput = document.getElementById('photo-input') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+
       toast.success("Pesée enregistrée avec succès ! 🎉");
 
     } catch (error: any) {
-      console.error('❌ Erreur lors de l\'enregistrement:', error);
+      console.error('💥 Erreur lors de l\'enregistrement:', error);
       
       let errorMessage = "Erreur lors de l'enregistrement de la pesée";
       
@@ -199,6 +241,8 @@ const WeighIn = () => {
         errorMessage = "Erreur lors de la mise à jour du profil";
       } else if (error.message?.includes('weight_entries')) {
         errorMessage = "Erreur lors de l'enregistrement de la pesée";
+      } else if (error.code) {
+        errorMessage = `Erreur base de données (${error.code}): ${error.message}`;
       }
 
       toast.error(errorMessage);
@@ -361,12 +405,17 @@ const WeighIn = () => {
                       id="weight"
                       type="number"
                       step="0.1"
-                      placeholder={profile?.current_weight ? `Actuel: ${profile.current_weight}kg` : "Entrez votre poids"}
+                      min="30"
+                      max="300"
+                      placeholder={profile?.current_weight ? `Actuel: ${profile.current_weight}kg` : "Ex: 75.5"}
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
                       required
                       className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
                     />
+                    <p className="text-xs text-white/50">
+                      Entre 30 et 300 kg
+                    </p>
                   </div>
 
                   <div className="space-y-2">

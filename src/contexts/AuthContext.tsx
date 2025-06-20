@@ -235,12 +235,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
+      // Préparer les données avec les valeurs par défaut si nécessaire
+      const updateData = {
+        user_id: user.id,
+        ...profileData,
+        updated_at: new Date().toISOString(),
+      };
+
+      console.log('📋 Données à mettre à jour:', updateData);
+
       const { data, error } = await supabase
         .from('profiles')
-        .upsert({
-          user_id: user.id,
-          ...profileData,
-          updated_at: new Date().toISOString(),
+        .upsert(updateData, {
+          onConflict: 'user_id'
         })
         .select()
         .single();
@@ -286,7 +293,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading, 
     user: !!user, 
     profile: !!profile,
-    userId: user?.id || 'none'
+    userId: user?.id || 'none',
+    profileData: profile ? {
+      nickname: profile.nickname,
+      current_weight: profile.current_weight,
+      goal_weight: profile.goal_weight
+    } : 'none'
   });
 
   const value = {
