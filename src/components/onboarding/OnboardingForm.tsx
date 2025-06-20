@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { useAuth } from '@/contexts/AuthContext'
-import { User, Target, Scale, ArrowRight, ArrowLeft } from 'lucide-react'
+import { User, Target, Scale, ArrowRight, ArrowLeft, LogOut } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export const OnboardingForm = () => {
@@ -15,7 +15,8 @@ export const OnboardingForm = () => {
   const [currentWeight, setCurrentWeight] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const { updateProfile } = useAuth()
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const { updateProfile, signOut, user } = useAuth()
 
   const totalSteps = 3
   const progress = (currentStep / totalSteps) * 100
@@ -29,6 +30,17 @@ export const OnboardingForm = () => {
   const handlePrevious = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
+    }
+  }
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await signOut()
+      // La redirection vers AuthForm se fera automatiquement via AuthContext
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error)
+      setIsLoggingOut(false)
     }
   }
 
@@ -97,6 +109,20 @@ export const OnboardingForm = () => {
       <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
 
       <div className="relative z-10 w-full max-w-md mx-auto px-4">
+        {/* Bouton de déconnexion en haut à droite */}
+        <div className="absolute top-0 right-0 z-20">
+          <Button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            variant="ghost"
+            size="sm"
+            className="text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            {isLoggingOut ? "..." : "Changer d'utilisateur"}
+          </Button>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -107,9 +133,16 @@ export const OnboardingForm = () => {
             Configuration de votre profil
           </h1>
           
-          <p className="text-white/70 leading-relaxed mb-6">
+          <p className="text-white/70 leading-relaxed mb-2">
             Quelques informations pour personnaliser votre expérience
           </p>
+
+          {/* Affichage de l'utilisateur connecté */}
+          {user && (
+            <div className="text-xs text-white/50 mb-4 p-2 bg-white/5 rounded-lg">
+              Connecté en tant que : {user.email}
+            </div>
+          )}
 
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-white/70">
@@ -270,6 +303,13 @@ export const OnboardingForm = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Aide pour les utilisateurs de test */}
+        <div className="mt-6 text-center">
+          <div className="text-xs text-white/40 p-3 bg-white/5 rounded-lg">
+            💡 Pour tester avec un autre utilisateur, cliquez sur "Changer d'utilisateur" en haut à droite
+          </div>
+        </div>
       </div>
     </div>
   )
