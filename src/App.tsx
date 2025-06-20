@@ -1,9 +1,11 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { AuthForm } from "@/components/auth/AuthForm";
+import { OnboardingForm } from "@/components/onboarding/OnboardingForm";
 import Index from "./pages/Index";
 import WeighIn from "./pages/WeighIn";
 import Rankings from "./pages/Rankings";
@@ -12,21 +14,49 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  const { user, profile, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Chargement...</div>
+      </div>
+    );
+  }
+
+  // Si l'utilisateur n'est pas connecté, afficher le formulaire d'authentification
+  if (!user) {
+    return <AuthForm />;
+  }
+
+  // Si l'utilisateur est connecté mais n'a pas de profil, afficher l'onboarding
+  if (!profile) {
+    return <OnboardingForm />;
+  }
+
+  // Si l'utilisateur est connecté et a un profil, afficher l'application
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/weigh-in" element={<WeighIn />} />
+        <Route path="/rankings" element={<Rankings />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/weigh-in" element={<WeighIn />} />
-          <Route path="/rankings" element={<Rankings />} />
-          <Route path="/profile" element={<Profile />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
