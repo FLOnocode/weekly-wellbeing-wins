@@ -103,15 +103,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (profileData: Partial<Profile>) => {
     if (!user) return { error: new Error('No user logged in') }
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .upsert({
         user_id: user.id,
         ...profileData,
         updated_at: new Date().toISOString(),
       })
+      .select()
+      .single()
 
-    if (!error) {
+    if (!error && data) {
+      // Mettre à jour immédiatement l'état local avec les données retournées
+      setProfile(data)
+      // Puis rafraîchir depuis la base de données pour assurer la cohérence
       await fetchProfile(user.id)
     }
 
