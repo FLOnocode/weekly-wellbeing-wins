@@ -252,7 +252,7 @@ const Index = () => {
             </div>
             
             <h1 className="text-3xl font-bold text-white mb-3">
-              Défis du jour
+              Ta discipline est ta plus grande force.
             </h1>
             
             <p className="text-white/70 leading-relaxed">
