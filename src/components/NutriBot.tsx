@@ -58,44 +58,48 @@ export function NutriBot() {
 
       const data = await response.json()
       
-      // Handle different response formats
-      if (data.message) {
+      // Handle different response formats with better validation
+      if (data && typeof data.message === "string" && data.message.trim()) {
         return data.message
-      } else if (data.response) {
+      } else if (data && typeof data.response === "string" && data.response.trim()) {
         return data.response
-      } else if (typeof data === "string") {
+      } else if (typeof data === "string" && data.trim()) {
         return data
       } else {
-        throw new Error("Invalid response format")
+        // Return a contextual fallback instead of throwing an error
+        console.warn("Received empty or invalid response format from nutrition service:", data)
+        return getContextualFallback(message)
       }
       
     } catch (error) {
       console.error("Error communicating with nutrition service:", error)
-      
-      // Provide contextual fallback responses
-      const lowerMessage = message.toLowerCase()
-      
-      if (lowerMessage.includes('photo') || lowerMessage.includes('image')) {
-        return "Merci pour cette photo ! Pour analyser votre repas, je recommande de vérifier l'équilibre : 1/2 de légumes, 1/4 de protéines maigres, 1/4 de glucides complexes. Les couleurs variées sont un bon indicateur ! 📸🥗"
-      }
-      
-      if (lowerMessage.includes('poids') || lowerMessage.includes('maigrir')) {
-        return "Pour une perte de poids saine, privilégiez les aliments nutritifs et rassasiants. Combinez alimentation équilibrée et activité physique régulière. La patience est clé ! ⚖️💪"
-      }
-      
-      if (lowerMessage.includes('recette') || lowerMessage.includes('cuisine')) {
-        return "Voici une idée équilibrée : Saumon grillé avec quinoa et légumes rôtis, assaisonnés à l'huile d'olive et aux herbes. Simple et nutritif ! 🐟🥬"
-      }
-      
-      // Default fallback
-      const fallbacks = [
-        "Pour une alimentation équilibrée, privilégiez les légumes verts, les protéines maigres et les céréales complètes. Essayez d'inclure 5 portions de fruits et légumes par jour ! 🥬🍎",
-        "Conseil nutrition : Buvez beaucoup d'eau et limitez les aliments transformés. Les aliments riches en fibres sont excellents pour la satiété ! 💧🫘",
-        "Pour maintenir un poids santé, privilégiez les repas faits maison avec des ingrédients frais. N'oubliez pas les bonnes graisses ! 🥑🌰"
-      ]
-      
-      return fallbacks[Math.floor(Math.random() * fallbacks.length)]
+      return getContextualFallback(message)
     }
+  }
+
+  const getContextualFallback = (message: string): string => {
+    const lowerMessage = message.toLowerCase()
+    
+    if (lowerMessage.includes('photo') || lowerMessage.includes('image')) {
+      return "Merci pour cette photo ! Pour analyser votre repas, je recommande de vérifier l'équilibre : 1/2 de légumes, 1/4 de protéines maigres, 1/4 de glucides complexes. Les couleurs variées sont un bon indicateur ! 📸🥗"
+    }
+    
+    if (lowerMessage.includes('poids') || lowerMessage.includes('maigrir')) {
+      return "Pour une perte de poids saine, privilégiez les aliments nutritifs et rassasiants. Combinez alimentation équilibrée et activité physique régulière. La patience est clé ! ⚖️💪"
+    }
+    
+    if (lowerMessage.includes('recette') || lowerMessage.includes('cuisine')) {
+      return "Voici une idée équilibrée : Saumon grillé avec quinoa et légumes rôtis, assaisonnés à l'huile d'olive et aux herbes. Simple et nutritif ! 🐟🥬"
+    }
+    
+    // Default fallback
+    const fallbacks = [
+      "Pour une alimentation équilibrée, privilégiez les légumes verts, les protéines maigres et les céréales complètes. Essayez d'inclure 5 portions de fruits et légumes par jour ! 🥬🍎",
+      "Conseil nutrition : Buvez beaucoup d'eau et limitez les aliments transformés. Les aliments riches en fibres sont excellents pour la satiété ! 💧🫘",
+      "Pour maintenir un poids santé, privilégiez les repas faits maison avec des ingrédients frais. N'oubliez pas les bonnes graisses ! 🥑🌰"
+    ]
+    
+    return fallbacks[Math.floor(Math.random() * fallbacks.length)]
   }
 
   const handleSubmit = async (e: FormEvent) => {
