@@ -48,6 +48,66 @@ function generateContextualResponse(message: string): string {
   return getRandomNutritionAdvice()
 }
 
+function extractMessageFromN8nResponse(responseText: string): string {
+  console.log("🔍 Raw n8n response text:", responseText)
+  console.log("🔍 Response text length:", responseText.length)
+  console.log("🔍 Response text type:", typeof responseText)
+
+  // If the response is empty or just whitespace, return fallback
+  if (!responseText || responseText.trim().length === 0) {
+    console.log("⚠️ Empty response from n8n, using fallback")
+    return getRandomNutritionAdvice()
+  }
+
+  // Try to parse as JSON first
+  try {
+    const jsonResponse = JSON.parse(responseText)
+    console.log("✅ Successfully parsed n8n response as JSON:", jsonResponse)
+    console.log("🔍 JSON response type:", typeof jsonResponse)
+    console.log("🔍 JSON response keys:", Object.keys(jsonResponse || {}))
+
+    // Try different common message keys
+    const possibleMessageKeys = ['message', 'response', 'text', 'output', 'result', 'content', 'data']
+    
+    for (const key of possibleMessageKeys) {
+      if (jsonResponse && typeof jsonResponse === 'object' && jsonResponse[key]) {
+        const messageValue = jsonResponse[key]
+        if (typeof messageValue === 'string' && messageValue.trim().length > 0) {
+          console.log(`✅ Found message in key '${key}':`, messageValue)
+          return messageValue.trim()
+        }
+      }
+    }
+
+    // If it's a simple string value in JSON
+    if (typeof jsonResponse === 'string' && jsonResponse.trim().length > 0) {
+      console.log("✅ n8n response is a JSON string:", jsonResponse)
+      return jsonResponse.trim()
+    }
+
+    // If it's an object but no message found, stringify it
+    if (jsonResponse && typeof jsonResponse === 'object') {
+      console.log("⚠️ JSON object found but no message key, stringifying")
+      return JSON.stringify(jsonResponse)
+    }
+
+  } catch (parseError) {
+    console.log("⚠️ Failed to parse n8n response as JSON:", parseError)
+    console.log("🔄 Treating as plain text response")
+  }
+
+  // If not JSON or JSON parsing failed, treat as plain text
+  const trimmedText = responseText.trim()
+  if (trimmedText.length > 0) {
+    console.log("✅ Using n8n response as plain text:", trimmedText)
+    return trimmedText
+  }
+
+  // Final fallback
+  console.log("❌ No valid content found in n8n response, using fallback")
+  return getRandomNutritionAdvice()
+}
+
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -76,13 +136,25 @@ Deno.serve(async (req: Request) => {
     const requestData = await req.json()
     const userMessage = requestData?.message || ""
 
-    // Get environment variables
-    const N8N_WEBHOOK_URL = Deno.env.get("N8N_WEBHOOK_URL")
+    console.log("📨 Received request:", {
+      hasData: !!requestData,
+      messageLength: userMessage.length,
+      message: userMessage.substring(0, 100) + (userMessage.length > 100 ? "..." : "")
+    })
+
+    // Get environment variables - check for the correct secret name
+    const N8N_WEBHOOK_URL = Deno.env.get("N8N_WEBHOOK_URL") || Deno.env.get("N8N_RELAY_SSM_2K_CHALLENGE")
     const N8N_SECRET_KEY = Deno.env.get("N8N_SECRET_KEY")
 
+    console.log("🔧 Environment check:", {
+      hasWebhookUrl: !!N8N_WEBHOOK_URL,
+      hasSecretKey: !!N8N_SECRET_KEY,
+      webhookUrlLength: N8N_WEBHOOK_URL?.length || 0
+    })
+
     // If n8n is not configured, provide fallback nutrition advice
-    if (!N8N_WEBHOOK_URL || !N8N_SECRET_KEY) {
-      console.log("N8N not configured, providing fallback nutrition advice")
+    if (!N8N_WEBHOOK_URL) {
+      console.log("⚠️ N8N not configured (no webhook URL), providing fallback nutrition advice")
       
       const fallbackResponse = generateContextualResponse(userMessage)
       
@@ -102,41 +174,58 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    console.log("Relaying request to n8n:", {
-      url: N8N_WEBHOOK_URL,
+    console.log("🚀 Relaying request to n8n:", {
+      url: N8N_WEBHOOK_URL.substring(0, 50) + "...",
       hasData: !!requestData,
       messageLength: userMessage.length,
     })
 
+    // Prepare headers for n8n request
+    const n8nHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+    }
+
+    // Add secret key if available
+    if (N8N_SECRET_KEY) {
+      n8nHeaders["x-secret-key"] = N8N_SECRET_KEY
+      console.log("🔐 Added secret key to n8n request")
+    }
+
     // Forward the request to n8n webhook
     const n8nResponse = await fetch(N8N_WEBHOOK_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-secret-key": N8N_SECRET_KEY,
-      },
+      headers: n8nHeaders,
       body: JSON.stringify(requestData),
     })
 
     // Get the response from n8n
     const responseText = await n8nResponse.text()
     
-    console.log("n8n response:", {
+    console.log("📥 n8n response received:", {
       status: n8nResponse.status,
+      statusText: n8nResponse.statusText,
       hasResponse: !!responseText,
       responseLength: responseText.length,
+      contentType: n8nResponse.headers.get("content-type")
     })
 
     // If n8n request fails, provide fallback
     if (!n8nResponse.ok) {
-      console.log("n8n request failed, providing fallback")
+      console.log("❌ n8n request failed, providing fallback")
+      console.log("❌ n8n error details:", {
+        status: n8nResponse.status,
+        statusText: n8nResponse.statusText,
+        response: responseText.substring(0, 200)
+      })
+      
       const fallbackResponse = generateContextualResponse(userMessage)
       
       return new Response(
         JSON.stringify({ 
           message: fallbackResponse,
           source: "fallback_after_error",
-          note: "Service temporairement indisponible, conseil nutrition de base fourni."
+          note: "Service temporairement indisponible, conseil nutrition de base fourni.",
+          error: `n8n responded with ${n8nResponse.status}: ${n8nResponse.statusText}`
         }),
         {
           status: 200,
@@ -148,17 +237,21 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // Parse the response as JSON if possible, otherwise return as text
-    let responseData
-    try {
-      responseData = JSON.parse(responseText)
-    } catch {
-      responseData = { message: responseText }
-    }
+    // Extract the message from n8n response
+    const extractedMessage = extractMessageFromN8nResponse(responseText)
 
-    // Return the n8n response to the client
+    console.log("✅ Successfully extracted message from n8n:", {
+      messageLength: extractedMessage.length,
+      messagePreview: extractedMessage.substring(0, 100) + (extractedMessage.length > 100 ? "..." : "")
+    })
+
+    // Always return a consistent format with the message
     return new Response(
-      JSON.stringify(responseData),
+      JSON.stringify({
+        message: extractedMessage,
+        source: "n8n",
+        timestamp: new Date().toISOString()
+      }),
       {
         status: 200,
         headers: {
@@ -169,7 +262,12 @@ Deno.serve(async (req: Request) => {
     )
 
   } catch (error) {
-    console.error("Error in relay-to-n8n function:", error)
+    console.error("💥 Error in relay-to-n8n function:", error)
+    console.error("💥 Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    })
     
     // Provide fallback nutrition advice even on error
     const fallbackResponse = getRandomNutritionAdvice()
@@ -178,7 +276,8 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({ 
         message: fallbackResponse,
         source: "error_fallback",
-        note: "Une erreur s'est produite, mais voici un conseil nutrition utile !"
+        note: "Une erreur s'est produite, mais voici un conseil nutrition utile !",
+        error: error.message
       }),
       {
         status: 200,

@@ -39,6 +39,12 @@ export function NutriBot() {
     try {
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/relay-to-n8n`
       
+      console.log("🚀 Sending message to n8n via Edge Function:", {
+        url: apiUrl,
+        messageLength: message.length,
+        messagePreview: message.substring(0, 50) + (message.length > 50 ? "..." : "")
+      })
+      
       const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
@@ -52,28 +58,38 @@ export function NutriBot() {
         }),
       })
 
+      console.log("📥 Edge Function response:", {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      })
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`)
       }
 
       const data = await response.json()
       
-      // Handle different response formats with better validation
-      if (data && typeof data.message === "string" && data.message.trim()) {
-        return data.message
-      } else if (data && typeof data.response === "string" && data.response.trim()) {
-        return data.response
-      } else if (typeof data === "string" && data.trim()) {
-        return data
+      console.log("📋 Parsed response data:", {
+        hasMessage: !!data.message,
+        messageLength: data.message?.length || 0,
+        source: data.source,
+        hasNote: !!data.note,
+        hasError: !!data.error
+      })
+
+      // The Edge Function now guarantees a message field
+      if (data && data.message && typeof data.message === "string" && data.message.trim()) {
+        console.log("✅ Successfully received message from n8n")
+        return data.message.trim()
       } else {
-        // Return a contextual fallback instead of throwing an error
-        console.warn("Received empty or invalid response format from nutrition service:", data)
-        return getContextualFallback(message)
+        console.warn("⚠️ No valid message in response:", data)
+        throw new Error("No valid message received from nutrition service")
       }
       
     } catch (error) {
-      console.error("Error communicating with nutrition service:", error)
-      return getContextualFallback(message)
+      console.error("❌ Error communicating with nutrition service:", error)
+      throw error
     }
   }
 
@@ -118,8 +134,15 @@ export function NutriBot() {
     setIsLoading(true)
 
     try {
+      console.log("🎯 Handling user message:", currentInput)
+      
       // Send message to nutrition service
       const aiResponse = await sendMessageToN8n(currentInput)
+      
+      console.log("✅ Received AI response:", {
+        length: aiResponse.length,
+        preview: aiResponse.substring(0, 100) + (aiResponse.length > 100 ? "..." : "")
+      })
       
       const aiMessage: Message = {
         id: messages.length + 2,
@@ -130,12 +153,12 @@ export function NutriBot() {
       setMessages((prev) => [...prev, aiMessage])
       
     } catch (error) {
-      console.error("Error in handleSubmit:", error)
+      console.error("❌ Error in handleSubmit:", error)
       
       // Add error message with helpful advice
       const errorMessage: Message = {
         id: messages.length + 2,
-        content: "Je rencontre des difficultés techniques, mais voici un conseil général : Pour une alimentation saine, privilégiez les aliments non transformés et variez les couleurs dans votre assiette ! 🌈🥗",
+        content: getContextualFallback(currentInput),
         sender: "ai",
       }
       
@@ -173,7 +196,7 @@ export function NutriBot() {
 
           setMessages((prev) => [...prev, aiMessage])
         } catch (error) {
-          console.error("Error analyzing photo:", error)
+          console.error("❌ Error analyzing photo:", error)
           
           const errorMessage: Message = {
             id: messages.length + 2,
@@ -211,7 +234,7 @@ export function NutriBot() {
 
       setMessages((prev) => [...prev, aiMessage])
     } catch (error) {
-      console.error("Error processing voice message:", error)
+      console.error("❌ Error processing voice message:", error)
       
       const errorMessage: Message = {
         id: messages.length + 2,
