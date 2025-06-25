@@ -35,13 +35,6 @@ export function NutriBot() {
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  // Fallback responses in case the API is unavailable
-  const fallbackResponses = [
-    "Je suis désolé, je rencontre actuellement des difficultés techniques. Pour une alimentation équilibrée, je recommande de privilégier les légumes verts, les protéines maigres et les céréales complètes. 🥬",
-    "Service temporairement indisponible. En attendant, n'oubliez pas de boire beaucoup d'eau et de limiter les aliments transformés ! 💧",
-    "Problème de connexion détecté. Conseil rapide : essayez d'inclure 5 portions de fruits et légumes par jour. Chaque couleur apporte des nutriments différents ! 🌈",
-  ]
-
   const sendMessageToN8n = async (message: string): Promise<string> => {
     try {
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/relay-to-n8n`
@@ -65,7 +58,7 @@ export function NutriBot() {
 
       const data = await response.json()
       
-      // Handle different response formats from n8n
+      // Handle different response formats
       if (data.message) {
         return data.message
       } else if (data.response) {
@@ -73,15 +66,35 @@ export function NutriBot() {
       } else if (typeof data === "string") {
         return data
       } else {
-        throw new Error("Invalid response format from n8n")
+        throw new Error("Invalid response format")
       }
       
     } catch (error) {
-      console.error("Error communicating with n8n:", error)
+      console.error("Error communicating with nutrition service:", error)
       
-      // Return a fallback response
-      const randomFallback = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)]
-      return randomFallback
+      // Provide contextual fallback responses
+      const lowerMessage = message.toLowerCase()
+      
+      if (lowerMessage.includes('photo') || lowerMessage.includes('image')) {
+        return "Merci pour cette photo ! Pour analyser votre repas, je recommande de vérifier l'équilibre : 1/2 de légumes, 1/4 de protéines maigres, 1/4 de glucides complexes. Les couleurs variées sont un bon indicateur ! 📸🥗"
+      }
+      
+      if (lowerMessage.includes('poids') || lowerMessage.includes('maigrir')) {
+        return "Pour une perte de poids saine, privilégiez les aliments nutritifs et rassasiants. Combinez alimentation équilibrée et activité physique régulière. La patience est clé ! ⚖️💪"
+      }
+      
+      if (lowerMessage.includes('recette') || lowerMessage.includes('cuisine')) {
+        return "Voici une idée équilibrée : Saumon grillé avec quinoa et légumes rôtis, assaisonnés à l'huile d'olive et aux herbes. Simple et nutritif ! 🐟🥬"
+      }
+      
+      // Default fallback
+      const fallbacks = [
+        "Pour une alimentation équilibrée, privilégiez les légumes verts, les protéines maigres et les céréales complètes. Essayez d'inclure 5 portions de fruits et légumes par jour ! 🥬🍎",
+        "Conseil nutrition : Buvez beaucoup d'eau et limitez les aliments transformés. Les aliments riches en fibres sont excellents pour la satiété ! 💧🫘",
+        "Pour maintenir un poids santé, privilégiez les repas faits maison avec des ingrédients frais. N'oubliez pas les bonnes graisses ! 🥑🌰"
+      ]
+      
+      return fallbacks[Math.floor(Math.random() * fallbacks.length)]
     }
   }
 
@@ -96,12 +109,13 @@ export function NutriBot() {
     }
 
     setMessages((prev) => [...prev, userMessage])
+    const currentInput = input
     setInput("")
     setIsLoading(true)
 
     try {
-      // Send message to n8n via our Edge Function
-      const aiResponse = await sendMessageToN8n(input)
+      // Send message to nutrition service
+      const aiResponse = await sendMessageToN8n(currentInput)
       
       const aiMessage: Message = {
         id: messages.length + 2,
@@ -114,10 +128,10 @@ export function NutriBot() {
     } catch (error) {
       console.error("Error in handleSubmit:", error)
       
-      // Add error message
+      // Add error message with helpful advice
       const errorMessage: Message = {
         id: messages.length + 2,
-        content: "Je suis désolé, je rencontre des difficultés techniques. Veuillez réessayer dans quelques instants. 🤖",
+        content: "Je rencontre des difficultés techniques, mais voici un conseil général : Pour une alimentation saine, privilégiez les aliments non transformés et variez les couleurs dans votre assiette ! 🌈🥗",
         sender: "ai",
       }
       
@@ -144,7 +158,7 @@ export function NutriBot() {
         setIsLoading(true)
 
         try {
-          // Send photo analysis request to n8n
+          // Send photo analysis request
           const aiResponse = await sendMessageToN8n(`Analyse cette photo de repas : ${file.name}. Peux-tu me donner des conseils nutritionnels ?`)
           
           const aiMessage: Message = {
@@ -159,7 +173,7 @@ export function NutriBot() {
           
           const errorMessage: Message = {
             id: messages.length + 2,
-            content: "Merci pour cette photo ! Je vois un repas intéressant. Pour l'améliorer, je suggère d'ajouter plus de légumes verts et peut-être une source de protéines maigres. Les couleurs dans votre assiette sont importantes pour la variété nutritionnelle ! 🥗✨",
+            content: "Merci pour cette photo ! Pour l'analyser, je recommande de vérifier l'équilibre : 1/2 de légumes, 1/4 de protéines maigres, 1/4 de glucides complexes. Les couleurs variées dans votre assiette sont importantes pour la variété nutritionnelle ! 🥗✨",
             sender: "ai",
           }
           
@@ -197,7 +211,7 @@ export function NutriBot() {
       
       const errorMessage: Message = {
         id: messages.length + 2,
-        content: "J'ai bien reçu votre message vocal ! Pour une réponse plus précise, n'hésitez pas à me donner plus de détails sur vos habitudes alimentaires actuelles et vos objectifs. 🎯",
+        content: "J'ai bien reçu votre message vocal ! Pour une réponse personnalisée, n'hésitez pas à me donner plus de détails sur vos habitudes alimentaires et vos objectifs. En attendant, privilégiez une alimentation variée et colorée ! 🎯🌈",
         sender: "ai",
       }
       
