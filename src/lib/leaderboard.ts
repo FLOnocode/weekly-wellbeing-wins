@@ -209,22 +209,38 @@ export const leaderboardService = {
     }, {} as Record<string, any[]>);
   },
 
-  // Récupérer le classement complet
+  // Récupérer le classement complet avec filtrage des profils complets
   async getLeaderboard(currentUserId?: string): Promise<LeaderboardEntry[]> {
     try {
-      // Récupérer tous les profils actifs
+      console.log('🔍 Récupération des profils pour le classement...');
+      
+      // Récupérer SEULEMENT les profils complets (avec surnom, poids actuel et objectif valides)
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, user_id, nickname, current_weight, goal_weight, created_at')
+        .not('nickname', 'is', null)
+        .neq('nickname', '')
+        .gt('current_weight', 0)
+        .gt('goal_weight', 0)
         .order('created_at');
 
-      if (profilesError || !profiles) {
-        console.error('Erreur lors de la récupération des profils:', profilesError);
+      if (profilesError) {
+        console.error('❌ Erreur lors de la récupération des profils:', profilesError);
         return [];
       }
 
-      // Calculer les points pour chaque utilisateur
+      if (!profiles || profiles.length === 0) {
+        console.log('📋 Aucun profil complet trouvé pour le classement');
+        return [];
+      }
+
+      console.log(`✅ ${profiles.length} profil(s) complet(s) trouvé(s) pour le classement:`, 
+        profiles.map(p => ({ nickname: p.nickname, current_weight: p.current_weight, goal_weight: p.goal_weight }))
+      );
+
+      // Calculer les points pour chaque utilisateur avec un profil complet
       const leaderboardPromises = profiles.map(async (profile) => {
+        console.log(`📊 Calcul des points pour ${profile.nickname}...`);
         const stats = await this.calculateUserPoints(profile.user_id);
         
         return {
@@ -242,6 +258,15 @@ export const leaderboardService = {
 
       const leaderboardData = await Promise.all(leaderboardPromises);
 
+      console.log('📈 Données du classement avant tri:', 
+        leaderboardData.map(entry => ({ 
+          name: entry.name, 
+          totalScore: entry.totalScore, 
+          weeklyScore: entry.weeklyScore,
+          weightLost: entry.weightLost 
+        }))
+      );
+
       // Trier par score total décroissant
       leaderboardData.sort((a, b) => b.totalScore - a.totalScore);
 
@@ -251,18 +276,30 @@ export const leaderboardService = {
       });
 
       // Déterminer le brûleur de la semaine (plus de poids perdu cette semaine)
-      const burnerOfWeek = leaderboardData.reduce((max, current) => 
-        current.weightLost > max.weightLost ? current : max
-      );
-      
-      if (burnerOfWeek.weightLost > 0) {
-        burnerOfWeek.isBurnerOfWeek = true;
+      if (leaderboardData.length > 0) {
+        const burnerOfWeek = leaderboardData.reduce((max, current) => 
+          current.weightLost > max.weightLost ? current : max
+        );
+        
+        if (burnerOfWeek.weightLost > 0) {
+          burnerOfWeek.isBurnerOfWeek = true;
+          console.log(`🔥 Brûleur de la semaine: ${burnerOfWeek.name} avec ${burnerOfWeek.weightLost}kg perdus`);
+        }
       }
+
+      console.log('🏆 Classement final:', 
+        leaderboardData.map(entry => ({ 
+          rank: entry.rank,
+          name: entry.name, 
+          totalScore: entry.totalScore,
+          isBurnerOfWeek: entry.isBurnerOfWeek || false
+        }))
+      );
 
       return leaderboardData;
 
     } catch (error) {
-      console.error('Erreur lors de la récupération du classement:', error);
+      console.error('💥 Erreur lors de la récupération du classement:', error);
       return [];
     }
   }
