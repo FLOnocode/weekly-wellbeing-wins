@@ -39,7 +39,7 @@ export const MobileHeader = ({
             </div>
             <div>
               <h1 className="text-heading-4 font-bold text-white">SSM 2K25</h1>
-              <p className="text-caption text-white/70">Challenge Weekly</p>
+              <p className="text-caption text-white/70">Fit Together Challenge</p>
             </div>
           </Link>
 
