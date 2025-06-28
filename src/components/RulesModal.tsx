@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { HelpCircle, Trophy, TrendingDown, TrendingUp, Calendar, Target, Zap, CheckCircle } from "lucide-react";
+import { HelpCircle, Trophy, TrendingDown, TrendingUp, Calendar, Target, Zap, CheckCircle, Minus } from "lucide-react";
 import { leaderboardService, ChallengeRule } from "@/lib/leaderboard";
 
 interface RulesModalProps {
@@ -46,6 +46,8 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
         return <TrendingDown className="h-5 w-5 text-green-500" />;
       case 'weight_gain_per_kg':
         return <TrendingUp className="h-5 w-5 text-red-500" />;
+      case 'no_weight_change':
+        return <Minus className="h-5 w-5 text-gray-400" />;
       case 'missed_weigh_in':
         return <Calendar className="h-5 w-5 text-red-500" />;
       case 'burner_of_week_bonus':
@@ -61,7 +63,7 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
     } else if (points < 0) {
       return "text-red-300 border-red-400/30";
     }
-    return "text-white border-white/30";
+    return "text-gray-300 border-gray-400/30";
   };
 
   const defaultTrigger = (
@@ -124,21 +126,23 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
                       key={rule.id}
                       className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-1">
                         {getRuleIcon(rule.rule_type)}
-                        <div>
+                        <div className="flex-1">
                           <div className="text-white font-medium">{rule.description}</div>
                           {rule.details && (
                             <div className="text-sm text-white/60 mt-1">{rule.details}</div>
                           )}
                         </div>
                       </div>
-                      <Badge 
-                        variant="outline" 
-                        className={`${getRuleColor(rule.points)} font-bold`}
-                      >
-                        {rule.points > 0 ? '+' : ''}{rule.points} pts
-                      </Badge>
+                      <div className="flex-shrink-0 ml-4">
+                        <Badge 
+                          variant="outline" 
+                          className={`${getRuleColor(rule.points)} font-bold text-center min-w-[80px] justify-center`}
+                        >
+                          {rule.points > 0 ? '+' : ''}{rule.points} pts
+                        </Badge>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -247,6 +251,17 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
                 <p className="text-sm text-blue-200">
                   Tous les défis quotidiens valent maintenant 10 points, qu'ils soient faciles ou difficiles.
                   L'important est la régularité !
+                </p>
+              </div>
+
+              <div className="p-3 bg-gray-500/10 border border-gray-400/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Minus className="h-5 w-5 text-gray-400" />
+                  <span className="font-semibold text-gray-300">Stabilité du poids</span>
+                </div>
+                <p className="text-sm text-gray-200">
+                  Nouveau ! Si votre poids reste stable d'une semaine à l'autre, vous gagnez 0 point.
+                  Ni bonus, ni pénalité - la stabilité est neutre.
                 </p>
               </div>
             </CardContent>
