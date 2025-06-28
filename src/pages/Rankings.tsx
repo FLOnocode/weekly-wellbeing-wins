@@ -35,6 +35,15 @@ const Rankings = () => {
           leaderboardService.getChallengeRules()
         ]);
 
+        console.log('📊 Données du classement reçues par Rankings.tsx:', leaderboard);
+        console.log('📋 Nombre de participants dans le classement:', leaderboard.length);
+        console.log('👥 Détail des participants:', leaderboard.map(entry => ({
+          name: entry.name,
+          totalScore: entry.totalScore,
+          isCurrentUser: entry.isCurrentUser,
+          rank: entry.rank
+        })));
+
         setLeaderboardData(leaderboard);
         setRules(challengeRules);
 
