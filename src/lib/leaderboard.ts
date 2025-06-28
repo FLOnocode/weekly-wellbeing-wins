@@ -166,14 +166,16 @@ export const leaderboardService = {
         // Récupérer le poids initial (première entrée)
         initialWeight = weightEntries[0].weight;
         
-        // Calcul du poids total perdu (première entrée vs dernière entrée)
+        // Calcul du poids total perdu/pris (première entrée vs dernière entrée)
         const firstWeight = weightEntries[0].weight;
         const lastWeight = weightEntries[weightEntries.length - 1].weight;
         const totalWeightDifference = firstWeight - lastWeight;
 
+        // CORRECTION: Stocker la différence réelle (positive = perte, négative = prise)
+        totalWeightLost = totalWeightDifference;
+
         if (totalWeightDifference > 0) {
           // Perte de poids totale
-          totalWeightLost = totalWeightDifference;
           const totalWeightLossPoints = Math.round(totalWeightDifference * (rulesMap['weight_loss_per_kg'] || 15));
           totalPoints += totalWeightLossPoints;
         } else if (totalWeightDifference < 0) {
@@ -226,7 +228,7 @@ export const leaderboardService = {
         totalPoints: Math.max(0, totalPoints), // Minimum 0 points
         weeklyPoints,
         challengesCompleted,
-        totalWeightLost: Math.max(0, totalWeightLost),
+        totalWeightLost, // CORRECTION: Retourner la vraie différence (peut être négative)
         weeklyWeightChange,
         initialWeight,
         perfectDays
