@@ -95,8 +95,33 @@ const Analytics = () => {
     }
   ];
 
-  // Couleurs pour le graphique en camembert
-  const pieColors = ['#4ade80', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#10b981'];
+  // Carte des couleurs pour les graphiques (codes hexadécimaux pour Recharts)
+  const chartColorsMap = {
+    wellness: "#4ade80",
+    energy: "#fb923c", 
+    motivation: "#60a5fa",
+    hydration: "#3b82f6",
+    nutrition: "#22c55e",
+    fitness: "#f97316",
+    detox: "#ef4444",
+    vitamins: "#10b981",
+    rest: "#8b5cf6",
+    pink: "#ec4899",
+  };
+
+  // Fonction pour obtenir la couleur principale du graphique
+  const getChartMainColor = (): string => {
+    // Si un seul défi est sélectionné, utiliser sa couleur
+    if (selectedChallenges.length === 1) {
+      const selectedChallenge = challenges.find(c => c.id === selectedChallenges[0]);
+      if (selectedChallenge) {
+        return chartColorsMap[selectedChallenge.color as keyof typeof chartColorsMap] || chartColorsMap.wellness;
+      }
+    }
+    
+    // Couleur par défaut
+    return chartColorsMap.wellness;
+  };
 
   const fetchAnalyticsData = async () => {
     if (!user) return;
@@ -246,6 +271,8 @@ const Analytics = () => {
       return <div className="text-center text-white/70 py-8">Chargement des données...</div>;
     }
 
+    const mainColor = getChartMainColor();
+
     switch (chartType) {
       case 'bar':
         return (
@@ -266,7 +293,7 @@ const Analytics = () => {
                   return null;
                 }}
               />
-              <Bar dataKey="challenges" fill="#4ade80" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="challenges" fill={mainColor} radius={[4, 4, 0, 0]} />
             </RechartsBarChart>
           </ResponsiveContainer>
         );
@@ -293,10 +320,10 @@ const Analytics = () => {
               <Line 
                 type="monotone" 
                 dataKey="challenges" 
-                stroke="#4ade80" 
+                stroke={mainColor} 
                 strokeWidth={2}
-                dot={{ fill: '#4ade80', strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: '#4ade80', strokeWidth: 2 }}
+                dot={{ fill: mainColor, strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: mainColor, strokeWidth: 2 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -316,9 +343,17 @@ const Analytics = () => {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {pieChartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
-                ))}
+                {pieChartData.map((entry, index) => {
+                  // Récupérer la couleur dynamique basée sur le challengeId
+                  const challenge = challenges.find(c => c.id === entry.challengeId);
+                  const color = challenge 
+                    ? chartColorsMap[challenge.color as keyof typeof chartColorsMap] 
+                    : chartColorsMap.wellness;
+                  
+                  return (
+                    <Cell key={`cell-${index}`} fill={color} />
+                  );
+                })}
               </Pie>
               <ChartTooltip 
                 content={({ active, payload }) => {
@@ -520,10 +555,10 @@ const Analytics = () => {
                       <Line 
                         type="monotone" 
                         dataKey="weight" 
-                        stroke="#3b82f6" 
+                        stroke={chartColorsMap.motivation} 
                         strokeWidth={2}
-                        dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-                        activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2 }}
+                        dot={{ fill: chartColorsMap.motivation, strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: chartColorsMap.motivation, strokeWidth: 2 }}
                       />
                     </LineChart>
                   </ResponsiveContainer>
