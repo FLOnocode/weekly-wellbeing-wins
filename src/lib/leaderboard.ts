@@ -209,19 +209,15 @@ export const leaderboardService = {
     }, {} as Record<string, any[]>);
   },
 
-  // Récupérer le classement complet avec filtrage des profils complets
+  // Récupérer le classement complet - TOUS les profils maintenant
   async getLeaderboard(currentUserId?: string): Promise<LeaderboardEntry[]> {
     try {
-      console.log('🔍 Récupération des profils pour le classement...');
+      console.log('🔍 Récupération de TOUS les profils pour le classement...');
       
-      // Récupérer SEULEMENT les profils complets (avec surnom, poids actuel et objectif valides)
+      // Récupérer TOUS les profils, même ceux sans données complètes
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('id, user_id, nickname, current_weight, goal_weight, created_at')
-        .not('nickname', 'is', null)
-        .neq('nickname', '')
-        .gt('current_weight', 0)
-        .gt('goal_weight', 0)
         .order('created_at');
 
       if (profilesError) {
@@ -230,22 +226,38 @@ export const leaderboardService = {
       }
 
       if (!profiles || profiles.length === 0) {
-        console.log('📋 Aucun profil complet trouvé pour le classement');
+        console.log('📋 Aucun profil trouvé dans la base de données');
         return [];
       }
 
-      console.log(`✅ ${profiles.length} profil(s) complet(s) trouvé(s) pour le classement:`, 
-        profiles.map(p => ({ nickname: p.nickname, current_weight: p.current_weight, goal_weight: p.goal_weight }))
+      console.log(`✅ ${profiles.length} profil(s) trouvé(s) pour le classement:`, 
+        profiles.map(p => ({ 
+          nickname: p.nickname || 'Non défini', 
+          current_weight: p.current_weight || 0, 
+          goal_weight: p.goal_weight || 0,
+          user_id: p.user_id.substring(0, 8) + '...'
+        }))
       );
 
-      // Calculer les points pour chaque utilisateur avec un profil complet
+      // Calculer les points pour chaque utilisateur
       const leaderboardPromises = profiles.map(async (profile) => {
-        console.log(`📊 Calcul des points pour ${profile.nickname}...`);
+        // Créer un nom d'affichage avec fallback
+        let displayName = 'Utilisateur';
+        
+        if (profile.nickname && profile.nickname.trim() !== '') {
+          displayName = profile.nickname;
+        } else {
+          // Utiliser les 4 premiers caractères de l'ID utilisateur comme identifiant unique
+          const userIdShort = profile.user_id.substring(0, 8);
+          displayName = `Utilisateur ${userIdShort}`;
+        }
+
+        console.log(`📊 Calcul des points pour ${displayName}...`);
         const stats = await this.calculateUserPoints(profile.user_id);
         
         return {
           id: profile.user_id,
-          name: profile.nickname,
+          name: displayName,
           totalScore: stats.totalPoints,
           weeklyScore: stats.weeklyPoints,
           weightLost: stats.weightLost,
