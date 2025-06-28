@@ -112,6 +112,7 @@ const Profile = () => {
   const currentRank = userLeaderboardStats?.rank || 0;
   const totalWeightLost = userLeaderboardStats?.weightLost || 0;
   const weeklyWeightChange = userLeaderboardStats?.weeklyWeightChange || 0;
+  const initialWeight = userLeaderboardStats?.initialWeight || 0;
   const perfectDays = userLeaderboardStats?.perfectDays || 0;
   const challengesCompleted = userLeaderboardStats?.challengesCompleted || 0;
   const weeklyScore = userLeaderboardStats?.weeklyScore || 0;
@@ -123,10 +124,9 @@ const Profile = () => {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   const participationWeeks = Math.floor(diffDays / 7);
 
-  // Calcul de la progression du poids
-  const hypotheticalStartWeight = (profile?.current_weight || 0) + totalWeightLost;
-  const actualWeightLossProgress = profile?.current_weight && profile?.goal_weight && hypotheticalStartWeight > profile.goal_weight
-    ? ((hypotheticalStartWeight - profile.current_weight) / (hypotheticalStartWeight - profile.goal_weight)) * 100
+  // Calcul de la progression du poids - CORRIGÉ avec le vrai poids initial
+  const actualWeightLossProgress = profile?.current_weight && profile?.goal_weight && initialWeight > 0 && initialWeight > profile.goal_weight
+    ? ((initialWeight - profile.current_weight) / (initialWeight - profile.goal_weight)) * 100
     : 0;
 
   // Générer les initiales du profil
@@ -276,7 +276,7 @@ const Profile = () => {
                   </div>
                 </div>
 
-                {profile?.current_weight > 0 && profile?.goal_weight > 0 && (
+                {profile?.current_weight > 0 && profile?.goal_weight > 0 && initialWeight > 0 && (
                   <>
                     <div className="space-y-2">
                       <div className="flex justify-between text-body-sm">
@@ -285,7 +285,7 @@ const Profile = () => {
                       </div>
                       <Progress value={actualWeightLossProgress} className="h-2 bg-white/20" />
                       <div className="flex justify-between text-body-sm text-white/70">
-                        <span>Départ: {hypotheticalStartWeight.toFixed(1)}kg</span>
+                        <span>Départ: {initialWeight.toFixed(1)}kg</span>
                         <span>Objectif: {profile.goal_weight}kg</span>
                       </div>
                     </div>
@@ -317,10 +317,13 @@ const Profile = () => {
                   </>
                 )}
 
-                {(profile?.current_weight === 0 || profile?.goal_weight === 0) && (
+                {(profile?.current_weight === 0 || profile?.goal_weight === 0 || initialWeight === 0) && (
                   <div className="p-4 bg-yellow-500/10 border border-yellow-400/30 rounded-lg text-center">
                     <p className="text-yellow-200 text-sm">
-                      Complétez votre profil pour voir votre progression
+                      {initialWeight === 0 
+                        ? "Enregistrez votre première pesée pour voir votre progression"
+                        : "Complétez votre profil pour voir votre progression"
+                      }
                     </p>
                   </div>
                 )}
@@ -422,6 +425,12 @@ const Profile = () => {
                         <span className="text-body font-bold text-white">{Math.round(actualWeightLossProgress)}%</span>
                       </div>
                     </>
+                  )}
+                  {initialWeight > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-body text-white/70">Poids de départ</span>
+                      <span className="text-body font-bold text-white">{initialWeight.toFixed(1)}kg</span>
+                    </div>
                   )}
                 </div>
               </CardContent>

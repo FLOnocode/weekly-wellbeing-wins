@@ -8,6 +8,7 @@ export interface LeaderboardEntry {
   weeklyScore: number;
   weightLost: number;
   weeklyWeightChange: number;
+  initialWeight: number;
   rank: number;
   isBurnerOfWeek?: boolean;
   isCurrentUser?: boolean;
@@ -86,6 +87,7 @@ export const leaderboardService = {
     challengesCompleted: number;
     totalWeightLost: number;
     weeklyWeightChange: number;
+    initialWeight: number;
     perfectDays: number;
   }> {
     try {
@@ -100,6 +102,7 @@ export const leaderboardService = {
       let challengesCompleted = 0;
       let totalWeightLost = 0;
       let weeklyWeightChange = 0;
+      let initialWeight = 0;
       let perfectDays = 0;
 
       // Calculer les points des défis quotidiens
@@ -152,7 +155,7 @@ export const leaderboardService = {
         });
       }
 
-      // Calculer les points de poids - NOUVELLE LOGIQUE
+      // Calculer les points de poids - NOUVELLE LOGIQUE AVEC POIDS INITIAL
       const { data: weightEntries, error: weightError } = await supabase
         .from('weight_entries')
         .select('weight, created_at')
@@ -160,6 +163,9 @@ export const leaderboardService = {
         .order('created_at', { ascending: true });
 
       if (!weightError && weightEntries && weightEntries.length > 0) {
+        // Récupérer le poids initial (première entrée)
+        initialWeight = weightEntries[0].weight;
+        
         // Calcul du poids total perdu (première entrée vs dernière entrée)
         const firstWeight = weightEntries[0].weight;
         const lastWeight = weightEntries[weightEntries.length - 1].weight;
@@ -222,6 +228,7 @@ export const leaderboardService = {
         challengesCompleted,
         totalWeightLost: Math.max(0, totalWeightLost),
         weeklyWeightChange,
+        initialWeight,
         perfectDays
       };
 
@@ -233,6 +240,7 @@ export const leaderboardService = {
         challengesCompleted: 0,
         totalWeightLost: 0,
         weeklyWeightChange: 0,
+        initialWeight: 0,
         perfectDays: 0
       };
     }
@@ -305,6 +313,7 @@ export const leaderboardService = {
           weeklyScore: stats.weeklyPoints,
           weightLost: stats.totalWeightLost,
           weeklyWeightChange: stats.weeklyWeightChange,
+          initialWeight: stats.initialWeight,
           rank: 0, // Sera calculé après le tri
           challengesCompleted: stats.challengesCompleted,
           perfectDays: stats.perfectDays,
@@ -320,7 +329,8 @@ export const leaderboardService = {
           totalScore: entry.totalScore, 
           weeklyScore: entry.weeklyScore,
           weightLost: entry.weightLost,
-          weeklyWeightChange: entry.weeklyWeightChange
+          weeklyWeightChange: entry.weeklyWeightChange,
+          initialWeight: entry.initialWeight
         }))
       );
 
@@ -350,6 +360,7 @@ export const leaderboardService = {
           name: entry.name, 
           totalScore: entry.totalScore,
           weeklyWeightChange: entry.weeklyWeightChange,
+          initialWeight: entry.initialWeight,
           isBurnerOfWeek: entry.isBurnerOfWeek || false
         }))
       );
