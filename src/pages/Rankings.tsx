@@ -145,7 +145,7 @@ const Rankings = () => {
       </div>
 
       <div className="relative z-10 pt-20 pb-6">
-        <div className="container mx-auto px-4 max-w-lg">
+        <div className="container mx-auto px-4 max-w-4xl">
           {/* Header avec retour */}
           <div className="flex items-center gap-3 mb-6">
             <Link to="/">
@@ -172,7 +172,7 @@ const Rankings = () => {
                   <CardDescription className="text-energy-200/70">Plus de poids perdu cette semaine</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-4 flex-wrap">
                     <Avatar className="h-12 w-12 border-2 border-energy-300">
                       <AvatarImage src={burnerOfWeek.avatar || "/placeholder.svg"} />
                       <AvatarFallback className="bg-energy-500/20 text-energy-300">
@@ -185,7 +185,7 @@ const Rankings = () => {
                         }
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="font-semibold text-white">{burnerOfWeek.name}</div>
                       <div className="text-body-sm text-energy-200">A perdu {burnerOfWeek.weeklyWeightChange.toFixed(1)}kg cette semaine</div>
                     </div>
@@ -216,15 +216,15 @@ const Rankings = () => {
                     {leaderboardData.map((entry) => (
                       <div
                         key={entry.id}
-                        className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${
+                        className={`flex items-center gap-4 p-3 rounded-lg transition-colors flex-wrap ${
                           entry.isCurrentUser 
                             ? "bg-white/20 backdrop-blur-sm border border-motivation-400/30" 
                             : "bg-white/10 backdrop-blur-sm border border-white/20 md:hover:bg-white/15"
                         }`}
                       >
-                        <div className="flex items-center justify-center w-8">{getRankIcon(entry.rank)}</div>
+                        <div className="flex items-center justify-center w-8 flex-shrink-0">{getRankIcon(entry.rank)}</div>
 
-                        <Avatar className="h-10 w-10">
+                        <Avatar className="h-10 w-10 flex-shrink-0">
                           <AvatarImage src={entry.avatar || "/placeholder.svg"} />
                           <AvatarFallback className="bg-wellness-500/20 text-wellness-300">
                             {entry.isCurrentUser 
@@ -237,7 +237,7 @@ const Rankings = () => {
                           </AvatarFallback>
                         </Avatar>
 
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className={`font-medium ${entry.isCurrentUser ? "text-motivation-200" : "text-white"}`}>
                             {entry.name}
                             {entry.isCurrentUser && (
@@ -251,14 +251,17 @@ const Rankings = () => {
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <div className="font-semibold text-white">{entry.totalScore}</div>
-                          <div className="text-body-sm text-white/70">pts total</div>
-                        </div>
+                        {/* Conteneur pour les scores - responsive */}
+                        <div className="flex flex-col gap-2 items-end md:flex-row md:gap-4">
+                          <div className="text-right">
+                            <div className="font-semibold text-white">{entry.totalScore}</div>
+                            <div className="text-body-sm text-white/70">pts total</div>
+                          </div>
 
-                        <div className="text-right">
-                          <div className="text-body-sm font-medium text-wellness-300">+{entry.weeklyScore}</div>
-                          <div className="text-body-sm text-white/70">cette semaine</div>
+                          <div className="text-right">
+                            <div className="text-body-sm font-medium text-wellness-300">+{entry.weeklyScore}</div>
+                            <div className="text-body-sm text-white/70">cette semaine</div>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -285,9 +288,9 @@ const Rankings = () => {
                 <div className="space-y-2 text-body-sm">
                   {/* Afficher les règles principales */}
                   {rules.filter(rule => ['challenge_completion', 'daily_perfect_bonus', 'weight_loss_per_kg', 'burner_of_week_bonus'].includes(rule.rule_type)).map((rule) => (
-                    <div key={rule.id} className="flex justify-between">
-                      <span className="text-white/70">{rule.description}</span>
-                      <span className={`font-medium ${rule.points > 0 ? 'text-wellness-300' : 'text-red-300'}`}>
+                    <div key={rule.id} className="flex justify-between flex-wrap gap-2">
+                      <span className="text-white/70 flex-1 min-w-0">{rule.description}</span>
+                      <span className={`font-medium flex-shrink-0 ${rule.points > 0 ? 'text-wellness-300' : 'text-red-300'}`}>
                         {rule.points > 0 ? '+' : ''}{rule.points} points
                       </span>
                     </div>
@@ -295,9 +298,9 @@ const Rankings = () => {
                   
                   {/* Afficher les pénalités en rouge */}
                   {rules.filter(rule => rule.points < 0).map((rule) => (
-                    <div key={rule.id} className="flex justify-between">
-                      <span className="text-red-300">{rule.description}</span>
-                      <span className="font-medium text-red-300">
+                    <div key={rule.id} className="flex justify-between flex-wrap gap-2">
+                      <span className="text-red-300 flex-1 min-w-0">{rule.description}</span>
+                      <span className="font-medium text-red-300 flex-shrink-0">
                         {rule.points} points
                       </span>
                     </div>
