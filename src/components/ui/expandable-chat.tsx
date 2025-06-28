@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useRef, useState } from "react";
@@ -135,10 +134,9 @@ const ExpandableChatToggle: React.FC<ExpandableChatToggleProps> = ({
   ...props
 }) => (
   <Button
-    variant="default"
     onClick={toggleChat}
     className={cn(
-      "w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 border-0",
+      "w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 border-0 bg-motivation-500 hover:bg-motivation-600 text-white",
       className,
     )}
     {...props}

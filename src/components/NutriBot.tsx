@@ -252,9 +252,9 @@ export function NutriBot() {
     <ExpandableChat
       size="lg"
       position="bottom-right"
-      icon={<Bot className="h-6 w-6" />}
+      icon={<Bot className="h-6 w-6 text-white" />}
     >
-      <ExpandableChatHeader className="flex-col text-center justify-center bg-gradient-wellness text-white">
+      <ExpandableChatHeader className="flex-col text-center justify-center bg-motivation-500 text-white">
         <h1 className="text-xl font-semibold">NutriBot 🤖</h1>
         <p className="text-sm text-white/80">
           Votre conseiller nutrition personnalisé
@@ -336,7 +336,7 @@ export function NutriBot() {
             <Button 
               type="submit" 
               size="sm" 
-              className="ml-auto gap-1.5" 
+              className="ml-auto gap-1.5 bg-motivation-500 hover:bg-motivation-600" 
               disabled={isLoading || !input.trim()}
             >
               Envoyer

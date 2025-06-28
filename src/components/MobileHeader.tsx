@@ -11,6 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 
 interface MobileHeaderProps {
   totalPoints: number;
@@ -63,7 +64,7 @@ export const MobileHeader = ({
               <SheetContent side="right" className="w-80 bg-black/90 backdrop-blur-xl border-white/20">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2 text-white">
-                    <Trophy className="h-5 w-5 text-wellness-400" />
+                    <Trophy className="h-5 w-5 text-yellow-500" />
                     Navigation
                   </SheetTitle>
                   <SheetDescription className="text-white/70">
@@ -72,10 +73,11 @@ export const MobileHeader = ({
                 </SheetHeader>
                 
                 <div className="mt-6 space-y-3">
+                  {/* Séparateur horizontal */}
+                  <Separator className="my-2 bg-white/20" />
+                  
                   {/* Navigation principale */}
                   <div className="space-y-2">
-                    <h3 className="text-body-sm font-medium text-white/80 px-3">Navigation</h3>
-                    
                     <Link 
                       to="/" 
                       onClick={() => setIsMenuOpen(false)}
@@ -102,15 +104,6 @@ export const MobileHeader = ({
                       <Medal className="h-5 w-5 text-energy-400" />
                       <span className="text-body font-medium">Le Classement</span>
                     </Link>
-                    
-                    <Link 
-                      to="/profile" 
-                      onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white"
-                    >
-                      <User className="h-5 w-5 text-white/70" />
-                      <span className="text-body font-medium">Profil</span>
-                    </Link>
 
                     <Link 
                       to="/analytics" 
@@ -119,6 +112,15 @@ export const MobileHeader = ({
                     >
                       <BarChart className="h-5 w-5 text-pink-400" />
                       <span className="text-body font-medium">Analyse</span>
+                    </Link>
+                    
+                    <Link 
+                      to="/profile" 
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors text-white"
+                    >
+                      <User className="h-5 w-5 text-white/70" />
+                      <span className="text-body font-medium">Profil</span>
                     </Link>
                   </div>
 
