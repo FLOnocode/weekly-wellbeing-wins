@@ -292,11 +292,17 @@ const Profile = () => {
 
                     <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                       <div className="flex items-center gap-2">
-                        <TrendingDown className="h-5 w-5 text-wellness-500" />
-                        <span className="text-body font-medium text-white">Poids perdu au total</span>
+                        {totalWeightLost >= 0 ? (
+                          <TrendingDown className="h-5 w-5 text-wellness-500" />
+                        ) : (
+                          <TrendingUp className="h-5 w-5 text-red-500" />
+                        )}
+                        <span className="text-body font-medium text-white">
+                          {totalWeightLost >= 0 ? 'Poids perdu au total' : 'Poids pris au total'}
+                        </span>
                       </div>
-                      <div className="text-body font-bold text-wellness-300">
-                        {totalWeightLost.toFixed(1)}kg
+                      <div className={`text-body font-bold ${totalWeightLost >= 0 ? 'text-wellness-300' : 'text-red-300'}`}>
+                        {Math.abs(totalWeightLost).toFixed(1)}kg
                       </div>
                     </div>
 
@@ -363,10 +369,18 @@ const Profile = () => {
 
                   <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                     <div className="flex items-center gap-2">
-                      <TrendingDown className="h-5 w-5 text-wellness-500" />
-                      <span className="text-body text-white">Poids perdu au total</span>
+                      {totalWeightLost >= 0 ? (
+                        <TrendingDown className="h-5 w-5 text-wellness-500" />
+                      ) : (
+                        <TrendingUp className="h-5 w-5 text-red-500" />
+                      )}
+                      <span className="text-body text-white">
+                        {totalWeightLost >= 0 ? 'Poids perdu au total' : 'Poids pris au total'}
+                      </span>
                     </div>
-                    <span className="text-body font-bold text-wellness-300">{totalWeightLost.toFixed(1)}kg</span>
+                    <span className={`text-body font-bold ${totalWeightLost >= 0 ? 'text-wellness-300' : 'text-red-300'}`}>
+                      {Math.abs(totalWeightLost).toFixed(1)}kg
+                    </span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
