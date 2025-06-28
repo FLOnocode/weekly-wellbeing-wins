@@ -115,9 +115,9 @@ export const MobileHeader = ({
                     <Link 
                       to="/analytics" 
                       onClick={() => setIsMenuOpen(false)}
-                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-energy-500/20 transition-colors text-white"
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-pink-500/20 transition-colors text-white"
                     >
-                      <BarChart className="h-5 w-5 text-energy-400" />
+                      <BarChart className="h-5 w-5 text-pink-400" />
                       <span className="text-body font-medium">Analyse</span>
                     </Link>
                   </div>
