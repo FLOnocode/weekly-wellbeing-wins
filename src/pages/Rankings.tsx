@@ -1,27 +1,62 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Trophy, Flame, Crown, Medal, Award, ArrowLeft } from "lucide-react";
+import { Trophy, Flame, Crown, Medal, Award, ArrowLeft, HelpCircle } from "lucide-react";
 import { MobileHeader } from "@/components/MobileHeader";
+import { RulesModal } from "@/components/RulesModal";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-
-interface LeaderboardEntry {
-  id: string;
-  name: string;
-  avatar?: string;
-  totalScore: number;
-  weeklyScore: number;
-  weightLost: number;
-  rank: number;
-  isBurnerOfWeek?: boolean;
-  isCurrentUser?: boolean;
-}
+import { leaderboardService, LeaderboardEntry, ChallengeRule } from "@/lib/leaderboard";
 
 const Rankings = () => {
   const { profile, user } = useAuth();
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [rules, setRules] = useState<ChallengeRule[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentUserStats, setCurrentUserStats] = useState({
+    totalPoints: 0,
+    completedChallenges: 0,
+    totalChallenges: 7
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return;
+
+      try {
+        setLoading(true);
+        
+        // Charger le classement et les règles en parallèle
+        const [leaderboard, challengeRules] = await Promise.all([
+          leaderboardService.getLeaderboard(user.id),
+          leaderboardService.getChallengeRules()
+        ]);
+
+        setLeaderboardData(leaderboard);
+        setRules(challengeRules);
+
+        // Trouver les stats de l'utilisateur actuel
+        const currentUser = leaderboard.find(entry => entry.isCurrentUser);
+        if (currentUser) {
+          setCurrentUserStats({
+            totalPoints: currentUser.totalScore,
+            completedChallenges: currentUser.challengesCompleted,
+            totalChallenges: 7
+          });
+        }
+
+      } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   // Générer les initiales du profil utilisateur
   const getUserInitials = () => {
@@ -35,61 +70,6 @@ const Rankings = () => {
     }
     return user?.email?.slice(0, 2).toUpperCase() || 'VP';
   };
-
-  const leaderboardData: LeaderboardEntry[] = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      totalScore: 285,
-      weeklyScore: 45,
-      weightLost: 3.2,
-      rank: 1,
-      isBurnerOfWeek: true,
-    },
-    {
-      id: "2",
-      name: "Mike Chen",
-      totalScore: 270,
-      weeklyScore: 40,
-      weightLost: 2.8,
-      rank: 2,
-    },
-    {
-      id: "3",
-      name: "Emma Davis",
-      totalScore: 255,
-      weeklyScore: 38,
-      weightLost: 2.5,
-      rank: 3,
-    },
-    {
-      id: "4",
-      name: profile?.nickname || "Vous",
-      totalScore: 240,
-      weeklyScore: 35,
-      weightLost: profile?.current_weight && profile?.goal_weight 
-        ? Math.max(0, (profile.current_weight + 3.5) - profile.current_weight)
-        : 2.2,
-      rank: 4,
-      isCurrentUser: true,
-    },
-    {
-      id: "5",
-      name: "Alex Rodriguez",
-      totalScore: 225,
-      weeklyScore: 32,
-      weightLost: 2.0,
-      rank: 5,
-    },
-    {
-      id: "6",
-      name: "Lisa Wang",
-      totalScore: 210,
-      weeklyScore: 30,
-      weightLost: 1.8,
-      rank: 6,
-    },
-  ];
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -105,6 +85,14 @@ const Rankings = () => {
   };
 
   const burnerOfWeek = leaderboardData.find((entry) => entry.isBurnerOfWeek);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Chargement du classement...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -140,9 +128,9 @@ const Rankings = () => {
 
       <div className="relative z-20">
         <MobileHeader 
-          totalPoints={240}
-          completedChallenges={5}
-          totalChallenges={7}
+          totalPoints={currentUserStats.totalPoints}
+          completedChallenges={currentUserStats.completedChallenges}
+          totalChallenges={currentUserStats.totalChallenges}
         />
       </div>
 
@@ -155,10 +143,11 @@ const Rankings = () => {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
-            <div>
+            <div className="flex-1">
               <h1 className="text-heading-2 font-bold text-gradient">Le Classement</h1>
               <p className="text-body text-white/70">Votre position dans le défi</p>
             </div>
+            <RulesModal />
           </div>
 
           <div className="space-y-4">
@@ -177,15 +166,18 @@ const Rankings = () => {
                     <Avatar className="h-12 w-12 border-2 border-energy-300">
                       <AvatarImage src={burnerOfWeek.avatar || "/placeholder.svg"} />
                       <AvatarFallback className="bg-energy-500/20 text-energy-300">
-                        {burnerOfWeek.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")}
+                        {burnerOfWeek.isCurrentUser 
+                          ? getUserInitials()
+                          : burnerOfWeek.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                        }
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <div className="font-semibold text-white">{burnerOfWeek.name}</div>
-                      <div className="text-body-sm text-energy-200">A perdu {burnerOfWeek.weightLost}kg cette semaine</div>
+                      <div className="text-body-sm text-energy-200">A perdu {burnerOfWeek.weightLost.toFixed(1)}kg cette semaine</div>
                     </div>
                     <Badge className="bg-energy-500/20 text-energy-200 border-energy-400/30">{burnerOfWeek.weeklyScore} pts</Badge>
                   </div>
@@ -200,85 +192,139 @@ const Rankings = () => {
                   <Trophy className="h-5 w-5 text-yellow-500" />
                   <span>Classement du défi</span>
                 </CardTitle>
-                <CardDescription className="text-white/70">Positions actuelles pour la Transformation de Janvier</CardDescription>
+                <CardDescription className="text-white/70">
+                  Positions actuelles - {leaderboardData.length} participant{leaderboardData.length > 1 ? 's' : ''}
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {leaderboardData.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${
-                        entry.isCurrentUser 
-                          ? "bg-white/20 backdrop-blur-sm border border-motivation-400/30" 
-                          : "bg-white/10 backdrop-blur-sm border border-white/20 md:hover:bg-white/15"
-                      }`}
-                    >
-                      <div className="flex items-center justify-center w-8">{getRankIcon(entry.rank)}</div>
+                {leaderboardData.length === 0 ? (
+                  <div className="text-center text-white/70 py-8">
+                    Aucun participant pour le moment
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {leaderboardData.map((entry) => (
+                      <div
+                        key={entry.id}
+                        className={`flex items-center gap-4 p-3 rounded-lg transition-colors ${
+                          entry.isCurrentUser 
+                            ? "bg-white/20 backdrop-blur-sm border border-motivation-400/30" 
+                            : "bg-white/10 backdrop-blur-sm border border-white/20 md:hover:bg-white/15"
+                        }`}
+                      >
+                        <div className="flex items-center justify-center w-8">{getRankIcon(entry.rank)}</div>
 
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={entry.avatar || "/placeholder.svg"} />
-                        <AvatarFallback className="bg-wellness-500/20 text-wellness-300">
-                          {entry.isCurrentUser 
-                            ? getUserInitials()
-                            : entry.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")
-                          }
-                        </AvatarFallback>
-                      </Avatar>
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={entry.avatar || "/placeholder.svg"} />
+                          <AvatarFallback className="bg-wellness-500/20 text-wellness-300">
+                            {entry.isCurrentUser 
+                              ? getUserInitials()
+                              : entry.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                            }
+                          </AvatarFallback>
+                        </Avatar>
 
-                      <div className="flex-1">
-                        <div className={`font-medium ${entry.isCurrentUser ? "text-motivation-200" : "text-white"}`}>
-                          {entry.name}
-                          {entry.isCurrentUser && (
-                            <Badge variant="outline" className="ml-2 text-xs border-motivation-400/30 text-motivation-200">
-                              Vous
-                            </Badge>
-                          )}
+                        <div className="flex-1">
+                          <div className={`font-medium ${entry.isCurrentUser ? "text-motivation-200" : "text-white"}`}>
+                            {entry.name}
+                            {entry.isCurrentUser && (
+                              <Badge variant="outline" className="ml-2 text-xs border-motivation-400/30 text-motivation-200">
+                                Vous
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="text-body-sm text-white/70">
+                            {entry.weightLost.toFixed(1)}kg perdus • {entry.challengesCompleted} défis
+                          </div>
                         </div>
-                        <div className="text-body-sm text-white/70">{entry.weightLost}kg perdus</div>
-                      </div>
 
-                      <div className="text-right">
-                        <div className="font-semibold text-white">{entry.totalScore}</div>
-                        <div className="text-body-sm text-white/70">pts total</div>
-                      </div>
+                        <div className="text-right">
+                          <div className="font-semibold text-white">{entry.totalScore}</div>
+                          <div className="text-body-sm text-white/70">pts total</div>
+                        </div>
 
-                      <div className="text-right">
-                        <div className="text-body-sm font-medium text-wellness-300">+{entry.weeklyScore}</div>
-                        <div className="text-body-sm text-white/70">cette semaine</div>
+                        <div className="text-right">
+                          <div className="text-body-sm font-medium text-wellness-300">+{entry.weeklyScore}</div>
+                          <div className="text-body-sm text-white/70">cette semaine</div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             {/* Système de points */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="text-heading-4 text-white">Comment ça marche</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
+                  <span>Comment ça marche</span>
+                  <RulesModal 
+                    trigger={
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-white/70 hover:text-white">
+                        <HelpCircle className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-body-sm">
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Perte de poids (par kg)</span>
-                    <span className="font-medium text-wellness-300">15 points</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Mission hebdomadaire réalisée</span>
-                    <span className="font-medium text-motivation-300">5 points</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Semaine parfaite (toutes les missions)</span>
-                    <span className="font-medium text-energy-300">+10 bonus</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-white/70">Brûleur de la semaine</span>
-                    <span className="font-medium text-energy-300">+25 bonus</span>
+                  {rules.slice(0, 4).map((rule) => (
+                    <div key={rule.id} className="flex justify-between">
+                      <span className="text-white/70">{rule.description}</span>
+                      <span className={`font-medium ${rule.points > 0 ? 'text-wellness-300' : 'text-red-300'}`}>
+                        {rule.points > 0 ? '+' : ''}{rule.points} points
+                      </span>
+                    </div>
+                  ))}
+                  
+                  {/* Afficher les pénalités en rouge */}
+                  {rules.filter(rule => rule.points < 0).map((rule) => (
+                    <div key={rule.id} className="flex justify-between">
+                      <span className="text-red-300">{rule.description}</span>
+                      <span className="font-medium text-red-300">
+                        {rule.points} points
+                      </span>
+                    </div>
+                  ))}
+                  
+                  <div className="pt-2 border-t border-white/20">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-wellness-300 hover:text-wellness-200 p-0 h-auto"
+                      asChild
+                    >
+                      <RulesModal 
+                        trigger={
+                          <span className="cursor-pointer">
+                            Voir toutes les règles et conseils →
+                          </span>
+                        }
+                      />
+                    </Button>
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Message d'encouragement */}
+            <Card className="glassmorphism border-wellness-400/30">
+              <CardContent className="p-4 text-center">
+                <div className="text-2xl mb-2">🏆</div>
+                <p className="text-white/80 text-sm">
+                  {leaderboardData.length > 0 
+                    ? `${leaderboardData.length} participant${leaderboardData.length > 1 ? 's' : ''} dans le challenge ! Continuez vos efforts pour grimper dans le classement.`
+                    : "Soyez le premier à rejoindre le challenge et à apparaître dans le classement !"
+                  }
+                </p>
+                <p className="text-wellness-300 text-xs mt-2">
+                  Les données sont mises à jour en temps réel
+                </p>
               </CardContent>
             </Card>
           </div>
