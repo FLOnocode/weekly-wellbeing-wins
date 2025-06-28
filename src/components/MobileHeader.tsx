@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, Star, Trophy, Scale, Medal, User, BarChart, MessageSquare } from "lucide-react";
+import { Heart, Menu, Star, Trophy, Scale, Medal, User, BarChart, MessageSquare, Settings } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -52,7 +52,7 @@ export const MobileHeader = ({
               </div>
             </Link>
 
-            {/* Stats rapides */}
+            {/* Stats rapides et boutons */}
             <div className="flex items-center gap-3">
               <div className="text-center">
                 <div className="text-body font-bold text-wellness-300">{totalPoints}</div>
@@ -63,10 +63,17 @@ export const MobileHeader = ({
                 <div className="text-caption text-white/60">fini</div>
               </div>
               
+              {/* Bouton Paramètres */}
+              <Link to="/settings">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white">
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </Link>
+              
               {/* Menu burger */}
               <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" className="ml-2 text-white hover:bg-white/10 hover:text-white">
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
@@ -121,6 +128,15 @@ export const MobileHeader = ({
                       >
                         <BarChart className="h-5 w-5 text-pink-400" />
                         <span className="text-body font-medium">Analyse</span>
+                      </Link>
+
+                      <Link 
+                        to="/settings" 
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-purple-500/20 transition-colors text-white"
+                      >
+                        <Settings className="h-5 w-5 text-purple-400" />
+                        <span className="text-body font-medium">Paramètres</span>
                       </Link>
                       
                       <Link 
