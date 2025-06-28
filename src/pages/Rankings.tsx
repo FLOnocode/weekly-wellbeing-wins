@@ -145,7 +145,7 @@ const Rankings = () => {
       </div>
 
       <div className="relative z-10 pt-20 pb-6">
-        <div className="container mx-auto px-4 max-w-4xl">
+        <div className="container mx-auto px-4 max-w-lg">
           {/* Header avec retour */}
           <div className="flex items-center gap-3 mb-6">
             <Link to="/">
@@ -216,43 +216,55 @@ const Rankings = () => {
                     {leaderboardData.map((entry) => (
                       <div
                         key={entry.id}
-                        className={`flex items-center gap-4 p-3 rounded-lg transition-colors flex-wrap ${
+                        className={`flex flex-col p-3 rounded-lg transition-colors gap-2 ${
                           entry.isCurrentUser 
                             ? "bg-white/20 backdrop-blur-sm border border-motivation-400/30" 
                             : "bg-white/10 backdrop-blur-sm border border-white/20 md:hover:bg-white/15"
                         }`}
                       >
-                        <div className="flex items-center justify-center w-8 flex-shrink-0">{getRankIcon(entry.rank)}</div>
-
-                        <Avatar className="h-10 w-10 flex-shrink-0">
-                          <AvatarImage src={entry.avatar || "/placeholder.svg"} />
-                          <AvatarFallback className="bg-wellness-500/20 text-wellness-300">
-                            {entry.isCurrentUser 
-                              ? getUserInitials()
-                              : entry.name
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                            }
-                          </AvatarFallback>
-                        </Avatar>
-
-                        <div className="flex-1 min-w-0">
-                          <div className={`font-medium ${entry.isCurrentUser ? "text-motivation-200" : "text-white"}`}>
-                            {entry.name}
-                            {entry.isCurrentUser && (
-                              <Badge variant="outline" className="ml-2 text-xs border-motivation-400/30 text-motivation-200">
-                                Vous
-                              </Badge>
-                            )}
+                        {/* Section supérieure : Rang, Avatar, Surnom, Badge "Vous" */}
+                        <div className="flex items-center gap-4 w-full">
+                          <div className="flex items-center justify-center w-8 flex-shrink-0">
+                            {getRankIcon(entry.rank)}
                           </div>
-                          <div className="text-body-sm text-white/70">
-                            {entry.weightLost.toFixed(1)}kg perdus • {entry.challengesCompleted} défis • {entry.perfectDays} journées parfaites
+
+                          <Avatar className="h-10 w-10 flex-shrink-0">
+                            <AvatarImage src={entry.avatar || "/placeholder.svg"} />
+                            <AvatarFallback className="bg-wellness-500/20 text-wellness-300">
+                              {entry.isCurrentUser 
+                                ? getUserInitials()
+                                : entry.name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")
+                              }
+                            </AvatarFallback>
+                          </Avatar>
+
+                          <div className="flex-1 min-w-0">
+                            <div className={`font-medium ${entry.isCurrentUser ? "text-motivation-200" : "text-white"}`}>
+                              {entry.name}
+                              {entry.isCurrentUser && (
+                                <Badge variant="outline" className="ml-2 text-xs border-motivation-400/30 text-motivation-200">
+                                  Vous
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
 
-                        {/* Conteneur pour les scores - responsive */}
-                        <div className="flex flex-col gap-2 items-end md:flex-row md:gap-4">
+                        {/* Section du milieu : Poids perdu, Défis complétés, Journées parfaites (cachées sur mobile) */}
+                        <div className="flex items-center justify-between w-full text-body-sm text-white/70">
+                          <span>
+                            {entry.weightLost.toFixed(1)}kg perdus • {entry.challengesCompleted} défis
+                          </span>
+                          <span className="hidden md:block">
+                            {entry.perfectDays} journées parfaites
+                          </span>
+                        </div>
+
+                        {/* Section inférieure : Points totaux, Points cette semaine */}
+                        <div className="flex items-center justify-between w-full">
                           <div className="text-right">
                             <div className="font-semibold text-white">{entry.totalScore}</div>
                             <div className="text-body-sm text-white/70">pts total</div>
