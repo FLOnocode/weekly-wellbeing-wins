@@ -41,7 +41,8 @@ const Rankings = () => {
           name: entry.name,
           totalScore: entry.totalScore,
           isCurrentUser: entry.isCurrentUser,
-          rank: entry.rank
+          rank: entry.rank,
+          weeklyWeightChange: entry.weeklyWeightChange
         })));
 
         setLeaderboardData(leaderboard);
@@ -186,7 +187,7 @@ const Rankings = () => {
                     </Avatar>
                     <div className="flex-1">
                       <div className="font-semibold text-white">{burnerOfWeek.name}</div>
-                      <div className="text-body-sm text-energy-200">A perdu {burnerOfWeek.weightLost.toFixed(1)}kg cette semaine</div>
+                      <div className="text-body-sm text-energy-200">A perdu {burnerOfWeek.weeklyWeightChange.toFixed(1)}kg cette semaine</div>
                     </div>
                     <Badge className="bg-energy-500/20 text-energy-200 border-energy-400/30">{burnerOfWeek.weeklyScore} pts</Badge>
                   </div>

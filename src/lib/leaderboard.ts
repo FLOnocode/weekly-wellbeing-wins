@@ -7,6 +7,7 @@ export interface LeaderboardEntry {
   totalScore: number;
   weeklyScore: number;
   weightLost: number;
+  weeklyWeightChange: number;
   rank: number;
   isBurnerOfWeek?: boolean;
   isCurrentUser?: boolean;
@@ -22,6 +23,44 @@ export interface ChallengeRule {
   details?: string;
   is_active: boolean;
 }
+
+// Utility functions for date handling
+const getMonday = (date: Date): Date => {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+  return new Date(d.setDate(diff));
+};
+
+const getPreviousMonday = (date: Date): Date => {
+  const monday = getMonday(date);
+  return new Date(monday.getTime() - 7 * 24 * 60 * 60 * 1000);
+};
+
+const findClosestWeightEntry = async (userId: string, targetDate: Date): Promise<{ weight: number; created_at: string } | null> => {
+  try {
+    const targetDateStr = targetDate.toISOString();
+    
+    // Find the closest weight entry on or before the target date
+    const { data, error } = await supabase
+      .from('weight_entries')
+      .select('weight, created_at')
+      .eq('user_id', userId)
+      .lte('created_at', targetDateStr)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error('Error finding closest weight entry:', error);
+      return null;
+    }
+
+    return data && data.length > 0 ? data[0] : null;
+  } catch (error) {
+    console.error('Exception in findClosestWeightEntry:', error);
+    return null;
+  }
+};
 
 export const leaderboardService = {
   // Récupérer les règles du challenge
@@ -45,7 +84,8 @@ export const leaderboardService = {
     totalPoints: number;
     weeklyPoints: number;
     challengesCompleted: number;
-    weightLost: number;
+    totalWeightLost: number;
+    weeklyWeightChange: number;
     perfectDays: number;
   }> {
     try {
@@ -58,7 +98,8 @@ export const leaderboardService = {
       let totalPoints = 0;
       let weeklyPoints = 0;
       let challengesCompleted = 0;
-      let weightLost = 0;
+      let totalWeightLost = 0;
+      let weeklyWeightChange = 0;
       let perfectDays = 0;
 
       // Calculer les points des défis quotidiens
@@ -111,64 +152,64 @@ export const leaderboardService = {
         });
       }
 
-      // Calculer les points de perte de poids
+      // Calculer les points de poids - NOUVELLE LOGIQUE
       const { data: weightEntries, error: weightError } = await supabase
         .from('weight_entries')
         .select('weight, created_at')
         .eq('user_id', userId)
-        .gte('created_at', challengeStartDate)
         .order('created_at', { ascending: true });
 
-      if (!weightError && weightEntries && weightEntries.length > 1) {
+      if (!weightError && weightEntries && weightEntries.length > 0) {
+        // Calcul du poids total perdu (première entrée vs dernière entrée)
         const firstWeight = weightEntries[0].weight;
         const lastWeight = weightEntries[weightEntries.length - 1].weight;
-        const weightDifference = firstWeight - lastWeight;
+        const totalWeightDifference = firstWeight - lastWeight;
 
-        if (weightDifference > 0) {
-          // Perte de poids
-          weightLost = weightDifference;
-          const weightLossPoints = Math.round(weightDifference * (rulesMap['weight_loss_per_kg'] || 15));
-          totalPoints += weightLossPoints;
-        } else if (weightDifference < 0) {
-          // Prise de poids (pénalité)
-          const weightGainPoints = Math.round(Math.abs(weightDifference) * (rulesMap['weight_gain_per_kg'] || -15));
-          totalPoints += weightGainPoints; // Déjà négatif
+        if (totalWeightDifference > 0) {
+          // Perte de poids totale
+          totalWeightLost = totalWeightDifference;
+          const totalWeightLossPoints = Math.round(totalWeightDifference * (rulesMap['weight_loss_per_kg'] || 15));
+          totalPoints += totalWeightLossPoints;
+        } else if (totalWeightDifference < 0) {
+          // Prise de poids totale (pénalité)
+          const totalWeightGainPoints = Math.round(Math.abs(totalWeightDifference) * (rulesMap['weight_gain_per_kg'] || -15));
+          totalPoints += totalWeightGainPoints; // Déjà négatif
         }
 
-        // Calculer les points de la semaine pour le poids
-        const thisWeekEntries = weightEntries.filter(entry => {
-          const entryDate = new Date(entry.created_at);
-          return entryDate >= new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-        });
+        // Calcul du changement de poids hebdomadaire
+        const currentMonday = getMonday(today);
+        const previousMonday = getPreviousMonday(today);
 
-        if (thisWeekEntries.length >= 2) {
-          const weekFirstWeight = thisWeekEntries[0].weight;
-          const weekLastWeight = thisWeekEntries[thisWeekEntries.length - 1].weight;
-          const weekWeightDifference = weekFirstWeight - weekLastWeight;
+        // Trouver les poids les plus proches des lundis
+        const currentWeekWeight = await findClosestWeightEntry(userId, currentMonday);
+        const previousWeekWeight = await findClosestWeightEntry(userId, previousMonday);
 
-          if (weekWeightDifference > 0) {
-            weeklyPoints += Math.round(weekWeightDifference * (rulesMap['weight_loss_per_kg'] || 15));
-          } else if (weekWeightDifference < 0) {
-            weeklyPoints += Math.round(Math.abs(weekWeightDifference) * (rulesMap['weight_gain_per_kg'] || -15));
+        if (currentWeekWeight && previousWeekWeight) {
+          const weeklyWeightDifference = previousWeekWeight.weight - currentWeekWeight.weight;
+          weeklyWeightChange = weeklyWeightDifference;
+
+          if (weeklyWeightDifference > 0) {
+            // Perte de poids cette semaine
+            const weeklyWeightLossPoints = Math.round(weeklyWeightDifference * (rulesMap['weight_loss_per_kg'] || 15));
+            weeklyPoints += weeklyWeightLossPoints;
+          } else if (weeklyWeightDifference < 0) {
+            // Prise de poids cette semaine (pénalité)
+            const weeklyWeightGainPoints = Math.round(Math.abs(weeklyWeightDifference) * (rulesMap['weight_gain_per_kg'] || -15));
+            weeklyPoints += weeklyWeightGainPoints; // Déjà négatif
           }
         }
       }
 
-      // Vérifier les pesées manquées (simplification: on vérifie juste s'il y a eu une pesée cette semaine)
-      const thisWeekStart = new Date(today);
-      thisWeekStart.setDate(today.getDate() - today.getDay() + 1); // Lundi de cette semaine
-      
-      const { data: thisWeekWeighIn, error: weighInError } = await supabase
-        .from('weight_entries')
-        .select('id')
-        .eq('user_id', userId)
-        .gte('created_at', thisWeekStart.toISOString())
-        .limit(1);
+      // Vérifier les pesées manquées - LOGIQUE AMÉLIORÉE
+      const currentMonday = getMonday(today);
+      const isAfterMonday = today.getDay() > 1 || (today.getDay() === 1 && today.getHours() > 12);
 
-      if (!weighInError && (!thisWeekWeighIn || thisWeekWeighIn.length === 0)) {
-        // Pesée manquée cette semaine (seulement si on est après lundi)
-        const dayOfWeek = today.getDay();
-        if (dayOfWeek > 1 || (dayOfWeek === 1 && today.getHours() > 12)) { // Après lundi midi
+      if (isAfterMonday) {
+        // Vérifier s'il y a une pesée pour le lundi de cette semaine
+        const mondayWeighIn = await findClosestWeightEntry(userId, new Date(currentMonday.getTime() + 24 * 60 * 60 * 1000)); // Jusqu'à mardi
+
+        if (!mondayWeighIn || new Date(mondayWeighIn.created_at) < currentMonday) {
+          // Pesée manquée cette semaine
           const missedWeighInPenalty = rulesMap['missed_weigh_in'] || -30;
           totalPoints += missedWeighInPenalty;
           weeklyPoints += missedWeighInPenalty;
@@ -179,7 +220,8 @@ export const leaderboardService = {
         totalPoints: Math.max(0, totalPoints), // Minimum 0 points
         weeklyPoints,
         challengesCompleted,
-        weightLost: Math.max(0, weightLost),
+        totalWeightLost: Math.max(0, totalWeightLost),
+        weeklyWeightChange,
         perfectDays
       };
 
@@ -189,7 +231,8 @@ export const leaderboardService = {
         totalPoints: 0,
         weeklyPoints: 0,
         challengesCompleted: 0,
-        weightLost: 0,
+        totalWeightLost: 0,
+        weeklyWeightChange: 0,
         perfectDays: 0
       };
     }
@@ -260,7 +303,8 @@ export const leaderboardService = {
           name: displayName,
           totalScore: stats.totalPoints,
           weeklyScore: stats.weeklyPoints,
-          weightLost: stats.weightLost,
+          weightLost: stats.totalWeightLost,
+          weeklyWeightChange: stats.weeklyWeightChange,
           rank: 0, // Sera calculé après le tri
           challengesCompleted: stats.challengesCompleted,
           perfectDays: stats.perfectDays,
@@ -275,7 +319,8 @@ export const leaderboardService = {
           name: entry.name, 
           totalScore: entry.totalScore, 
           weeklyScore: entry.weeklyScore,
-          weightLost: entry.weightLost 
+          weightLost: entry.weightLost,
+          weeklyWeightChange: entry.weeklyWeightChange
         }))
       );
 
@@ -287,15 +332,15 @@ export const leaderboardService = {
         entry.rank = index + 1;
       });
 
-      // Déterminer le brûleur de la semaine (plus de poids perdu cette semaine)
+      // Déterminer le brûleur de la semaine (plus de poids perdu CETTE SEMAINE)
       if (leaderboardData.length > 0) {
         const burnerOfWeek = leaderboardData.reduce((max, current) => 
-          current.weightLost > max.weightLost ? current : max
+          current.weeklyWeightChange > max.weeklyWeightChange ? current : max
         );
         
-        if (burnerOfWeek.weightLost > 0) {
+        if (burnerOfWeek.weeklyWeightChange > 0) {
           burnerOfWeek.isBurnerOfWeek = true;
-          console.log(`🔥 Brûleur de la semaine: ${burnerOfWeek.name} avec ${burnerOfWeek.weightLost}kg perdus`);
+          console.log(`🔥 Brûleur de la semaine: ${burnerOfWeek.name} avec ${burnerOfWeek.weeklyWeightChange.toFixed(1)}kg perdus cette semaine`);
         }
       }
 
@@ -304,6 +349,7 @@ export const leaderboardService = {
           rank: entry.rank,
           name: entry.name, 
           totalScore: entry.totalScore,
+          weeklyWeightChange: entry.weeklyWeightChange,
           isBurnerOfWeek: entry.isBurnerOfWeek || false
         }))
       );

@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { User, Scale, Trophy, TrendingDown, Calendar, ArrowLeft, Medal, Target, LogOut, Settings, PlusCircle } from "lucide-react";
+import { User, Scale, Trophy, TrendingDown, Calendar, ArrowLeft, Medal, Target, LogOut, Settings, PlusCircle, TrendingUp } from "lucide-react";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -111,6 +111,7 @@ const Profile = () => {
   const totalPoints = userLeaderboardStats?.totalScore || 0;
   const currentRank = userLeaderboardStats?.rank || 0;
   const totalWeightLost = userLeaderboardStats?.weightLost || 0;
+  const weeklyWeightChange = userLeaderboardStats?.weeklyWeightChange || 0;
   const perfectDays = userLeaderboardStats?.perfectDays || 0;
   const challengesCompleted = userLeaderboardStats?.challengesCompleted || 0;
   const weeklyScore = userLeaderboardStats?.weeklyScore || 0;
@@ -296,6 +297,21 @@ const Profile = () => {
                       </div>
                       <div className="text-body font-bold text-wellness-300">
                         {totalWeightLost.toFixed(1)}kg
+                      </div>
+                    </div>
+
+                    {/* Nouveau: Changement de poids hebdomadaire */}
+                    <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        {weeklyWeightChange >= 0 ? (
+                          <TrendingDown className="h-5 w-5 text-wellness-500" />
+                        ) : (
+                          <TrendingUp className="h-5 w-5 text-red-500" />
+                        )}
+                        <span className="text-body font-medium text-white">Cette semaine</span>
+                      </div>
+                      <div className={`text-body font-bold ${weeklyWeightChange >= 0 ? 'text-wellness-300' : 'text-red-300'}`}>
+                        {weeklyWeightChange >= 0 ? '-' : '+'}{Math.abs(weeklyWeightChange).toFixed(1)}kg
                       </div>
                     </div>
                   </>
