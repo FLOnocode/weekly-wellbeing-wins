@@ -11,12 +11,14 @@ import { NutriBot } from "@/components/NutriBot";
 import { FeyButton } from "@/components/ui/fey-button";
 import { useAuth } from "@/contexts/AuthContext";
 import { challengeService } from "@/lib/supabase";
+import { leaderboardService } from "@/lib/leaderboard";
 import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
   const { user } = useAuth();
   const [completedChallenges, setCompletedChallenges] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const [challengeRules, setChallengeRules] = useState<any[]>([]);
 
   // Obtenir la date du jour au format YYYY-MM-DD
   const getTodayDate = () => {
@@ -30,7 +32,8 @@ const Index = () => {
     daysLeft: 5
   };
 
-  const challenges = [
+  // Définition des défis avec points dynamiques
+  const [challenges, setChallenges] = useState([
     {
       id: "steps",
       title: "10 000 pas",
@@ -47,7 +50,7 @@ const Index = () => {
       description: "Buvez au moins 1,5 litres d'eau",
       icon: Droplets,
       difficulty: "Facile",
-      points: 8,
+      points: 10,
       color: "hydration",
       tips: "Gardez une bouteille d'eau près de vous, mettez des rappels sur votre téléphone"
     },
@@ -57,7 +60,7 @@ const Index = () => {
       description: "Préparez un repas équilibré",
       icon: Utensils,
       difficulty: "Moyen",
-      points: 15,
+      points: 10,
       color: "nutrition",
       tips: "Privilégiez les légumes, protéines maigres et céréales complètes. Planifiez vos repas à l'avance"
     },
@@ -67,7 +70,7 @@ const Index = () => {
       description: "Faites 10 minutes d'activité physique",
       icon: Dumbbell,
       difficulty: "Facile",
-      points: 12,
+      points: 10,
       color: "fitness",
       tips: "Yoga, étirements, marche rapide ou exercices de renforcement. Commencez petit !"
     },
@@ -76,8 +79,8 @@ const Index = () => {
       title: "Journée sans sucre",
       description: "Évitez le sucre ajouté aujourd'hui",
       icon: Ban,
-      difficulty: "Difficile",
-      points: 20,
+      difficulty: "Moyen",
+      points: 10,
       color: "detox",
       tips: "Lisez les étiquettes, privilégiez les fruits frais, préparez des collations saines"
     },
@@ -87,7 +90,7 @@ const Index = () => {
       description: "Consommez 5 portions de fruits et légumes",
       icon: Apple,
       difficulty: "Moyen",
-      points: 15,
+      points: 10,
       color: "vitamins",
       tips: "Variez les couleurs pour plus de nutriments. Ajoutez des légumes à chaque repas"
     },
@@ -97,36 +100,55 @@ const Index = () => {
       description: "Dormez au moins 8 heures",
       icon: Moon,
       difficulty: "Moyen",
-      points: 12,
+      points: 10,
       color: "rest",
       tips: "Éteignez les écrans 1h avant le coucher, créez une routine relaxante"
     }
-  ];
+  ]);
 
-  // Charger les défis complétés pour aujourd'hui
+  // Charger les règles de points et les défis complétés
   useEffect(() => {
-    const loadTodaysChallenges = async () => {
+    const loadData = async () => {
       if (!user) {
         setIsLoading(false);
         return;
       }
 
       try {
-        console.log('🔄 Chargement des défis pour aujourd\'hui...');
-        const todayDate = getTodayDate();
-        const completedChallengeIds = await challengeService.getCompletedChallenges(user.id, todayDate);
+        console.log('🔄 Chargement des données...');
         
+        // Charger les règles de points et les défis complétés en parallèle
+        const [rules, completedChallengeIds] = await Promise.all([
+          leaderboardService.getChallengeRules(),
+          challengeService.getCompletedChallenges(user.id, getTodayDate())
+        ]);
+
+        console.log('✅ Règles chargées:', rules);
         console.log('✅ Défis complétés aujourd\'hui:', completedChallengeIds);
+
+        setChallengeRules(rules);
         setCompletedChallenges(new Set(completedChallengeIds));
+
+        // Mettre à jour les points des défis avec les valeurs de la base de données
+        const challengeCompletionRule = rules.find(rule => rule.rule_type === 'challenge_completion');
+        if (challengeCompletionRule) {
+          setChallenges(prevChallenges => 
+            prevChallenges.map(challenge => ({
+              ...challenge,
+              points: challengeCompletionRule.points
+            }))
+          );
+        }
+
       } catch (error) {
-        console.error('❌ Erreur lors du chargement des défis:', error);
-        toast.error("Erreur lors du chargement des défis");
+        console.error('❌ Erreur lors du chargement des données:', error);
+        toast.error("Erreur lors du chargement des données");
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadTodaysChallenges();
+    loadData();
   }, [user]);
 
   const toggleChallenge = async (challengeId: string) => {
@@ -165,10 +187,19 @@ const Index = () => {
         return;
       }
 
-      // Afficher un message de succès
+      // Afficher un message de succès avec les points dynamiques
       const challenge = challenges.find(c => c.id === challengeId);
       if (newCompletionStatus) {
-        toast.success(`✅ Défi "${challenge?.title}" complété ! +${challenge?.points} points`);
+        let message = `✅ Défi "${challenge?.title}" complété ! +${challenge?.points} points`;
+        
+        // Vérifier si c'est une journée parfaite
+        if (newCompleted.size === challenges.length) {
+          const perfectDayRule = challengeRules.find(rule => rule.rule_type === 'daily_perfect_bonus');
+          const bonusPoints = perfectDayRule?.points || 10;
+          message += ` + ${bonusPoints} points bonus (journée parfaite) !`;
+        }
+        
+        toast.success(message);
       } else {
         toast.success(`↩️ Défi "${challenge?.title}" annulé`);
       }
@@ -186,6 +217,11 @@ const Index = () => {
   const totalPoints = challenges
     .filter(challenge => completedChallenges.has(challenge.id))
     .reduce((sum, challenge) => sum + challenge.points, 0);
+
+  // Ajouter le bonus de journée parfaite si applicable
+  const finalTotalPoints = completedChallenges.size === challenges.length 
+    ? totalPoints + (challengeRules.find(rule => rule.rule_type === 'daily_perfect_bonus')?.points || 10)
+    : totalPoints;
 
   if (isLoading) {
     return (
@@ -230,7 +266,7 @@ const Index = () => {
       {/* Header mobile avec style adapté */}
       <div className="relative z-20">
         <MobileHeader 
-          totalPoints={totalPoints}
+          totalPoints={finalTotalPoints}
           completedChallenges={completedChallenges.size}
           totalChallenges={challenges.length}
         />
@@ -318,7 +354,7 @@ const Index = () => {
               <CardContent>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-white">{totalPoints}</div>
+                    <div className="text-2xl font-bold text-white">{finalTotalPoints}</div>
                     <div className="text-sm text-white/70">Points</div>
                   </div>
                   <div>
@@ -337,7 +373,7 @@ const Index = () => {
                 {completedChallenges.size === challenges.length && (
                   <div className="mt-4 p-3 bg-wellness-500/20 border border-wellness-400/30 rounded-lg text-center">
                     <p className="text-wellness-200 text-sm font-medium">
-                      🎉 Félicitations ! Vous avez complété tous les défis d'aujourd'hui !
+                      🎉 Félicitations ! Journée parfaite ! Vous avez gagné un bonus de {challengeRules.find(rule => rule.rule_type === 'daily_perfect_bonus')?.points || 10} points !
                     </p>
                   </div>
                 )}

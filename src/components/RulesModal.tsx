@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { HelpCircle, Trophy, TrendingDown, TrendingUp, Calendar, Target, Zap } from "lucide-react";
+import { HelpCircle, Trophy, TrendingDown, TrendingUp, Calendar, Target, Zap, CheckCircle } from "lucide-react";
 import { leaderboardService, ChallengeRule } from "@/lib/leaderboard";
 
 interface RulesModalProps {
@@ -39,16 +39,15 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
   const getRuleIcon = (ruleType: string) => {
     switch (ruleType) {
       case 'challenge_completion':
-      case 'challenge_completion_difficult':
-        return <Target className="h-5 w-5" />;
+        return <Target className="h-5 w-5 text-wellness-400" />;
+      case 'daily_perfect_bonus':
+        return <CheckCircle className="h-5 w-5 text-wellness-400" />;
       case 'weight_loss_per_kg':
         return <TrendingDown className="h-5 w-5 text-green-500" />;
       case 'weight_gain_per_kg':
         return <TrendingUp className="h-5 w-5 text-red-500" />;
       case 'missed_weigh_in':
         return <Calendar className="h-5 w-5 text-red-500" />;
-      case 'perfect_week_bonus':
-        return <Trophy className="h-5 w-5 text-yellow-500" />;
       case 'burner_of_week_bonus':
         return <Zap className="h-5 w-5 text-orange-500" />;
       default:
@@ -58,11 +57,11 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
 
   const getRuleColor = (points: number) => {
     if (points > 0) {
-      return "text-green-300";
+      return "text-green-300 border-green-400/30";
     } else if (points < 0) {
-      return "text-red-300";
+      return "text-red-300 border-red-400/30";
     }
-    return "text-white";
+    return "text-white border-white/30";
   };
 
   const defaultTrigger = (
@@ -136,7 +135,7 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
                       </div>
                       <Badge 
                         variant="outline" 
-                        className={`${getRuleColor(rule.points)} border-current font-bold`}
+                        className={`${getRuleColor(rule.points)} font-bold`}
                       >
                         {rule.points > 0 ? '+' : ''}{rule.points} pts
                       </Badge>
@@ -164,6 +163,14 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
               </div>
               
               <div className="space-y-2">
+                <h4 className="font-semibold text-white">✅ Viser la journée parfaite</h4>
+                <p className="text-sm">
+                  Complétez TOUS les défis d'une journée pour obtenir le bonus de 10 points.
+                  C'est le nouveau système qui remplace les bonus hebdomadaires !
+                </p>
+              </div>
+              
+              <div className="space-y-2">
                 <h4 className="font-semibold text-white">⚖️ Pesée hebdomadaire</h4>
                 <p className="text-sm">
                   N'oubliez jamais votre pesée du lundi ! Une pesée manquée vous coûte 30 points.
@@ -172,18 +179,10 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
               </div>
               
               <div className="space-y-2">
-                <h4 className="font-semibold text-white">🏆 Viser la semaine parfaite</h4>
+                <h4 className="font-semibold text-white">📈 Progression constante</h4>
                 <p className="text-sm">
-                  Complétez tous les défis de la semaine pour obtenir le bonus de 10 points.
-                  Cela peut faire la différence dans le classement !
-                </p>
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="font-semibold text-white">🔥 Défis difficiles</h4>
-                <p className="text-sm">
-                  Les défis marqués comme "Difficile" (ex: journée sans sucre) rapportent 
-                  plus de points. Relevez le défi !
+                  Tous les défis valent maintenant le même nombre de points (10 points chacun).
+                  Concentrez-vous sur la régularité plutôt que sur la difficulté.
                 </p>
               </div>
             </CardContent>
@@ -200,7 +199,7 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
               <div className="p-3 bg-red-500/10 border border-red-400/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="h-5 w-5 text-red-400" />
-                  <span className="font-semibold text-red-300">Prise de poids</span>
+                  <span className="font-semibold text-red-300">Prise de poids (-15 pts/kg)</span>
                 </div>
                 <p className="text-sm text-red-200">
                   Chaque kilogramme pris vous fait perdre 15 points. Restez motivé et 
@@ -211,11 +210,43 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
               <div className="p-3 bg-red-500/10 border border-red-400/30 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar className="h-5 w-5 text-red-400" />
-                  <span className="font-semibold text-red-300">Pesée manquée</span>
+                  <span className="font-semibold text-red-300">Pesée manquée le lundi (-30 pts)</span>
                 </div>
                 <p className="text-sm text-red-200">
                   Ne pas se peser le lundi coûte 30 points. Programmez un rappel pour 
                   ne jamais l'oublier !
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Nouveautés du système */}
+          <Card className="glassmorphism border-wellness-400/30">
+            <CardHeader>
+              <CardTitle className="text-lg text-wellness-300">
+                🆕 Nouveautés du Système de Points
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-white/80">
+              <div className="p-3 bg-wellness-500/10 border border-wellness-400/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="h-5 w-5 text-wellness-400" />
+                  <span className="font-semibold text-wellness-300">Bonus journée parfaite</span>
+                </div>
+                <p className="text-sm text-wellness-200">
+                  Nouveau ! Complétez 100% des défis d'une journée pour gagner 10 points bonus.
+                  Plus accessible que l'ancien bonus hebdomadaire !
+                </p>
+              </div>
+              
+              <div className="p-3 bg-blue-500/10 border border-blue-400/30 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="h-5 w-5 text-blue-400" />
+                  <span className="font-semibold text-blue-300">Égalité des défis</span>
+                </div>
+                <p className="text-sm text-blue-200">
+                  Tous les défis quotidiens valent maintenant 10 points, qu'ils soient faciles ou difficiles.
+                  L'important est la régularité !
                 </p>
               </div>
             </CardContent>

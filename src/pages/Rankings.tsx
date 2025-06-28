@@ -237,7 +237,7 @@ const Rankings = () => {
                             )}
                           </div>
                           <div className="text-body-sm text-white/70">
-                            {entry.weightLost.toFixed(1)}kg perdus • {entry.challengesCompleted} défis
+                            {entry.weightLost.toFixed(1)}kg perdus • {entry.challengesCompleted} défis • {entry.perfectDays} journées parfaites
                           </div>
                         </div>
 
@@ -273,7 +273,8 @@ const Rankings = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 text-body-sm">
-                  {rules.slice(0, 4).map((rule) => (
+                  {/* Afficher les règles principales */}
+                  {rules.filter(rule => ['challenge_completion', 'daily_perfect_bonus', 'weight_loss_per_kg', 'burner_of_week_bonus'].includes(rule.rule_type)).map((rule) => (
                     <div key={rule.id} className="flex justify-between">
                       <span className="text-white/70">{rule.description}</span>
                       <span className={`font-medium ${rule.points > 0 ? 'text-wellness-300' : 'text-red-300'}`}>
@@ -293,20 +294,17 @@ const Rankings = () => {
                   ))}
                   
                   <div className="pt-2 border-t border-white/20">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-wellness-300 hover:text-wellness-200 p-0 h-auto"
-                      asChild
-                    >
-                      <RulesModal 
-                        trigger={
-                          <span className="cursor-pointer">
-                            Voir toutes les règles et conseils →
-                          </span>
-                        }
-                      />
-                    </Button>
+                    <RulesModal 
+                      trigger={
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-wellness-300 hover:text-wellness-200 p-0 h-auto"
+                        >
+                          Voir toutes les règles et conseils →
+                        </Button>
+                      }
+                    />
                   </div>
                 </div>
               </CardContent>

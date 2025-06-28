@@ -11,7 +11,7 @@ export interface LeaderboardEntry {
   isBurnerOfWeek?: boolean;
   isCurrentUser?: boolean;
   challengesCompleted: number;
-  perfectWeeks: number;
+  perfectDays: number;
 }
 
 export interface ChallengeRule {
@@ -46,7 +46,7 @@ export const leaderboardService = {
     weeklyPoints: number;
     challengesCompleted: number;
     weightLost: number;
-    perfectWeeks: number;
+    perfectDays: number;
   }> {
     try {
       const rules = await this.getChallengeRules();
@@ -59,7 +59,7 @@ export const leaderboardService = {
       let weeklyPoints = 0;
       let challengesCompleted = 0;
       let weightLost = 0;
-      let perfectWeeks = 0;
+      let perfectDays = 0;
 
       // Calculer les points des défis quotidiens
       const today = new Date();
@@ -81,34 +81,34 @@ export const leaderboardService = {
       if (!challengeError && challenges) {
         challengesCompleted = challenges.length;
 
-        // Calculer les points des défis
-        challenges.forEach(challenge => {
-          const challengeDate = new Date(challenge.date);
+        // Grouper les défis par date pour calculer les journées parfaites
+        const challengesByDate = this.groupChallengesByDate(challenges);
+        const totalAvailableChallenges = 7; // Nombre total de défis par jour
+
+        // Calculer les points des défis et les journées parfaites
+        Object.entries(challengesByDate).forEach(([date, dateChallenges]) => {
+          const challengeDate = new Date(date);
           const isThisWeek = challengeDate >= new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-          let points = 0;
-          // Défis difficiles valent plus de points
-          if (challenge.challenge_id === 'no-sugar') {
-            points = rulesMap['challenge_completion_difficult'] || 20;
-          } else {
-            points = rulesMap['challenge_completion'] || 10;
+          // Points pour les défis complétés (tous valent le même nombre de points maintenant)
+          const challengePoints = dateChallenges.length * (rulesMap['challenge_completion'] || 10);
+          totalPoints += challengePoints;
+          
+          if (isThisWeek) {
+            weeklyPoints += challengePoints;
           }
 
-          totalPoints += points;
-          if (isThisWeek) {
-            weeklyPoints += points;
+          // Bonus pour journée parfaite (100% des défis complétés)
+          if (dateChallenges.length >= totalAvailableChallenges) {
+            perfectDays++;
+            const perfectDayBonus = rulesMap['daily_perfect_bonus'] || 10;
+            totalPoints += perfectDayBonus;
+            
+            if (isThisWeek) {
+              weeklyPoints += perfectDayBonus;
+            }
           }
         });
-
-        // Calculer les semaines parfaites
-        const challengesByWeek = this.groupChallengesByWeek(challenges);
-        perfectWeeks = Object.values(challengesByWeek).filter(weekChallenges => 
-          weekChallenges.length >= 7 // Tous les défis de la semaine
-        ).length;
-
-        // Bonus pour semaines parfaites
-        const perfectWeekBonus = (rulesMap['perfect_week_bonus'] || 10) * perfectWeeks;
-        totalPoints += perfectWeekBonus;
       }
 
       // Calculer les points de perte de poids
@@ -130,7 +130,7 @@ export const leaderboardService = {
           const weightLossPoints = Math.round(weightDifference * (rulesMap['weight_loss_per_kg'] || 15));
           totalPoints += weightLossPoints;
         } else if (weightDifference < 0) {
-          // Prise de poids
+          // Prise de poids (pénalité)
           const weightGainPoints = Math.round(Math.abs(weightDifference) * (rulesMap['weight_gain_per_kg'] || -15));
           totalPoints += weightGainPoints; // Déjà négatif
         }
@@ -166,10 +166,13 @@ export const leaderboardService = {
         .limit(1);
 
       if (!weighInError && (!thisWeekWeighIn || thisWeekWeighIn.length === 0)) {
-        // Pesée manquée cette semaine
-        const missedWeighInPenalty = rulesMap['missed_weigh_in'] || -30;
-        totalPoints += missedWeighInPenalty;
-        weeklyPoints += missedWeighInPenalty;
+        // Pesée manquée cette semaine (seulement si on est après lundi)
+        const dayOfWeek = today.getDay();
+        if (dayOfWeek > 1 || (dayOfWeek === 1 && today.getHours() > 12)) { // Après lundi midi
+          const missedWeighInPenalty = rulesMap['missed_weigh_in'] || -30;
+          totalPoints += missedWeighInPenalty;
+          weeklyPoints += missedWeighInPenalty;
+        }
       }
 
       return {
@@ -177,7 +180,7 @@ export const leaderboardService = {
         weeklyPoints,
         challengesCompleted,
         weightLost: Math.max(0, weightLost),
-        perfectWeeks
+        perfectDays
       };
 
     } catch (error) {
@@ -187,23 +190,20 @@ export const leaderboardService = {
         weeklyPoints: 0,
         challengesCompleted: 0,
         weightLost: 0,
-        perfectWeeks: 0
+        perfectDays: 0
       };
     }
   },
 
-  // Grouper les défis par semaine
-  groupChallengesByWeek(challenges: any[]): Record<string, any[]> {
+  // Grouper les défis par date
+  groupChallengesByDate(challenges: any[]): Record<string, any[]> {
     return challenges.reduce((acc, challenge) => {
-      const date = new Date(challenge.date);
-      const weekStart = new Date(date);
-      weekStart.setDate(date.getDate() - date.getDay() + 1); // Lundi de la semaine
-      const weekKey = weekStart.toISOString().split('T')[0];
+      const date = challenge.date;
       
-      if (!acc[weekKey]) {
-        acc[weekKey] = [];
+      if (!acc[date]) {
+        acc[date] = [];
       }
-      acc[weekKey].push(challenge);
+      acc[date].push(challenge);
       
       return acc;
     }, {} as Record<string, any[]>);
@@ -235,7 +235,7 @@ export const leaderboardService = {
           weightLost: stats.weightLost,
           rank: 0, // Sera calculé après le tri
           challengesCompleted: stats.challengesCompleted,
-          perfectWeeks: stats.perfectWeeks,
+          perfectDays: stats.perfectDays,
           isCurrentUser: profile.user_id === currentUserId
         };
       });
