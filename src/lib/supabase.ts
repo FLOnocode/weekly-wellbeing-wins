@@ -18,6 +18,7 @@ export interface Profile {
   current_weight: number
   created_at: string
   updated_at: string
+  avatar_url: string | null // Ajout de la colonne avatar
 }
 
 export interface WeightEntry {

@@ -3,51 +3,130 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { User, Scale, Trophy, TrendingDown, Calendar, ArrowLeft, Medal, Target, LogOut, Settings } from "lucide-react";
+import { User, Scale, Trophy, TrendingDown, Calendar, ArrowLeft, Medal, Target, LogOut, Settings, PlusCircle } from "lucide-react";
 import { MobileHeader } from "@/components/MobileHeader";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { leaderboardService, LeaderboardEntry } from "@/lib/leaderboard";
+import { supabase } from "@/lib/supabase";
+import { toast } from "@/components/ui/sonner";
 
 const Profile = () => {
-  const { signOut, profile, user } = useAuth();
+  const { signOut, profile, user, updateProfile, refreshProfile } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [userLeaderboardStats, setUserLeaderboardStats] = useState<LeaderboardEntry | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  useEffect(() => {
+    const fetchUserStats = async () => {
+      if (!user) return;
+      setLoadingStats(true);
+      try {
+        const leaderboard = await leaderboardService.getLeaderboard(user.id);
+        const currentUserEntry = leaderboard.find(entry => entry.isCurrentUser);
+        setUserLeaderboardStats(currentUserEntry || null);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des statistiques de l'utilisateur:", error);
+        toast.error("Erreur lors du chargement de vos statistiques.");
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+
+    fetchUserStats();
+  }, [user]);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
       await signOut();
-      // La redirection vers AuthForm se fera automatiquement via AuthContext
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
       setIsLoggingOut(false);
     }
   };
 
-  // Utiliser les données du profil ou des valeurs par défaut
-  const userStats = {
-    name: profile?.nickname || "Votre Profil",
-    currentWeight: profile?.current_weight || 0,
-    previousWeight: (profile?.current_weight || 0) + 0.8, // Simulation semaine précédente
-    startWeight: (profile?.current_weight || 0) + 3.5, // Simulation poids de départ
-    goalWeight: profile?.goal_weight || 0,
-    rank: 4,
-    totalPoints: 240,
-    weeklyPoints: 35,
-    weightLost: profile?.current_weight && profile?.goal_weight 
-      ? ((profile.current_weight + 3.5) - profile.current_weight) 
-      : 3.5,
-    joinDate: profile?.created_at || "2025-01-01",
-    perfectWeeks: 2,
-    totalWeeks: 4
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 1 * 1024 * 1024) { // Max 1MB
+        toast.error("L'avatar ne doit pas dépasser 1MB.");
+        return;
+      }
+      if (!file.type.startsWith('image/')) {
+        toast.error("Veuillez sélectionner une image valide pour l'avatar.");
+        return;
+      }
+      uploadAvatar(file); // Déclenche l'upload immédiatement
+    }
   };
 
-  const weightLossProgress = profile?.current_weight && profile?.goal_weight 
-    ? ((userStats.startWeight - userStats.currentWeight) / (userStats.startWeight - userStats.goalWeight)) * 100
+  const uploadAvatar = async (file: File) => {
+    if (!user || !profile) {
+      toast.error("Vous devez être connecté pour changer votre avatar.");
+      return;
+    }
+    setIsUploadingAvatar(true);
+    toast.loading("Téléchargement de l'avatar...");
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/avatar.${fileExt}`; // Nom de fichier unique par utilisateur
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true // Permet de remplacer l'avatar existant
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      const { error: updateError } = await updateProfile({ avatar_url: publicUrl });
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      toast.success("Avatar mis à jour avec succès !");
+      await refreshProfile(); // Rafraîchit le profil dans le contexte
+    } catch (error: any) {
+      console.error("Erreur lors de l'upload de l'avatar:", error);
+      toast.error(`Erreur: ${error.message || "Impossible de mettre à jour l'avatar."}`);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  // Calculs dynamiques basés sur les données réelles
+  const totalPoints = userLeaderboardStats?.totalScore || 0;
+  const currentRank = userLeaderboardStats?.rank || 0;
+  const totalWeightLost = userLeaderboardStats?.weightLost || 0;
+  const perfectDays = userLeaderboardStats?.perfectDays || 0;
+  const challengesCompleted = userLeaderboardStats?.challengesCompleted || 0;
+  const weeklyScore = userLeaderboardStats?.weeklyScore || 0;
+
+  // Calcul de la durée de participation
+  const joinDate = profile?.created_at ? new Date(profile.created_at) : new Date();
+  const now = new Date();
+  const diffTime = Math.abs(now.getTime() - joinDate.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const participationWeeks = Math.floor(diffDays / 7);
+
+  // Calcul de la progression du poids
+  const hypotheticalStartWeight = (profile?.current_weight || 0) + totalWeightLost;
+  const actualWeightLossProgress = profile?.current_weight && profile?.goal_weight && hypotheticalStartWeight > profile.goal_weight
+    ? ((hypotheticalStartWeight - profile.current_weight) / (hypotheticalStartWeight - profile.goal_weight)) * 100
     : 0;
-  
-  const weeklyChange = userStats.previousWeight - userStats.currentWeight;
 
   // Générer les initiales du profil
   const getInitials = () => {
@@ -61,6 +140,14 @@ const Profile = () => {
     }
     return user?.email?.slice(0, 2).toUpperCase() || 'VP';
   };
+
+  if (loadingStats) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Chargement du profil...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
@@ -96,9 +183,9 @@ const Profile = () => {
 
       <div className="relative z-20">
         <MobileHeader 
-          totalPoints={userStats.totalPoints}
-          completedChallenges={5}
-          totalChallenges={7}
+          totalPoints={totalPoints}
+          completedChallenges={challengesCompleted}
+          totalChallenges={7} // Nombre de défis par jour pour l'affichage du header
         />
       </div>
 
@@ -118,24 +205,46 @@ const Profile = () => {
           </div>
 
           <div className="space-y-4">
-            {/* Profil utilisateur */}
+            {/* Profil utilisateur avec avatar */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-4">
-                  <Avatar className="h-16 w-16 border-2 border-wellness-300">
-                    <AvatarImage src="/placeholder.svg" />
-                    <AvatarFallback className="bg-wellness-500/20 text-wellness-300 text-heading-4">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <Avatar className="h-16 w-16 border-2 border-wellness-300">
+                      <AvatarImage src={profile?.avatar_url || "/placeholder.svg"} />
+                      <AvatarFallback className="bg-wellness-500/20 text-wellness-300 text-heading-4">
+                        {getInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <input
+                      id="avatar-input"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                      disabled={isUploadingAvatar}
+                    />
+                    <label htmlFor="avatar-input" className="absolute bottom-0 right-0 cursor-pointer">
+                      <div className="h-6 w-6 bg-black rounded-full border border-wellness-400 flex items-center justify-center">
+                        <PlusCircle className="h-4 w-4 text-wellness-400" />
+                      </div>
+                    </label>
+                    {isUploadingAvatar && (
+                      <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                        <div className="text-xs text-white">...</div>
+                      </div>
+                    )}
+                  </div>
                   <div className="flex-1">
-                    <CardTitle className="text-heading-4 text-white">{userStats.name}</CardTitle>
+                    <CardTitle className="text-heading-4 text-white">{profile?.nickname || "Votre Profil"}</CardTitle>
                     <CardDescription className="text-white/70">
-                      Membre depuis le {new Date(userStats.joinDate).toLocaleDateString("fr-FR")}
+                      Membre depuis le {new Date(joinDate).toLocaleDateString("fr-FR")}
                     </CardDescription>
                     <div className="flex items-center gap-2 mt-2">
-                      <Badge className="bg-wellness-500/20 text-wellness-200 border-wellness-400/30">#{userStats.rank} au classement</Badge>
-                      <Badge className="bg-motivation-500/20 text-motivation-200 border-motivation-400/30">{userStats.totalPoints} pts</Badge>
+                      {currentRank > 0 && (
+                        <Badge className="bg-wellness-500/20 text-wellness-200 border-wellness-400/30">#{currentRank} au classement</Badge>
+                      )}
+                      <Badge className="bg-motivation-500/20 text-motivation-200 border-motivation-400/30">{totalPoints} pts</Badge>
                     </div>
                   </div>
                 </div>
@@ -154,45 +263,45 @@ const Profile = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-wellness-400/30 rounded-lg">
                     <div className="text-heading-3 font-bold text-wellness-300">
-                      {userStats.currentWeight > 0 ? `${userStats.currentWeight}kg` : 'Non défini'}
+                      {profile?.current_weight > 0 ? `${profile.current_weight}kg` : 'Non défini'}
                     </div>
                     <div className="text-body-sm text-white/70">Poids actuel</div>
                   </div>
                   <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-motivation-400/30 rounded-lg">
                     <div className="text-heading-3 font-bold text-motivation-300">
-                      {userStats.goalWeight > 0 ? `${userStats.goalWeight}kg` : 'Non défini'}
+                      {profile?.goal_weight > 0 ? `${profile.goal_weight}kg` : 'Non défini'}
                     </div>
                     <div className="text-body-sm text-white/70">Poids objectif</div>
                   </div>
                 </div>
 
-                {userStats.currentWeight > 0 && userStats.goalWeight > 0 && (
+                {profile?.current_weight > 0 && profile?.goal_weight > 0 && (
                   <>
                     <div className="space-y-2">
                       <div className="flex justify-between text-body-sm">
                         <span className="text-white/70">Progression vers l'objectif</span>
-                        <span className="font-medium text-white">{Math.round(weightLossProgress)}%</span>
+                        <span className="font-medium text-white">{Math.round(actualWeightLossProgress)}%</span>
                       </div>
-                      <Progress value={weightLossProgress} className="h-2 bg-white/20" />
+                      <Progress value={actualWeightLossProgress} className="h-2 bg-white/20" />
                       <div className="flex justify-between text-body-sm text-white/70">
-                        <span>Départ: {userStats.startWeight}kg</span>
-                        <span>Objectif: {userStats.goalWeight}kg</span>
+                        <span>Départ: {hypotheticalStartWeight.toFixed(1)}kg</span>
+                        <span>Objectif: {profile.goal_weight}kg</span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                       <div className="flex items-center gap-2">
                         <TrendingDown className="h-5 w-5 text-wellness-500" />
-                        <span className="text-body font-medium text-white">Changement cette semaine</span>
+                        <span className="text-body font-medium text-white">Poids perdu au total</span>
                       </div>
-                      <div className={`text-body font-bold ${weeklyChange > 0 ? "text-wellness-300" : "text-red-300"}`}>
-                        {weeklyChange > 0 ? "-" : "+"}{Math.abs(weeklyChange)}kg
+                      <div className="text-body font-bold text-wellness-300">
+                        {totalWeightLost.toFixed(1)}kg
                       </div>
                     </div>
                   </>
                 )}
 
-                {(userStats.currentWeight === 0 || userStats.goalWeight === 0) && (
+                {(profile?.current_weight === 0 || profile?.goal_weight === 0) && (
                   <div className="p-4 bg-yellow-500/10 border border-yellow-400/30 rounded-lg text-center">
                     <p className="text-yellow-200 text-sm">
                       Complétez votre profil pour voir votre progression
@@ -202,7 +311,7 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            {/* Statistiques du défi */}
+            {/* Statistiques du défi avec données réelles */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
@@ -213,11 +322,11 @@ const Profile = () => {
               <CardContent>
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-yellow-400/30 rounded-lg">
-                    <div className="text-heading-3 font-bold text-yellow-300">{userStats.totalPoints}</div>
+                    <div className="text-heading-3 font-bold text-yellow-300">{totalPoints}</div>
                     <div className="text-body-sm text-white/70">Points total</div>
                   </div>
                   <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-energy-400/30 rounded-lg">
-                    <div className="text-heading-3 font-bold text-energy-300">{userStats.weeklyPoints}</div>
+                    <div className="text-heading-3 font-bold text-energy-300">{weeklyScore}</div>
                     <div className="text-body-sm text-white/70">Cette semaine</div>
                   </div>
                 </div>
@@ -228,7 +337,9 @@ const Profile = () => {
                       <Medal className="h-5 w-5 text-motivation-500" />
                       <span className="text-body text-white">Classement actuel</span>
                     </div>
-                    <span className="text-body font-bold text-motivation-300">#{userStats.rank}</span>
+                    <span className="text-body font-bold text-motivation-300">
+                      {currentRank > 0 ? `#${currentRank}` : 'Non classé'}
+                    </span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
@@ -236,15 +347,23 @@ const Profile = () => {
                       <TrendingDown className="h-5 w-5 text-wellness-500" />
                       <span className="text-body text-white">Poids perdu au total</span>
                     </div>
-                    <span className="text-body font-bold text-wellness-300">{userStats.weightLost}kg</span>
+                    <span className="text-body font-bold text-wellness-300">{totalWeightLost.toFixed(1)}kg</span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Target className="h-5 w-5 text-energy-500" />
-                      <span className="text-body text-white">Semaines parfaites</span>
+                      <span className="text-body text-white">Journées parfaites</span>
                     </div>
-                    <span className="text-body font-bold text-energy-300">{userStats.perfectWeeks}/{userStats.totalWeeks}</span>
+                    <span className="text-body font-bold text-energy-300">{perfectDays}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="h-5 w-5 text-motivation-500" />
+                      <span className="text-body text-white">Défis complétés</span>
+                    </div>
+                    <span className="text-body font-bold text-motivation-300">{challengesCompleted}</span>
                   </div>
 
                   <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
@@ -252,7 +371,7 @@ const Profile = () => {
                       <Calendar className="h-5 w-5 text-motivation-500" />
                       <span className="text-body text-white">Durée de participation</span>
                     </div>
-                    <span className="text-body font-bold text-motivation-300">{userStats.totalWeeks} semaines</span>
+                    <span className="text-body font-bold text-motivation-300">{participationWeeks} semaines</span>
                   </div>
                 </div>
               </CardContent>
@@ -271,20 +390,20 @@ const Profile = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-body text-white/70">Poids objectif</span>
                     <span className="text-body font-bold text-white">
-                      {userStats.goalWeight > 0 ? `${userStats.goalWeight}kg` : 'Non défini'}
+                      {profile?.goal_weight > 0 ? `${profile.goal_weight}kg` : 'Non défini'}
                     </span>
                   </div>
-                  {userStats.currentWeight > 0 && userStats.goalWeight > 0 && (
+                  {profile?.current_weight > 0 && profile?.goal_weight > 0 && (
                     <>
                       <div className="flex justify-between items-center">
                         <span className="text-body text-white/70">Reste à perdre</span>
                         <span className="text-body font-bold text-white">
-                          {Math.max(0, userStats.currentWeight - userStats.goalWeight).toFixed(1)}kg
+                          {Math.max(0, (profile?.current_weight || 0) - (profile?.goal_weight || 0)).toFixed(1)}kg
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-body text-white/70">Progression</span>
-                        <span className="text-body font-bold text-white">{Math.round(weightLossProgress)}%</span>
+                        <span className="text-body font-bold text-white">{Math.round(actualWeightLossProgress)}%</span>
                       </div>
                     </>
                   )}
