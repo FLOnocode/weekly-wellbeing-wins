@@ -226,7 +226,7 @@ const Rankings = () => {
                         key={entry.id}
                         className={`flex flex-col p-3 rounded-lg transition-colors gap-2 ${
                           entry.isCurrentUser 
-                            ? "bg-white/20 backdrop-blur-sm border border-motivation-400/30" 
+                            ? "bg-motivation-900/50 backdrop-blur-sm border-2 border-motivation-400" 
                             : "bg-white/10 backdrop-blur-sm border border-white/20 md:hover:bg-white/15"
                         }`}
                       >
