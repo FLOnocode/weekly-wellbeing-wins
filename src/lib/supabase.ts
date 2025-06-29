@@ -1,109 +1,87 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+  throw new Error('Missing Supabase environment variables')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false,
-    flowType: 'pkce',
-    storage: {
-      getItem: (key: string) => {
-        try {
-          return localStorage.getItem(key);
-        } catch (error) {
-          console.warn('Error reading from localStorage:', error);
-          return null;
-        }
-      },
-      setItem: (key: string, value: string) => {
-        try {
-          localStorage.setItem(key, value);
-        } catch (error) {
-          console.warn('Error writing to localStorage:', error);
-        }
-      },
-      removeItem: (key: string) => {
-        try {
-          localStorage.removeItem(key);
-        } catch (error) {
-          console.warn('Error removing from localStorage:', error);
-        }
-      },
-    },
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'supabase-js-web',
-    },
-  },
-});
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Add error handling for auth state changes
-supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'TOKEN_REFRESHED' && !session) {
-    console.warn('Token refresh failed, clearing local storage');
-    // Clear any stale auth data
-    try {
-      localStorage.removeItem(`sb-${supabaseUrl.split('//')[1].split('.')[0]}-auth-token`);
-    } catch (error) {
-      console.warn('Error clearing auth token:', error);
-    }
-  }
-});
+// Types pour TypeScript
+export interface Profile {
+  id: string
+  user_id: string
+  nickname: string
+  goal_weight: number
+  current_weight: number
+  created_at: string
+  updated_at: string
+  avatar_url: string | null // Ajout de la colonne avatar
+}
 
-// Challenge service for managing daily challenges
+export interface WeightEntry {
+  id: string
+  user_id: string
+  weight: number
+  photo_url?: string
+  notes?: string
+  created_at: string
+}
+
+export interface DailyChallenge {
+  id: string
+  user_id: string
+  challenge_id: string
+  date: string
+  is_completed: boolean
+  created_at: string
+  updated_at: string
+}
+
+// Fonctions utilitaires pour les défis quotidiens
 export const challengeService = {
-  // Get completed challenges for a specific date
+  // Récupérer les défis complétés pour une date donnée
   async getCompletedChallenges(userId: string, date: string): Promise<string[]> {
-    try {
-      const { data, error } = await supabase
-        .from('daily_challenges')
-        .select('challenge_id')
-        .eq('user_id', userId)
-        .eq('date', date)
-        .eq('is_completed', true);
+    const { data, error } = await supabase
+      .from('daily_challenges')
+      .select('challenge_id')
+      .eq('user_id', userId)
+      .eq('date', date)
+      .eq('is_completed', true);
 
-      if (error) {
-        console.error('Error fetching completed challenges:', error);
-        return [];
-      }
-
-      return data?.map(item => item.challenge_id) || [];
-    } catch (error) {
-      console.error('Exception in getCompletedChallenges:', error);
+    if (error) {
+      console.error('Erreur lors de la récupération des défis:', error);
       return [];
     }
+
+    return data?.map(item => item.challenge_id) || [];
   },
 
-  // Toggle a challenge completion status
+  // Marquer un défi comme complété ou non complété
   async toggleChallenge(userId: string, challengeId: string, date: string, isCompleted: boolean): Promise<boolean> {
     try {
       if (isCompleted) {
-        // Insert or update the challenge as completed
+        // Insérer ou mettre à jour le défi comme complété
         const { error } = await supabase
           .from('daily_challenges')
           .upsert({
             user_id: userId,
             challenge_id: challengeId,
             date: date,
-            is_completed: true
+            is_completed: true,
+            updated_at: new Date().toISOString()
           }, {
             onConflict: 'user_id,challenge_id,date'
           });
 
         if (error) {
-          console.error('Error completing challenge:', error);
+          console.error('Erreur lors de la sauvegarde du défi:', error);
           return false;
         }
       } else {
-        // Delete the challenge record
+        // Supprimer l'entrée du défi
         const { error } = await supabase
           .from('daily_challenges')
           .delete()
@@ -112,89 +90,115 @@ export const challengeService = {
           .eq('date', date);
 
         if (error) {
-          console.error('Error removing challenge:', error);
+          console.error('Erreur lors de la suppression du défi:', error);
           return false;
         }
       }
 
       return true;
     } catch (error) {
-      console.error('Exception in toggleChallenge:', error);
+      console.error('Exception lors de la gestion du défi:', error);
       return false;
     }
   },
 
-  // Get daily challenge count for a date range with optional filtering
-  async getFilteredDailyChallengeCount(
-    userId: string, 
-    startDate: string, 
-    endDate: string, 
-    challengeIds?: string[]
-  ): Promise<Record<string, number>> {
-    try {
-      let query = supabase
-        .from('daily_challenges')
-        .select('date, challenge_id')
-        .eq('user_id', userId)
-        .eq('is_completed', true)
-        .gte('date', startDate)
-        .lte('date', endDate);
+  // Récupérer les statistiques des défis pour une période
+  async getChallengeStats(userId: string, startDate: string, endDate: string) {
+    const { data, error } = await supabase
+      .from('daily_challenges')
+      .select('challenge_id, date, is_completed')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .eq('is_completed', true)
+      .order('date', { ascending: true });
 
-      if (challengeIds && challengeIds.length > 0) {
-        query = query.in('challenge_id', challengeIds);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching filtered challenge count:', error);
-        return {};
-      }
-
-      // Group by date and count challenges
-      const countByDate: Record<string, number> = {};
-      data?.forEach(item => {
-        countByDate[item.date] = (countByDate[item.date] || 0) + 1;
-      });
-
-      return countByDate;
-    } catch (error) {
-      console.error('Exception in getFilteredDailyChallengeCount:', error);
-      return {};
-    }
-  },
-
-  // Get detailed challenge statistics
-  async getChallengeStatsDetailed(
-    userId: string, 
-    startDate: string, 
-    endDate: string, 
-    challengeIds?: string[]
-  ): Promise<Array<{ challenge_id: string; date: string; is_completed: boolean }>> {
-    try {
-      let query = supabase
-        .from('daily_challenges')
-        .select('challenge_id, date, is_completed')
-        .eq('user_id', userId)
-        .eq('is_completed', true)
-        .gte('date', startDate)
-        .lte('date', endDate);
-
-      if (challengeIds && challengeIds.length > 0) {
-        query = query.in('challenge_id', challengeIds);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching detailed challenge stats:', error);
-        return [];
-      }
-
-      return data || [];
-    } catch (error) {
-      console.error('Exception in getChallengeStatsDetailed:', error);
+    if (error) {
+      console.error('Erreur lors de la récupération des statistiques:', error);
       return [];
     }
+
+    return data || [];
+  },
+
+  // Récupérer le nombre de défis complétés par jour
+  async getDailyChallengeCount(userId: string, startDate: string, endDate: string) {
+    const { data, error } = await supabase
+      .from('daily_challenges')
+      .select('date')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .eq('is_completed', true);
+
+    if (error) {
+      console.error('Erreur lors du comptage des défis:', error);
+      return {};
+    }
+
+    // Grouper par date et compter
+    const countByDate: { [key: string]: number } = {};
+    data?.forEach(item => {
+      countByDate[item.date] = (countByDate[item.date] || 0) + 1;
+    });
+
+    return countByDate;
+  },
+
+  // Nouvelle fonction : Récupérer le nombre de défis complétés par jour pour des défis spécifiques
+  async getFilteredDailyChallengeCount(userId: string, startDate: string, endDate: string, challengeIds?: string[]) {
+    let query = supabase
+      .from('daily_challenges')
+      .select('date, challenge_id')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .eq('is_completed', true);
+
+    // Appliquer le filtre par challenge_id si fourni
+    if (challengeIds && challengeIds.length > 0) {
+      query = query.in('challenge_id', challengeIds);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Erreur lors du comptage des défis filtrés:', error);
+      return {};
+    }
+
+    // Grouper par date et compter
+    const countByDate: { [key: string]: number } = {};
+    data?.forEach(item => {
+      countByDate[item.date] = (countByDate[item.date] || 0) + 1;
+    });
+
+    return countByDate;
+  },
+
+  // Nouvelle fonction : Récupérer les statistiques détaillées par défi
+  async getChallengeStatsDetailed(userId: string, startDate: string, endDate: string, challengeIds?: string[]) {
+    let query = supabase
+      .from('daily_challenges')
+      .select('challenge_id, date, is_completed')
+      .eq('user_id', userId)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .eq('is_completed', true)
+      .order('date', { ascending: true });
+
+    // Appliquer le filtre par challenge_id si fourni
+    if (challengeIds && challengeIds.length > 0) {
+      query = query.in('challenge_id', challengeIds);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Erreur lors de la récupération des statistiques détaillées:', error);
+      return [];
+    }
+
+    return data || [];
   }
 };
