@@ -43,7 +43,7 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
       case 'daily_perfect_bonus':
         return <CheckCircle className="h-5 w-5 text-wellness-400" />;
       case 'weight_loss_per_kg':
-        return <TrendingDown className="h-5 w-5 text-green-500" />;
+        return <TrendingDown className="h-5 w-5 text-wellness-500" />;
       case 'weight_gain_per_kg':
         return <TrendingUp className="h-5 w-5 text-red-500" />;
       case 'no_weight_change':
@@ -59,7 +59,7 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
 
   const getRuleColor = (points: number) => {
     if (points > 0) {
-      return "text-green-300 border-green-400/30";
+      return "text-wellness-300 border-wellness-400/30";
     } else if (points < 0) {
       return "text-red-300 border-red-400/30";
     }

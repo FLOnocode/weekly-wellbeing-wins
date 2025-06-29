@@ -99,7 +99,7 @@ export const QuickChallengeIcons = ({
                 )}
               />
 
-              {/* Indicateur de complétion */}
+              {/* Indicateur de complétion avec couleur wellness */}
               {isCompleted && (
                 <motion.div 
                   className="absolute -top-1 -right-1 h-4 w-4 bg-wellness-500 rounded-full flex items-center justify-center shadow-lg"

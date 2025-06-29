@@ -80,7 +80,7 @@ export const ChallengeCard = ({ challenge, isCompleted, onToggle }: ChallengeCar
             >
               {challenge.difficulty}
             </Badge>
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs text-wellness-600 border-wellness-400">
               +{challenge.points} pts
             </Badge>
           </div>

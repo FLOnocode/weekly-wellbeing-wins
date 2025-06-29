@@ -67,7 +67,7 @@ export const GlassChallengeCard = ({
             <div className="flex items-center gap-3">
               <div className={`
                 p-3 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30
-                ${isCompleted ? 'bg-green-400/30 border-green-400/50' : ''}
+                ${isCompleted ? 'bg-wellness-400/30 border-wellness-400/50' : ''}
               `}>
                 <Icon className={`h-6 w-6 ${isCompleted ? 'text-wellness-400' : iconColor}`} />
               </div>
@@ -100,7 +100,7 @@ export const GlassChallengeCard = ({
               transition={{ duration: 0.5 }}
             >
               {isCompleted ? (
-                <CheckCircle className="h-6 w-6 text-green-400" />
+                <CheckCircle className="h-6 w-6 text-wellness-400" />
               ) : (
                 <Circle className="h-6 w-6 text-white/60" />
               )}
