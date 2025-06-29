@@ -225,16 +225,16 @@ const Index = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Chargement des défis...</div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Chargement des défis...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Effets de fond adaptatifs - utilise la variable CSS */}
-      <div className="absolute inset-0 bg-[var(--page-background-overlay)]" />
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Effets de fond similaires au sign-in-card */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
       
       {/* Texture de bruit subtile */}
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
@@ -260,8 +260,8 @@ const Index = () => {
       />
 
       {/* Spots lumineux animés */}
-      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse opacity-40" />
-      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
+      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40" />
+      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
 
       {/* Header mobile avec style adapté */}
       <div className="relative z-20">
@@ -282,21 +282,21 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/10 backdrop-blur-sm border border-border text-foreground rounded-full text-sm font-medium mb-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-full text-sm font-medium mb-4">
               <span className="text-lg">✨</span>
               Votre transformation commence ici
             </div>
             
-            <h1 className="text-3xl font-bold text-foreground mb-3">
+            <h1 className="text-3xl font-bold text-white mb-3">
               Ta discipline est ta plus grande force.
             </h1>
             
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="text-white/70 leading-relaxed">
               Chaque petit pas vous rapproche de vos objectifs
             </p>
             
             {/* Affichage de la date */}
-            <div className="mt-2 text-muted-foreground text-sm">
+            <div className="mt-2 text-white/60 text-sm">
               {new Date().toLocaleDateString('fr-FR', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -323,7 +323,7 @@ const Index = () => {
             className="mb-4 flex justify-center"
           >
             <Link to="/analytics">
-              <FeyButton className="text-foreground">
+              <FeyButton className="text-white">
                 + d'infos
               </FeyButton>
             </Link>
@@ -344,9 +344,9 @@ const Index = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            <Card className="border-0 shadow-2xl glassmorphism text-foreground">
+            <Card className="border-0 shadow-2xl bg-white/10 backdrop-blur-xl border border-white/20 text-white">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg flex items-center gap-2 text-foreground">
+                <CardTitle className="text-lg flex items-center gap-2 text-white">
                   <Heart className="h-6 w-6" />
                   Résumé de la journée
                 </CardTitle>
@@ -354,25 +354,25 @@ const Index = () => {
               <CardContent>
                 <div className="grid grid-cols-3 gap-4 text-center">
                   <div>
-                    <div className="text-2xl font-bold text-foreground">{finalTotalPoints}</div>
-                    <div className="text-sm text-muted-foreground">Points</div>
+                    <div className="text-2xl font-bold text-white">{finalTotalPoints}</div>
+                    <div className="text-sm text-white/70">Points</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-foreground">{completedChallenges.size}</div>
-                    <div className="text-sm text-muted-foreground">Défis</div>
+                    <div className="text-2xl font-bold text-white">{completedChallenges.size}</div>
+                    <div className="text-sm text-white/70">Défis</div>
                   </div>
                   <div>
-                    <div className="text-2xl font-bold text-foreground">
+                    <div className="text-2xl font-bold text-white">
                       {Math.round((completedChallenges.size / challenges.length) * 100)}%
                     </div>
-                    <div className="text-sm text-muted-foreground">Progression</div>
+                    <div className="text-sm text-white/70">Progression</div>
                   </div>
                 </div>
                 
                 {/* Message de motivation basé sur la progression */}
                 {completedChallenges.size === challenges.length && (
                   <div className="mt-4 p-3 bg-wellness-500/20 border border-wellness-400/30 rounded-lg text-center">
-                    <p className="text-wellness-600 dark:text-wellness-200 text-sm font-medium">
+                    <p className="text-wellness-200 text-sm font-medium">
                       🎉 Félicitations ! Journée parfaite ! Vous avez gagné un bonus de {challengeRules.find(rule => rule.rule_type === 'daily_perfect_bonus')?.points || 10} points !
                     </p>
                   </div>

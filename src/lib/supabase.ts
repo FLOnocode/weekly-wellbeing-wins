@@ -40,18 +40,6 @@ export interface DailyChallenge {
   updated_at: string
 }
 
-export interface UserPreferences {
-  id: string
-  user_id: string
-  theme: string
-  push_notifications: boolean
-  email_notifications: boolean
-  challenge_reminders: boolean
-  weekly_reports: boolean
-  created_at: string
-  updated_at: string
-}
-
 // Fonctions utilitaires pour les défis quotidiens
 export const challengeService = {
   // Récupérer les défis complétés pour une date donnée
@@ -212,59 +200,5 @@ export const challengeService = {
     }
 
     return data || [];
-  }
-};
-
-// Service pour gérer les préférences utilisateur
-export const preferencesService = {
-  // Récupérer les préférences d'un utilisateur
-  async getUserPreferences(userId: string): Promise<UserPreferences | null> {
-    try {
-      const { data, error } = await supabase
-        .from('user_preferences')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Erreur lors de la récupération des préférences:', error);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Exception lors de la récupération des préférences:', error);
-      return null;
-    }
-  },
-
-  // Créer ou mettre à jour les préférences d'un utilisateur
-  async updateUserPreferences(userId: string, preferences: Partial<UserPreferences>): Promise<UserPreferences | null> {
-    try {
-      // S'assurer que user_id est inclus
-      const preferencesData = {
-        ...preferences,
-        user_id: userId,
-        updated_at: new Date().toISOString()
-      };
-
-      const { data, error } = await supabase
-        .from('user_preferences')
-        .upsert(preferencesData, {
-          onConflict: 'user_id'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Erreur lors de la mise à jour des préférences:', error);
-        return null;
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Exception lors de la mise à jour des préférences:', error);
-      return null;
-    }
   }
 };

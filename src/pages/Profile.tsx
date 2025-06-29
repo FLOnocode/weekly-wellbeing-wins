@@ -144,16 +144,16 @@ const Profile = () => {
 
   if (loadingStats) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Chargement du profil...</div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Chargement du profil...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Effets de fond adaptatifs */}
-      <div className="absolute inset-0 bg-[var(--page-background-overlay)]" />
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Effets de fond similaires à la page principale */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
       
       {/* Texture de bruit subtile */}
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
@@ -179,8 +179,8 @@ const Profile = () => {
       />
 
       {/* Spots lumineux animés */}
-      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse opacity-40" />
-      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
+      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40" />
+      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
 
       <div className="relative z-20">
         <MobileHeader 
@@ -195,13 +195,13 @@ const Profile = () => {
           {/* Header avec retour */}
           <div className="flex items-center gap-3 mb-6">
             <Link to="/">
-              <Button variant="ghost" size="icon" className="text-foreground">
+              <Button variant="ghost" size="icon" className="text-white">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div>
               <h1 className="text-heading-2 font-bold text-gradient">Profil</h1>
-              <p className="text-body text-muted-foreground">Votre progression personnelle</p>
+              <p className="text-body text-white/70">Votre progression personnelle</p>
             </div>
           </div>
 
@@ -213,7 +213,7 @@ const Profile = () => {
                   <div className="relative">
                     <Avatar className="h-16 w-16 border-2 border-wellness-300">
                       <AvatarImage src={profile?.avatar_url || "/placeholder.svg"} />
-                      <AvatarFallback className="bg-wellness-500/20 text-wellness-600 dark:text-wellness-300 text-heading-4">
+                      <AvatarFallback className="bg-wellness-500/20 text-wellness-300 text-heading-4">
                         {getInitials()}
                       </AvatarFallback>
                     </Avatar>
@@ -226,26 +226,26 @@ const Profile = () => {
                       disabled={isUploadingAvatar}
                     />
                     <label htmlFor="avatar-input" className="absolute bottom-0 right-0 cursor-pointer">
-                      <div className="h-6 w-6 bg-background rounded-full border border-wellness-400 flex items-center justify-center">
+                      <div className="h-6 w-6 bg-black rounded-full border border-wellness-400 flex items-center justify-center">
                         <PlusCircle className="h-4 w-4 text-wellness-400" />
                       </div>
                     </label>
                     {isUploadingAvatar && (
-                      <div className="absolute inset-0 bg-background/50 rounded-full flex items-center justify-center">
-                        <div className="text-xs text-foreground">...</div>
+                      <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                        <div className="text-xs text-white">...</div>
                       </div>
                     )}
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-heading-4 text-foreground">{profile?.nickname || "Votre Profil"}</CardTitle>
-                    <CardDescription className="text-muted-foreground">
+                    <CardTitle className="text-heading-4 text-white">{profile?.nickname || "Votre Profil"}</CardTitle>
+                    <CardDescription className="text-white/70">
                       Membre depuis le {new Date(joinDate).toLocaleDateString("fr-FR")}
                     </CardDescription>
                     <div className="flex items-center gap-2 mt-2">
                       {currentRank > 0 && (
-                        <Badge className="bg-wellness-500/20 text-wellness-600 dark:text-wellness-200 border-wellness-400/30">#{currentRank} au classement</Badge>
+                        <Badge className="bg-wellness-500/20 text-wellness-200 border-wellness-400/30">#{currentRank} au classement</Badge>
                       )}
-                      <Badge className="bg-motivation-500/20 text-motivation-600 dark:text-motivation-200 border-motivation-400/30">{totalPoints} pts</Badge>
+                      <Badge className="bg-motivation-500/20 text-motivation-200 border-motivation-400/30">{totalPoints} pts</Badge>
                     </div>
                   </div>
                 </div>
@@ -255,24 +255,24 @@ const Profile = () => {
             {/* Statistiques de poids */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                   <Scale className="h-5 w-5 text-wellness-500" />
                   <span>Progression du poids</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-muted border border-wellness-400/30 rounded-lg">
-                    <div className="text-heading-3 font-bold text-wellness-600 dark:text-wellness-300">
+                  <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-wellness-400/30 rounded-lg">
+                    <div className="text-heading-3 font-bold text-wellness-300">
                       {profile?.current_weight > 0 ? `${profile.current_weight}kg` : 'Non défini'}
                     </div>
-                    <div className="text-body-sm text-muted-foreground">Poids actuel</div>
+                    <div className="text-body-sm text-white/70">Poids actuel</div>
                   </div>
-                  <div className="text-center p-3 bg-muted border border-motivation-400/30 rounded-lg">
-                    <div className="text-heading-3 font-bold text-motivation-600 dark:text-motivation-300">
+                  <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-motivation-400/30 rounded-lg">
+                    <div className="text-heading-3 font-bold text-motivation-300">
                       {profile?.goal_weight > 0 ? `${profile.goal_weight}kg` : 'Non défini'}
                     </div>
-                    <div className="text-body-sm text-muted-foreground">Poids objectif</div>
+                    <div className="text-body-sm text-white/70">Poids objectif</div>
                   </div>
                 </div>
 
@@ -280,43 +280,43 @@ const Profile = () => {
                   <>
                     <div className="space-y-2">
                       <div className="flex justify-between text-body-sm">
-                        <span className="text-muted-foreground">Progression vers l'objectif</span>
-                        <span className="font-medium text-foreground">{Math.round(actualWeightLossProgress)}%</span>
+                        <span className="text-white/70">Progression vers l'objectif</span>
+                        <span className="font-medium text-white">{Math.round(actualWeightLossProgress)}%</span>
                       </div>
-                      <Progress value={actualWeightLossProgress} className="h-2 bg-muted" />
-                      <div className="flex justify-between text-body-sm text-muted-foreground">
+                      <Progress value={actualWeightLossProgress} className="h-2 bg-white/20" />
+                      <div className="flex justify-between text-body-sm text-white/70">
                         <span>Départ: {initialWeight.toFixed(1)}kg</span>
                         <span>Objectif: {profile.goal_weight}kg</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                       <div className="flex items-center gap-2">
                         {totalWeightLost >= 0 ? (
                           <TrendingDown className="h-5 w-5 text-wellness-500" />
                         ) : (
                           <TrendingUp className="h-5 w-5 text-red-500" />
                         )}
-                        <span className="text-body font-medium text-foreground">
+                        <span className="text-body font-medium text-white">
                           {totalWeightLost >= 0 ? 'Poids perdu au total' : 'Poids pris au total'}
                         </span>
                       </div>
-                      <div className={`text-body font-bold ${totalWeightLost >= 0 ? 'text-wellness-600 dark:text-wellness-300' : 'text-red-600 dark:text-red-300'}`}>
+                      <div className={`text-body font-bold ${totalWeightLost >= 0 ? 'text-wellness-300' : 'text-red-300'}`}>
                         {Math.abs(totalWeightLost).toFixed(1)}kg
                       </div>
                     </div>
 
                     {/* Nouveau: Changement de poids hebdomadaire */}
-                    <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
+                    <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                       <div className="flex items-center gap-2">
                         {weeklyWeightChange >= 0 ? (
                           <TrendingDown className="h-5 w-5 text-wellness-500" />
                         ) : (
                           <TrendingUp className="h-5 w-5 text-red-500" />
                         )}
-                        <span className="text-body font-medium text-foreground">Cette semaine</span>
+                        <span className="text-body font-medium text-white">Cette semaine</span>
                       </div>
-                      <div className={`text-body font-bold ${weeklyWeightChange >= 0 ? 'text-wellness-600 dark:text-wellness-300' : 'text-red-600 dark:text-red-300'}`}>
+                      <div className={`text-body font-bold ${weeklyWeightChange >= 0 ? 'text-wellness-300' : 'text-red-300'}`}>
                         {weeklyWeightChange >= 0 ? '-' : '+'}{Math.abs(weeklyWeightChange).toFixed(1)}kg
                       </div>
                     </div>
@@ -325,7 +325,7 @@ const Profile = () => {
 
                 {(profile?.current_weight === 0 || profile?.goal_weight === 0 || initialWeight === 0) && (
                   <div className="p-4 bg-yellow-500/10 border border-yellow-400/30 rounded-lg text-center">
-                    <p className="text-yellow-600 dark:text-yellow-200 text-sm">
+                    <p className="text-yellow-200 text-sm">
                       {initialWeight === 0 
                         ? "Enregistrez votre première pesée pour voir votre progression"
                         : "Complétez votre profil pour voir votre progression"
@@ -339,72 +339,72 @@ const Profile = () => {
             {/* Statistiques du défi avec données réelles */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                   <Trophy className="h-5 w-5 text-yellow-500" />
                   <span>Statistiques du défi</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="text-center p-3 bg-muted border border-yellow-400/30 rounded-lg">
-                    <div className="text-heading-3 font-bold text-yellow-600 dark:text-yellow-300">{totalPoints}</div>
-                    <div className="text-body-sm text-muted-foreground">Points total</div>
+                  <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-yellow-400/30 rounded-lg">
+                    <div className="text-heading-3 font-bold text-yellow-300">{totalPoints}</div>
+                    <div className="text-body-sm text-white/70">Points total</div>
                   </div>
-                  <div className="text-center p-3 bg-muted border border-energy-400/30 rounded-lg">
-                    <div className="text-heading-3 font-bold text-energy-600 dark:text-energy-300">{weeklyScore}</div>
-                    <div className="text-body-sm text-muted-foreground">Cette semaine</div>
+                  <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-energy-400/30 rounded-lg">
+                    <div className="text-heading-3 font-bold text-energy-300">{weeklyScore}</div>
+                    <div className="text-body-sm text-white/70">Cette semaine</div>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Medal className="h-5 w-5 text-motivation-500" />
-                      <span className="text-body text-foreground">Classement actuel</span>
+                      <span className="text-body text-white">Classement actuel</span>
                     </div>
-                    <span className="text-body font-bold text-motivation-600 dark:text-motivation-300">
+                    <span className="text-body font-bold text-motivation-300">
                       {currentRank > 0 ? `#${currentRank}` : 'Non classé'}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                     <div className="flex items-center gap-2">
                       {totalWeightLost >= 0 ? (
                         <TrendingDown className="h-5 w-5 text-wellness-500" />
                       ) : (
                         <TrendingUp className="h-5 w-5 text-red-500" />
                       )}
-                      <span className="text-body text-foreground">
+                      <span className="text-body text-white">
                         {totalWeightLost >= 0 ? 'Poids perdu au total' : 'Poids pris au total'}
                       </span>
                     </div>
-                    <span className={`text-body font-bold ${totalWeightLost >= 0 ? 'text-wellness-600 dark:text-wellness-300' : 'text-red-600 dark:text-red-300'}`}>
+                    <span className={`text-body font-bold ${totalWeightLost >= 0 ? 'text-wellness-300' : 'text-red-300'}`}>
                       {Math.abs(totalWeightLost).toFixed(1)}kg
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Target className="h-5 w-5 text-energy-500" />
-                      <span className="text-body text-foreground">Journées parfaites</span>
+                      <span className="text-body text-white">Journées parfaites</span>
                     </div>
-                    <span className="text-body font-bold text-energy-600 dark:text-energy-300">{perfectDays}</span>
+                    <span className="text-body font-bold text-energy-300">{perfectDays}</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Trophy className="h-5 w-5 text-motivation-500" />
-                      <span className="text-body text-foreground">Défis complétés</span>
+                      <span className="text-body text-white">Défis complétés</span>
                     </div>
-                    <span className="text-body font-bold text-motivation-600 dark:text-motivation-300">{challengesCompleted}</span>
+                    <span className="text-body font-bold text-motivation-300">{challengesCompleted}</span>
                   </div>
 
-                  <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
+                  <div className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-5 w-5 text-motivation-500" />
-                      <span className="text-body text-foreground">Durée de participation</span>
+                      <span className="text-body text-white">Durée de participation</span>
                     </div>
-                    <span className="text-body font-bold text-motivation-600 dark:text-motivation-300">{participationWeeks} semaines</span>
+                    <span className="text-body font-bold text-motivation-300">{participationWeeks} semaines</span>
                   </div>
                 </div>
               </CardContent>
@@ -413,7 +413,7 @@ const Profile = () => {
             {/* Objectifs personnels */}
             <Card className="glassmorphism border-wellness-400/30">
               <CardHeader className="pb-4">
-                <CardTitle className="text-heading-4 flex items-center gap-2 text-foreground">
+                <CardTitle className="text-heading-4 flex items-center gap-2 text-white">
                   <Target className="h-6 w-6 text-wellness-400" />
                   Vos objectifs
                 </CardTitle>
@@ -421,29 +421,29 @@ const Profile = () => {
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
-                    <span className="text-body text-muted-foreground">Poids objectif</span>
-                    <span className="text-body font-bold text-foreground">
+                    <span className="text-body text-white/70">Poids objectif</span>
+                    <span className="text-body font-bold text-white">
                       {profile?.goal_weight > 0 ? `${profile.goal_weight}kg` : 'Non défini'}
                     </span>
                   </div>
                   {profile?.current_weight > 0 && profile?.goal_weight > 0 && (
                     <>
                       <div className="flex justify-between items-center">
-                        <span className="text-body text-muted-foreground">Reste à perdre</span>
-                        <span className="text-body font-bold text-foreground">
+                        <span className="text-body text-white/70">Reste à perdre</span>
+                        <span className="text-body font-bold text-white">
                           {Math.max(0, (profile?.current_weight || 0) - (profile?.goal_weight || 0)).toFixed(1)}kg
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-body text-muted-foreground">Progression</span>
-                        <span className="text-body font-bold text-foreground">{Math.round(actualWeightLossProgress)}%</span>
+                        <span className="text-body text-white/70">Progression</span>
+                        <span className="text-body font-bold text-white">{Math.round(actualWeightLossProgress)}%</span>
                       </div>
                     </>
                   )}
                   {initialWeight > 0 && (
                     <div className="flex justify-between items-center">
-                      <span className="text-body text-muted-foreground">Poids de départ</span>
-                      <span className="text-body font-bold text-foreground">{initialWeight.toFixed(1)}kg</span>
+                      <span className="text-body text-white/70">Poids de départ</span>
+                      <span className="text-body font-bold text-white">{initialWeight.toFixed(1)}kg</span>
                     </div>
                   )}
                 </div>
@@ -453,11 +453,11 @@ const Profile = () => {
             {/* Gestion du compte */}
             <Card className="glassmorphism border-red-400/30">
               <CardHeader className="pb-4">
-                <CardTitle className="text-heading-4 flex items-center gap-2 text-foreground">
+                <CardTitle className="text-heading-4 flex items-center gap-2 text-white">
                   <Settings className="h-6 w-6 text-red-400" />
                   Gestion du compte
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardDescription className="text-white/70">
                   Options de compte et déconnexion
                 </CardDescription>
               </CardHeader>
@@ -467,13 +467,13 @@ const Profile = () => {
                     onClick={handleLogout}
                     disabled={isLoggingOut}
                     variant="outline"
-                    className="w-full bg-red-500/10 border-red-400/30 text-red-600 dark:text-red-300 hover:bg-red-500/20 hover:text-red-600 dark:hover:text-red-200 transition-colors"
+                    className="w-full bg-red-500/10 border-red-400/30 text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-colors"
                   >
                     <LogOut className="h-4 w-4 mr-2" />
                     {isLoggingOut ? "Déconnexion..." : "Se déconnecter"}
                   </Button>
                   
-                  <p className="text-body-sm text-muted-foreground text-center">
+                  <p className="text-body-sm text-white/60 text-center">
                     Vous serez redirigé vers la page de connexion
                   </p>
                 </div>

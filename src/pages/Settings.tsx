@@ -22,18 +22,16 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useThemeContext } from "@/contexts/ThemeContext";
+import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/sonner";
-import { preferencesService, UserPreferences } from "@/lib/supabase";
 
 const Settings = () => {
   const { profile, user } = useAuth();
-  const { theme, setTheme, saveThemePreference } = useThemeContext();
+  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
   
-  // États pour les notifications
+  // États pour les notifications futures (placeholders)
   const [pushNotifications, setPushNotifications] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [challengeReminders, setChallengeReminders] = useState(true);
@@ -44,81 +42,30 @@ const Settings = () => {
     setMounted(true);
   }, []);
 
-  // Charger les préférences utilisateur
-  useEffect(() => {
-    const loadUserPreferences = async () => {
-      if (!user) return;
-      
-      try {
-        setLoading(true);
-        const preferences = await preferencesService.getUserPreferences(user.id);
-        
-        if (preferences) {
-          setPushNotifications(preferences.push_notifications);
-          setEmailNotifications(preferences.email_notifications);
-          setChallengeReminders(preferences.challenge_reminders);
-          setWeeklyReports(preferences.weekly_reports);
-        } else {
-          // Créer des préférences par défaut si elles n'existent pas
-          await preferencesService.updateUserPreferences(user.id, {
-            theme: theme || 'dark',
-            push_notifications: false,
-            email_notifications: true,
-            challenge_reminders: true,
-            weekly_reports: true
-          });
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement des préférences:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadUserPreferences();
-  }, [user, theme]);
-
-  const handleThemeToggle = async (checked: boolean) => {
+  const handleThemeToggle = (checked: boolean) => {
     const newTheme = checked ? "light" : "dark";
     setTheme(newTheme);
-    
-    if (user) {
-      await saveThemePreference(newTheme);
-    }
-    
     toast.success(`Mode ${newTheme === "light" ? "clair" : "sombre"} activé`);
   };
 
-  const handleNotificationToggle = async (type: string, checked: boolean) => {
-    if (!user) return;
-    
-    try {
-      let updatedPreferences: Partial<UserPreferences> = {};
-      
-      switch (type) {
-        case 'push':
-          setPushNotifications(checked);
-          updatedPreferences.push_notifications = checked;
-          break;
-        case 'email':
-          setEmailNotifications(checked);
-          updatedPreferences.email_notifications = checked;
-          break;
-        case 'challenges':
-          setChallengeReminders(checked);
-          updatedPreferences.challenge_reminders = checked;
-          break;
-        case 'reports':
-          setWeeklyReports(checked);
-          updatedPreferences.weekly_reports = checked;
-          break;
-      }
-      
-      await preferencesService.updateUserPreferences(user.id, updatedPreferences);
-      toast.success(`Notifications ${checked ? 'activées' : 'désactivées'}`);
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour des préférences:', error);
-      toast.error("Erreur lors de la mise à jour des préférences");
+  const handleNotificationToggle = (type: string, checked: boolean) => {
+    switch (type) {
+      case 'push':
+        setPushNotifications(checked);
+        toast.success(`Notifications push ${checked ? 'activées' : 'désactivées'}`);
+        break;
+      case 'email':
+        setEmailNotifications(checked);
+        toast.success(`Notifications email ${checked ? 'activées' : 'désactivées'}`);
+        break;
+      case 'challenges':
+        setChallengeReminders(checked);
+        toast.success(`Rappels de défis ${checked ? 'activés' : 'désactivés'}`);
+        break;
+      case 'reports':
+        setWeeklyReports(checked);
+        toast.success(`Rapports hebdomadaires ${checked ? 'activés' : 'désactivés'}`);
+        break;
     }
   };
 
@@ -129,18 +76,18 @@ const Settings = () => {
     totalChallenges: 7
   };
 
-  if (!mounted || loading) {
+  if (!mounted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Chargement des paramètres...</div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Chargement des paramètres...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Effets de fond adaptatifs */}
-      <div className="absolute inset-0 bg-[var(--page-background-overlay)]" />
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Effets de fond similaires aux autres pages */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
       
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
         style={{
@@ -163,8 +110,8 @@ const Settings = () => {
         }}
       />
 
-      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse opacity-40" />
-      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
+      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40" />
+      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
 
       <div className="relative z-20">
         <MobileHeader 
@@ -179,13 +126,13 @@ const Settings = () => {
           {/* Header avec retour */}
           <div className="flex items-center gap-3 mb-6">
             <Link to="/">
-              <Button variant="ghost" size="icon" className="text-foreground">
+              <Button variant="ghost" size="icon" className="text-white">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div>
               <h1 className="text-heading-2 font-bold text-gradient">Paramètres</h1>
-              <p className="text-body text-muted-foreground">Personnalisez votre expérience</p>
+              <p className="text-body text-white/70">Personnalisez votre expérience</p>
             </div>
           </div>
 
@@ -193,27 +140,27 @@ const Settings = () => {
             {/* Informations sur l'application */}
             <Card className="glassmorphism border-wellness-400/30">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                   <Info className="h-5 w-5 text-wellness-500" />
                   <span>À propos de l'application</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-body text-muted-foreground">Nom de l'application</span>
-                  <span className="text-body font-medium text-foreground">Challenge Wellness Weekly</span>
+                  <span className="text-body text-white/70">Nom de l'application</span>
+                  <span className="text-body font-medium text-white">Challenge Wellness Weekly</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-body text-muted-foreground">Version</span>
-                  <Badge className="bg-wellness-500/20 text-wellness-600 dark:text-wellness-200 border-wellness-400/30">v1.0.0</Badge>
+                  <span className="text-body text-white/70">Version</span>
+                  <Badge className="bg-wellness-500/20 text-wellness-200 border-wellness-400/30">v1.0.0</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-body text-muted-foreground">Utilisateur connecté</span>
-                  <span className="text-body font-medium text-foreground">{profile?.nickname || 'Utilisateur'}</span>
+                  <span className="text-body text-white/70">Utilisateur connecté</span>
+                  <span className="text-body font-medium text-white">{profile?.nickname || 'Utilisateur'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-body text-muted-foreground">Type de défi</span>
-                  <span className="text-body font-medium text-foreground">SSM 2K25 Challenge</span>
+                  <span className="text-body text-white/70">Type de défi</span>
+                  <span className="text-body font-medium text-white">SSM 2K25 Challenge</span>
                 </div>
               </CardContent>
             </Card>
@@ -221,11 +168,11 @@ const Settings = () => {
             {/* Apparence */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                   <Palette className="h-5 w-5 text-motivation-500" />
                   <span>Apparence</span>
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardDescription className="text-white/70">
                   Personnalisez l'apparence de l'application
                 </CardDescription>
               </CardHeader>
@@ -238,10 +185,10 @@ const Settings = () => {
                       <Moon className="h-5 w-5 text-blue-400" />
                     )}
                     <div>
-                      <Label htmlFor="theme-toggle" className="text-body font-medium text-foreground">
+                      <Label htmlFor="theme-toggle" className="text-body font-medium text-white">
                         Mode clair
                       </Label>
-                      <p className="text-body-sm text-muted-foreground">
+                      <p className="text-body-sm text-white/60">
                         Basculer entre le mode sombre et clair
                       </p>
                     </div>
@@ -258,11 +205,11 @@ const Settings = () => {
             {/* Notifications */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                   <Bell className="h-5 w-5 text-energy-500" />
                   <span>Notifications</span>
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardDescription className="text-white/70">
                   Gérez vos préférences de notifications
                 </CardDescription>
               </CardHeader>
@@ -271,10 +218,10 @@ const Settings = () => {
                   <div className="flex items-center gap-3">
                     <Smartphone className="h-5 w-5 text-blue-400" />
                     <div>
-                      <Label htmlFor="push-notifications" className="text-body font-medium text-foreground">
+                      <Label htmlFor="push-notifications" className="text-body font-medium text-white">
                         Notifications push
                       </Label>
-                      <p className="text-body-sm text-muted-foreground">
+                      <p className="text-body-sm text-white/60">
                         Recevoir des notifications sur votre appareil
                       </p>
                     </div>
@@ -286,16 +233,16 @@ const Settings = () => {
                   />
                 </div>
 
-                <Separator className="bg-border" />
+                <Separator className="bg-white/20" />
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-green-400" />
                     <div>
-                      <Label htmlFor="email-notifications" className="text-body font-medium text-foreground">
+                      <Label htmlFor="email-notifications" className="text-body font-medium text-white">
                         Notifications email
                       </Label>
-                      <p className="text-body-sm text-muted-foreground">
+                      <p className="text-body-sm text-white/60">
                         Recevoir des emails de rappel
                       </p>
                     </div>
@@ -307,16 +254,16 @@ const Settings = () => {
                   />
                 </div>
 
-                <Separator className="bg-border" />
+                <Separator className="bg-white/20" />
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Heart className="h-5 w-5 text-wellness-400" />
                     <div>
-                      <Label htmlFor="challenge-reminders" className="text-body font-medium text-foreground">
+                      <Label htmlFor="challenge-reminders" className="text-body font-medium text-white">
                         Rappels de défis
                       </Label>
-                      <p className="text-body-sm text-muted-foreground">
+                      <p className="text-body-sm text-white/60">
                         Rappels quotidiens pour vos défis
                       </p>
                     </div>
@@ -328,16 +275,16 @@ const Settings = () => {
                   />
                 </div>
 
-                <Separator className="bg-border" />
+                <Separator className="bg-white/20" />
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Database className="h-5 w-5 text-purple-400" />
                     <div>
-                      <Label htmlFor="weekly-reports" className="text-body font-medium text-foreground">
+                      <Label htmlFor="weekly-reports" className="text-body font-medium text-white">
                         Rapports hebdomadaires
                       </Label>
-                      <p className="text-body-sm text-muted-foreground">
+                      <p className="text-body-sm text-white/60">
                         Résumé de vos progrès chaque semaine
                       </p>
                     </div>
@@ -354,23 +301,23 @@ const Settings = () => {
             {/* Confidentialité et sécurité */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                   <Shield className="h-5 w-5 text-red-400" />
                   <span>Confidentialité et sécurité</span>
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardDescription className="text-white/70">
                   Vos données sont protégées et sécurisées
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 bg-muted border border-border rounded-lg">
-                  <p className="text-body-sm text-foreground leading-relaxed">
+                <div className="p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
+                  <p className="text-body-sm text-white/80 leading-relaxed">
                     🔒 Toutes vos données personnelles sont chiffrées et stockées de manière sécurisée. 
                     Nous ne partageons jamais vos informations avec des tiers.
                   </p>
                 </div>
                 <div className="p-3 bg-wellness-500/10 border border-wellness-400/30 rounded-lg">
-                  <p className="text-body-sm text-wellness-600 dark:text-wellness-200 leading-relaxed">
+                  <p className="text-body-sm text-wellness-200 leading-relaxed">
                     💡 Vos données de santé et de progression restent privées et ne sont utilisées 
                     que pour améliorer votre expérience dans le challenge.
                   </p>
@@ -381,10 +328,10 @@ const Settings = () => {
             {/* Support et aide */}
             <Card className="glassmorphism border-motivation-400/30">
               <CardHeader className="pb-4">
-                <CardTitle className="text-heading-4 text-foreground">
+                <CardTitle className="text-heading-4 text-white">
                   Support et aide
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardDescription className="text-white/70">
                   Besoin d'aide ? Nous sommes là pour vous
                 </CardDescription>
               </CardHeader>
@@ -392,7 +339,7 @@ const Settings = () => {
                 <div className="space-y-3">
                   <Button
                     variant="outline"
-                    className="w-full bg-muted border-border text-foreground hover:bg-accent justify-start"
+                    className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 justify-start"
                   >
                     <Heart className="h-4 w-4 mr-2 text-wellness-400" />
                     Centre d'aide
@@ -400,7 +347,7 @@ const Settings = () => {
                   
                   <Button
                     variant="outline"
-                    className="w-full bg-muted border-border text-foreground hover:bg-accent justify-start"
+                    className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 justify-start"
                   >
                     <Mail className="h-4 w-4 mr-2 text-motivation-400" />
                     Nous contacter
@@ -413,10 +360,10 @@ const Settings = () => {
             <Card className="glassmorphism border-wellness-400/30">
               <CardContent className="p-4 text-center">
                 <div className="text-2xl mb-2">⚙️</div>
-                <p className="text-foreground text-sm">
+                <p className="text-white/80 text-sm">
                   Personnalisez votre expérience pour tirer le meilleur parti de votre transformation !
                 </p>
-                <p className="text-wellness-600 dark:text-wellness-300 text-xs mt-2">
+                <p className="text-wellness-300 text-xs mt-2">
                   Vos paramètres sont sauvegardés automatiquement
                 </p>
               </CardContent>

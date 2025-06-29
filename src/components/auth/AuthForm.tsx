@@ -45,9 +45,9 @@ export const AuthForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center">
-      {/* Effets de fond adaptatifs */}
-      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-background" />
+    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
+      {/* Effets de fond */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
       
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
         style={{
@@ -70,8 +70,8 @@ export const AuthForm = () => {
         }}
       />
 
-      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse opacity-40" />
-      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
+      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40" />
+      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
 
       <div className="relative z-10 w-full max-w-md mx-auto px-4">
         <motion.div
@@ -80,16 +80,16 @@ export const AuthForm = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-8"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/10 backdrop-blur-sm border border-border text-foreground rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-full text-sm font-medium mb-4">
             <Heart className="h-4 w-4 text-wellness-400" />
             Challenge Wellness Weekly
           </div>
           
-          <h1 className="text-3xl font-bold text-foreground mb-3">
+          <h1 className="text-3xl font-bold text-white mb-3">
             Bienvenue
           </h1>
           
-          <p className="text-muted-foreground leading-relaxed">
+          <p className="text-white/70 leading-relaxed">
             {activeTab === 'signin' 
               ? 'Connectez-vous pour continuer votre transformation'
               : 'Créez votre compte et commencez votre transformation'
@@ -104,10 +104,10 @@ export const AuthForm = () => {
         >
           <Card className="glassmorphism">
             <CardHeader className="text-center">
-              <CardTitle className="text-foreground">
+              <CardTitle className="text-white">
                 {activeTab === 'signin' ? 'Connexion' : 'Créer un compte'}
               </CardTitle>
-              <CardDescription className="text-muted-foreground">
+              <CardDescription className="text-white/70">
                 {activeTab === 'signin' 
                   ? 'Accédez à votre espace personnel'
                   : 'Rejoignez le défi et transformez-vous'
@@ -116,11 +116,11 @@ export const AuthForm = () => {
             </CardHeader>
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-muted">
-                  <TabsTrigger value="signin" className="text-foreground data-[state=active]:bg-background">
+                <TabsList className="grid w-full grid-cols-2 bg-white/10">
+                  <TabsTrigger value="signin" className="text-white data-[state=active]:bg-white/20">
                     Se connecter
                   </TabsTrigger>
-                  <TabsTrigger value="signup" className="text-foreground data-[state=active]:bg-background">
+                  <TabsTrigger value="signup" className="text-white data-[state=active]:bg-white/20">
                     S'inscrire
                   </TabsTrigger>
                 </TabsList>
@@ -128,9 +128,9 @@ export const AuthForm = () => {
                 <TabsContent value="signin">
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email" className="text-foreground">Email</Label>
+                      <Label htmlFor="signin-email" className="text-white">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
                         <Input
                           id="signin-email"
                           type="email"
@@ -138,15 +138,15 @@ export const AuthForm = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signin-password" className="text-foreground">Mot de passe</Label>
+                      <Label htmlFor="signin-password" className="text-white">Mot de passe</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
                         <Input
                           id="signin-password"
                           type="password"
@@ -154,13 +154,13 @@ export const AuthForm = () => {
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
                     </div>
 
                     {error && (
-                      <div className="text-red-600 text-sm text-center p-2 bg-red-50 dark:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20">
+                      <div className="text-red-300 text-sm text-center p-2 bg-red-500/10 rounded-lg border border-red-500/20">
                         {error}
                       </div>
                     )}
@@ -174,12 +174,12 @@ export const AuthForm = () => {
                     </Button>
 
                     <div className="text-center">
-                      <p className="text-muted-foreground text-sm">
+                      <p className="text-white/60 text-sm">
                         Pas encore de compte ?{' '}
                         <button
                           type="button"
                           onClick={() => setActiveTab('signup')}
-                          className="text-wellness-500 hover:text-wellness-600 underline"
+                          className="text-wellness-300 hover:text-wellness-200 underline"
                         >
                           Créez-en un
                         </button>
@@ -191,9 +191,9 @@ export const AuthForm = () => {
                 <TabsContent value="signup">
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email" className="text-foreground">Email</Label>
+                      <Label htmlFor="signup-email" className="text-white">Email</Label>
                       <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
                         <Input
                           id="signup-email"
                           type="email"
@@ -201,15 +201,15 @@ export const AuthForm = () => {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           required
-                          className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password" className="text-foreground">Mot de passe</Label>
+                      <Label htmlFor="signup-password" className="text-white">Mot de passe</Label>
                       <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/50" />
                         <Input
                           id="signup-password"
                           type="password"
@@ -218,16 +218,16 @@ export const AuthForm = () => {
                           onChange={(e) => setPassword(e.target.value)}
                           required
                           minLength={6}
-                          className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground"
+                          className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50"
                         />
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-white/50">
                         Minimum 6 caractères
                       </p>
                     </div>
 
                     {error && (
-                      <div className="text-red-600 text-sm text-center p-2 bg-red-50 dark:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20">
+                      <div className="text-red-300 text-sm text-center p-2 bg-red-500/10 rounded-lg border border-red-500/20">
                         {error}
                       </div>
                     )}
@@ -241,12 +241,12 @@ export const AuthForm = () => {
                     </Button>
 
                     <div className="text-center">
-                      <p className="text-muted-foreground text-sm">
+                      <p className="text-white/60 text-sm">
                         Déjà un compte ?{' '}
                         <button
                           type="button"
                           onClick={() => setActiveTab('signin')}
-                          className="text-wellness-500 hover:text-wellness-600 underline"
+                          className="text-wellness-300 hover:text-wellness-200 underline"
                         >
                           Connectez-vous
                         </button>
@@ -254,7 +254,7 @@ export const AuthForm = () => {
                     </div>
 
                     <div className="p-3 bg-wellness-500/10 border border-wellness-400/30 rounded-lg">
-                      <p className="text-xs text-wellness-600 dark:text-wellness-200 text-center">
+                      <p className="text-xs text-wellness-200 text-center">
                         En créant un compte, vous rejoignez le Challenge Wellness Weekly et acceptez de participer au défi de transformation.
                       </p>
                     </div>

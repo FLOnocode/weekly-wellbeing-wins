@@ -90,7 +90,7 @@ const Rankings = () => {
       case 3:
         return <Award className="h-5 w-5 text-amber-600" />;
       default:
-        return <span className="text-body-sm font-bold text-muted-foreground">#{rank}</span>;
+        return <span className="text-body-sm font-bold text-white/70">#{rank}</span>;
     }
   };
 
@@ -98,16 +98,16 @@ const Rankings = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-foreground">Chargement du classement...</div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Chargement du classement...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Effets de fond adaptatifs */}
-      <div className="absolute inset-0 bg-[var(--page-background-overlay)]" />
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Effets de fond similaires à la page principale */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
       
       {/* Texture de bruit subtile */}
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
@@ -133,8 +133,8 @@ const Rankings = () => {
       />
 
       {/* Spots lumineux animés */}
-      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse opacity-40" />
-      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
+      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40" />
+      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
 
       <div className="relative z-20">
         <MobileHeader 
@@ -149,13 +149,13 @@ const Rankings = () => {
           {/* Header avec retour */}
           <div className="flex items-center gap-3 mb-6">
             <Link to="/">
-              <Button variant="ghost" size="icon" className="text-foreground">
+              <Button variant="ghost" size="icon" className="text-white">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div className="flex-1">
               <h1 className="text-heading-2 font-bold text-gradient">Le Classement</h1>
-              <p className="text-body text-muted-foreground">Votre position dans le défi</p>
+              <p className="text-body text-white/70">Votre position dans le défi</p>
             </div>
             <RulesModal />
           </div>
@@ -165,17 +165,17 @@ const Rankings = () => {
             {burnerOfWeek && (
               <Card className="glassmorphism border-energy-400/30">
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
+                  <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                     <Flame className="h-6 w-6 text-energy-500" />
-                    <span className="text-energy-600 dark:text-energy-300">Brûleur de la semaine</span>
+                    <span className="text-energy-300">Brûleur de la semaine</span>
                   </CardTitle>
-                  <CardDescription className="text-energy-600/70 dark:text-energy-200/70">Plus de poids perdu cette semaine</CardDescription>
+                  <CardDescription className="text-energy-200/70">Plus de poids perdu cette semaine</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-4 flex-wrap">
                     <Avatar className="h-12 w-12 border-2 border-energy-300">
                       <AvatarImage src={burnerOfWeek.avatar || "/placeholder.svg"} />
-                      <AvatarFallback className="bg-energy-500/20 text-energy-600 dark:text-energy-300">
+                      <AvatarFallback className="bg-energy-500/20 text-energy-300">
                         {burnerOfWeek.isCurrentUser 
                           ? getUserInitials()
                           : burnerOfWeek.name
@@ -186,10 +186,10 @@ const Rankings = () => {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-foreground">{burnerOfWeek.name}</div>
-                      <div className="text-body-sm text-energy-600 dark:text-energy-200">A perdu {burnerOfWeek.weeklyWeightChange.toFixed(1)}kg cette semaine</div>
+                      <div className="font-semibold text-white">{burnerOfWeek.name}</div>
+                      <div className="text-body-sm text-energy-200">A perdu {burnerOfWeek.weeklyWeightChange.toFixed(1)}kg cette semaine</div>
                     </div>
-                    <Badge className="bg-energy-500/20 text-energy-600 dark:text-energy-200 border-energy-400/30">{burnerOfWeek.weeklyScore} pts</Badge>
+                    <Badge className="bg-energy-500/20 text-energy-200 border-energy-400/30">{burnerOfWeek.weeklyScore} pts</Badge>
                   </div>
                 </CardContent>
               </Card>
@@ -198,17 +198,17 @@ const Rankings = () => {
             {/* Classement général */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                   <Trophy className="h-5 w-5 text-yellow-500" />
                   <span>Classement du défi</span>
                 </CardTitle>
-                <CardDescription className="text-muted-foreground">
+                <CardDescription className="text-white/70">
                   Positions actuelles - {leaderboardData.length} participant{leaderboardData.length > 1 ? 's' : ''}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {leaderboardData.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
+                  <div className="text-center text-white/70 py-8">
                     Aucun participant pour le moment
                   </div>
                 ) : (
@@ -218,8 +218,8 @@ const Rankings = () => {
                         key={entry.id}
                         className={`flex flex-col p-3 rounded-lg transition-colors gap-2 ${
                           entry.isCurrentUser 
-                            ? "bg-muted border border-motivation-400/30" 
-                            : "bg-muted/50 border border-border md:hover:bg-muted"
+                            ? "bg-white/20 backdrop-blur-sm border border-motivation-400/30" 
+                            : "bg-white/10 backdrop-blur-sm border border-white/20 md:hover:bg-white/15"
                         }`}
                       >
                         {/* Section supérieure : Rang, Avatar, Surnom, Badge "Vous" */}
@@ -230,7 +230,7 @@ const Rankings = () => {
 
                           <Avatar className="h-10 w-10 flex-shrink-0">
                             <AvatarImage src={entry.avatar || "/placeholder.svg"} />
-                            <AvatarFallback className="bg-wellness-500/20 text-wellness-600 dark:text-wellness-300">
+                            <AvatarFallback className="bg-wellness-500/20 text-wellness-300">
                               {entry.isCurrentUser 
                                 ? getUserInitials()
                                 : entry.name
@@ -242,10 +242,10 @@ const Rankings = () => {
                           </Avatar>
 
                           <div className="flex-1 min-w-0">
-                            <div className={`font-medium ${entry.isCurrentUser ? "text-motivation-600 dark:text-motivation-200" : "text-foreground"}`}>
+                            <div className={`font-medium ${entry.isCurrentUser ? "text-motivation-200" : "text-white"}`}>
                               {entry.name}
                               {entry.isCurrentUser && (
-                                <Badge variant="outline" className="ml-2 text-xs border-motivation-400/30 text-motivation-600 dark:text-motivation-200">
+                                <Badge variant="outline" className="ml-2 text-xs border-motivation-400/30 text-motivation-200">
                                   Vous
                                 </Badge>
                               )}
@@ -254,7 +254,7 @@ const Rankings = () => {
                         </div>
 
                         {/* Section du milieu : Poids perdu, Défis complétés, Journées parfaites (cachées sur mobile) */}
-                        <div className="flex items-center justify-between w-full text-body-sm text-muted-foreground">
+                        <div className="flex items-center justify-between w-full text-body-sm text-white/70">
                           <span>
                             {entry.weightLost.toFixed(1)}kg perdus • {entry.challengesCompleted} défis
                           </span>
@@ -266,13 +266,13 @@ const Rankings = () => {
                         {/* Section inférieure : Points totaux, Points cette semaine */}
                         <div className="flex items-center justify-between w-full">
                           <div className="text-right">
-                            <div className="font-semibold text-foreground">{entry.totalScore}</div>
-                            <div className="text-body-sm text-muted-foreground">pts total</div>
+                            <div className="font-semibold text-white">{entry.totalScore}</div>
+                            <div className="text-body-sm text-white/70">pts total</div>
                           </div>
 
                           <div className="text-right">
-                            <div className="text-body-sm font-medium text-wellness-600 dark:text-wellness-300">+{entry.weeklyScore}</div>
-                            <div className="text-body-sm text-muted-foreground">cette semaine</div>
+                            <div className="text-body-sm font-medium text-wellness-300">+{entry.weeklyScore}</div>
+                            <div className="text-body-sm text-white/70">cette semaine</div>
                           </div>
                         </div>
                       </div>
@@ -285,11 +285,11 @@ const Rankings = () => {
             {/* Système de points */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
                   <span>Comment ça marche</span>
                   <RulesModal 
                     trigger={
-                      <Button variant="ghost" size="icon" className="h-6 w-6 text-muted-foreground hover:text-foreground">
+                      <Button variant="ghost" size="icon" className="h-6 w-6 text-white/70 hover:text-white">
                         <HelpCircle className="h-4 w-4" />
                       </Button>
                     }
@@ -301,8 +301,8 @@ const Rankings = () => {
                   {/* Afficher les règles principales */}
                   {rules.filter(rule => ['challenge_completion', 'daily_perfect_bonus', 'weight_loss_per_kg', 'burner_of_week_bonus'].includes(rule.rule_type)).map((rule) => (
                     <div key={rule.id} className="flex justify-between flex-wrap gap-2">
-                      <span className="text-muted-foreground flex-1 min-w-0">{rule.description}</span>
-                      <span className={`font-medium flex-shrink-0 ${rule.points > 0 ? 'text-wellness-600 dark:text-wellness-300' : 'text-red-600 dark:text-red-300'}`}>
+                      <span className="text-white/70 flex-1 min-w-0">{rule.description}</span>
+                      <span className={`font-medium flex-shrink-0 ${rule.points > 0 ? 'text-wellness-300' : 'text-red-300'}`}>
                         {rule.points > 0 ? '+' : ''}{rule.points} points
                       </span>
                     </div>
@@ -311,20 +311,20 @@ const Rankings = () => {
                   {/* Afficher les pénalités en rouge */}
                   {rules.filter(rule => rule.points < 0).map((rule) => (
                     <div key={rule.id} className="flex justify-between flex-wrap gap-2">
-                      <span className="text-red-600 dark:text-red-300 flex-1 min-w-0">{rule.description}</span>
-                      <span className="font-medium text-red-600 dark:text-red-300 flex-shrink-0">
+                      <span className="text-red-300 flex-1 min-w-0">{rule.description}</span>
+                      <span className="font-medium text-red-300 flex-shrink-0">
                         {rule.points} points
                       </span>
                     </div>
                   ))}
                   
-                  <div className="pt-2 border-t border-border">
+                  <div className="pt-2 border-t border-white/20">
                     <RulesModal 
                       trigger={
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="text-wellness-600 dark:text-wellness-300 hover:text-wellness-700 dark:hover:text-wellness-200 p-0 h-auto"
+                          className="text-wellness-300 hover:text-wellness-200 p-0 h-auto"
                         >
                           Voir toutes les règles et conseils →
                         </Button>
@@ -339,13 +339,13 @@ const Rankings = () => {
             <Card className="glassmorphism border-wellness-400/30">
               <CardContent className="p-4 text-center">
                 <div className="text-2xl mb-2">🏆</div>
-                <p className="text-foreground text-sm">
+                <p className="text-white/80 text-sm">
                   {leaderboardData.length > 0 
                     ? `${leaderboardData.length} participant${leaderboardData.length > 1 ? 's' : ''} dans le challenge ! Continuez vos efforts pour grimper dans le classement.`
                     : "Soyez le premier à rejoindre le challenge et à apparaître dans le classement !"
                   }
                 </p>
-                <p className="text-wellness-600 dark:text-wellness-300 text-xs mt-2">
+                <p className="text-wellness-300 text-xs mt-2">
                   Les données sont mises à jour en temps réel
                 </p>
               </CardContent>
