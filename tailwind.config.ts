@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -54,17 +53,29 @@ export default {
 					foreground: 'hsl(var(--card-foreground))'
 				},
 				// Design System Colors
+				oceanblue: {
+					50: '#e6f0ff',
+					100: '#cce0ff',
+					200: '#99c2ff',
+					300: '#66a3ff',
+					400: '#3385ff',
+					500: '#004aad',
+					600: '#003d8f',
+					700: '#003071',
+					800: '#002354',
+					900: '#001636',
+				},
 				wellness: {
-					50: '#f0fdf4',
-					100: '#dcfce7',
-					200: '#bbf7d0',
-					300: '#86efac',
-					400: '#4ade80',
-					500: '#22c55e',
-					600: '#16a34a',
-					700: '#15803d',
-					800: '#166534',
-					900: '#14532d',
+					50: '#e6f0ff',
+					100: '#cce0ff',
+					200: '#99c2ff',
+					300: '#66a3ff',
+					400: '#3385ff',
+					500: '#004aad',
+					600: '#003d8f',
+					700: '#003071',
+					800: '#002354',
+					900: '#001636',
 				},
 				energy: {
 					50: '#fff7ed',

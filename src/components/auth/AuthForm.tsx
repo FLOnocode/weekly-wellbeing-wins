@@ -46,8 +46,8 @@ export const AuthForm = () => {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      {/* Effets de fond */}
-      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
+      {/* Effets de fond avec bleu marine */}
+      <div className="absolute inset-0 bg-gradient-to-b from-oceanblue-400/20 via-oceanblue-700/30 to-black" />
       
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
         style={{
@@ -56,9 +56,9 @@ export const AuthForm = () => {
         }}
       />
 
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-wellness-400/20 blur-[80px]" />
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-oceanblue-400/20 blur-[80px]" />
       <motion.div 
-        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-wellness-300/20 blur-[60px]"
+        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-oceanblue-300/20 blur-[60px]"
         animate={{ 
           opacity: [0.15, 0.3, 0.15],
           scale: [0.98, 1.02, 0.98]
@@ -81,7 +81,7 @@ export const AuthForm = () => {
           className="text-center mb-8"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-full text-sm font-medium mb-4">
-            <Heart className="h-4 w-4 text-wellness-400" />
+            <Heart className="h-4 w-4 text-oceanblue-400" />
             Challenge Wellness Weekly
           </div>
           
@@ -168,7 +168,7 @@ export const AuthForm = () => {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-gradient-to-r from-wellness-500 to-motivation-500 text-white"
+                      className="w-full bg-gradient-to-r from-oceanblue-500 to-motivation-500 text-white"
                     >
                       {loading ? 'Connexion...' : 'Se connecter'}
                     </Button>
@@ -179,7 +179,7 @@ export const AuthForm = () => {
                         <button
                           type="button"
                           onClick={() => setActiveTab('signup')}
-                          className="text-wellness-300 hover:text-wellness-200 underline"
+                          className="text-oceanblue-300 hover:text-oceanblue-200 underline"
                         >
                           Créez-en un
                         </button>
@@ -235,7 +235,7 @@ export const AuthForm = () => {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-gradient-to-r from-wellness-500 to-motivation-500 text-white"
+                      className="w-full bg-gradient-to-r from-oceanblue-500 to-motivation-500 text-white"
                     >
                       {loading ? 'Création...' : 'Créer mon compte'}
                     </Button>
@@ -246,15 +246,15 @@ export const AuthForm = () => {
                         <button
                           type="button"
                           onClick={() => setActiveTab('signin')}
-                          className="text-wellness-300 hover:text-wellness-200 underline"
+                          className="text-oceanblue-300 hover:text-oceanblue-200 underline"
                         >
                           Connectez-vous
                         </button>
                       </p>
                     </div>
 
-                    <div className="p-3 bg-wellness-500/10 border border-wellness-400/30 rounded-lg">
-                      <p className="text-xs text-wellness-200 text-center">
+                    <div className="p-3 bg-oceanblue-500/10 border border-oceanblue-400/30 rounded-lg">
+                      <p className="text-xs text-oceanblue-200 text-center">
                         En créant un compte, vous rejoignez le Challenge Wellness Weekly et acceptez de participer au défi de transformation.
                       </p>
                     </div>

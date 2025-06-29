@@ -86,8 +86,8 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Effets de fond similaires aux autres pages */}
-      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
+      {/* Effets de fond avec bleu marine */}
+      <div className="absolute inset-0 bg-gradient-to-b from-oceanblue-400/20 via-oceanblue-700/30 to-black" />
       
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
         style={{
@@ -96,9 +96,9 @@ const Settings = () => {
         }}
       />
 
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-wellness-400/20 blur-[80px]" />
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-oceanblue-400/20 blur-[80px]" />
       <motion.div 
-        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-wellness-300/20 blur-[60px]"
+        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-oceanblue-300/20 blur-[60px]"
         animate={{ 
           opacity: [0.15, 0.3, 0.15],
           scale: [0.98, 1.02, 0.98]
@@ -138,10 +138,10 @@ const Settings = () => {
 
           <div className="space-y-4">
             {/* Informations sur l'application */}
-            <Card className="glassmorphism border-wellness-400/30">
+            <Card className="glassmorphism border-oceanblue-400/30">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
-                  <Info className="h-5 w-5 text-wellness-500" />
+                  <Info className="h-5 w-5 text-oceanblue-500" />
                   <span>À propos de l'application</span>
                 </CardTitle>
               </CardHeader>
@@ -152,7 +152,7 @@ const Settings = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-body text-white/70">Version</span>
-                  <Badge className="bg-wellness-500/20 text-wellness-200 border-wellness-400/30">v1.0.0</Badge>
+                  <Badge className="bg-oceanblue-500/20 text-oceanblue-200 border-oceanblue-400/30">v1.0.0</Badge>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-body text-white/70">Utilisateur connecté</span>
@@ -258,7 +258,7 @@ const Settings = () => {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Heart className="h-5 w-5 text-wellness-400" />
+                    <Heart className="h-5 w-5 text-oceanblue-400" />
                     <div>
                       <Label htmlFor="challenge-reminders" className="text-body font-medium text-white">
                         Rappels de défis
@@ -316,8 +316,8 @@ const Settings = () => {
                     Nous ne partageons jamais vos informations avec des tiers.
                   </p>
                 </div>
-                <div className="p-3 bg-wellness-500/10 border border-wellness-400/30 rounded-lg">
-                  <p className="text-body-sm text-wellness-200 leading-relaxed">
+                <div className="p-3 bg-oceanblue-500/10 border border-oceanblue-400/30 rounded-lg">
+                  <p className="text-body-sm text-oceanblue-200 leading-relaxed">
                     💡 Vos données de santé et de progression restent privées et ne sont utilisées 
                     que pour améliorer votre expérience dans le challenge.
                   </p>
@@ -341,7 +341,7 @@ const Settings = () => {
                     variant="outline"
                     className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 justify-start"
                   >
-                    <Heart className="h-4 w-4 mr-2 text-wellness-400" />
+                    <Heart className="h-4 w-4 mr-2 text-oceanblue-400" />
                     Centre d'aide
                   </Button>
                   
@@ -357,13 +357,13 @@ const Settings = () => {
             </Card>
 
             {/* Message de motivation */}
-            <Card className="glassmorphism border-wellness-400/30">
+            <Card className="glassmorphism border-oceanblue-400/30">
               <CardContent className="p-4 text-center">
                 <div className="text-2xl mb-2">⚙️</div>
                 <p className="text-white/80 text-sm">
                   Personnalisez votre expérience pour tirer le meilleur parti de votre transformation !
                 </p>
-                <p className="text-wellness-300 text-xs mt-2">
+                <p className="text-oceanblue-300 text-xs mt-2">
                   Vos paramètres sont sauvegardés automatiquement
                 </p>
               </CardContent>
