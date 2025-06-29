@@ -148,7 +148,7 @@ const Settings = () => {
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-body text-white/70">Nom de l'application</span>
-                  <span className="text-body font-medium text-white">Challenge Wellness Weekly</span>
+                  <span className="text-body font-medium text-white">Fit Together</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-body text-white/70">Version</span>
