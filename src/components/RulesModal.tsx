@@ -98,7 +98,7 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
             </CardHeader>
             <CardContent className="text-white/80 space-y-2">
               <p>
-                Le Challenge Wellness Weekly est conçu pour vous aider à adopter des habitudes saines 
+                Le Challenge Fit Together est conçu pour vous aider à adopter des habitudes saines 
                 de manière progressive et durable. Chaque action positive vous rapporte des points !
               </p>
               <p className="text-wellness-200 font-medium">
