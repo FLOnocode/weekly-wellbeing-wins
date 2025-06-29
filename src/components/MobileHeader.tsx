@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Heart, Menu, Star, Trophy, Scale, Medal, User, BarChart, MessageSquare, Settings } from "lucide-react";
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Sheet,
@@ -28,7 +28,6 @@ export const MobileHeader = ({
 }: MobileHeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-  const location = useLocation();
   
   const progressPercentage = Math.round((completedChallenges / totalChallenges) * 100);
 
@@ -36,9 +35,6 @@ export const MobileHeader = ({
     setIsMenuOpen(false); // Fermer le menu
     setIsFeedbackOpen(true); // Ouvrir le feedback
   };
-
-  // Déterminer la destination du bouton paramètres
-  const settingsDestination = location.pathname === '/settings' ? '/' : '/settings';
 
   return (
     <>
@@ -67,15 +63,9 @@ export const MobileHeader = ({
                 <div className="text-caption text-white/60">fini</div>
               </div>
               
-              {/* Bouton Paramètres avec logique de basculement */}
-              <Link to={settingsDestination}>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className={`text-white hover:bg-white/10 hover:text-white ${
-                    location.pathname === '/settings' ? 'bg-white/20' : ''
-                  }`}
-                >
+              {/* Bouton Paramètres */}
+              <Link to="/settings">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white">
                   <Settings className="h-5 w-5" />
                 </Button>
               </Link>
