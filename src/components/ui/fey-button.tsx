@@ -3,16 +3,17 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
-import { BarChart } from "lucide-react"
 
 interface FeyButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode
+  startIcon?: React.ReactNode
 }
 
 export function FeyButton({
   className,
   children,
+  startIcon,
   ...props
 }: FeyButtonProps) {
   const { resolvedTheme } = useTheme()
@@ -52,7 +53,7 @@ export function FeyButton({
       {...props}
     >
       <span className="relative z-10 flex items-center gap-1">
-        <BarChart className="h-4 w-4" />
+        {startIcon}
         {children}
       </span>
     </button>

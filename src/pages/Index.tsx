@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon, Trophy } from "lucide-react";
+import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon, Trophy, BarChart } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ChallengeCarousel } from "@/components/ChallengeCarousel";
@@ -324,14 +324,19 @@ const Index = () => {
           >
             <div className="flex gap-3">
               <Link to="/analytics">
-                <FeyButton className="text-white">
+                <FeyButton 
+                  className="text-white"
+                  startIcon={<BarChart className="h-4 w-4 text-pink-400" />}
+                >
                   + d'infos
                 </FeyButton>
               </Link>
               
               <Link to="/rankings">
-                <FeyButton className="text-white flex items-center gap-2">
-                  <Trophy className="h-4 w-4" />
+                <FeyButton 
+                  className="text-white"
+                  startIcon={<Trophy className="h-4 w-4 text-yellow-500" />}
+                >
                   Mon classement
                 </FeyButton>
               </Link>
