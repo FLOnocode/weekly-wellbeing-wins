@@ -12,7 +12,6 @@ import WeighIn from "./pages/WeighIn";
 import Rankings from "./pages/Rankings";
 import Profile from "./pages/Profile";
 import Analytics from "./pages/Analytics";
-import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,7 +46,6 @@ const AppContent = () => {
         <Route path="/rankings" element={<Rankings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/analytics" element={<Analytics />} />
-        <Route path="/settings" element={<Settings />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

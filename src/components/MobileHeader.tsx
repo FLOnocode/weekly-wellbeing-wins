@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { FeedbackForm } from "@/components/FeedbackForm";
+import { SettingsSheet } from "@/components/SettingsSheet";
 
 interface MobileHeaderProps {
   totalPoints: number;
@@ -28,12 +29,17 @@ export const MobileHeader = ({
 }: MobileHeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   const progressPercentage = Math.round((completedChallenges / totalChallenges) * 100);
 
   const handleFeedbackClick = () => {
     setIsMenuOpen(false); // Fermer le menu
     setIsFeedbackOpen(true); // Ouvrir le feedback
+  };
+
+  const handleSettingsClick = () => {
+    setIsSettingsOpen(true); // Ouvrir les paramètres
   };
 
   return (
@@ -64,11 +70,14 @@ export const MobileHeader = ({
               </div>
               
               {/* Bouton Paramètres */}
-              <Link to="/settings">
-                <Button variant="ghost" size="icon" className="text-white hover:bg-white/10 hover:text-white">
-                  <Settings className="h-5 w-5" />
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-white hover:bg-white/10 hover:text-white"
+                onClick={handleSettingsClick}
+              >
+                <Settings className="h-5 w-5" />
+              </Button>
               
               {/* Menu burger */}
               <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -128,15 +137,6 @@ export const MobileHeader = ({
                       >
                         <BarChart className="h-5 w-5 text-pink-400" />
                         <span className="text-body font-medium">Analyse</span>
-                      </Link>
-
-                      <Link 
-                        to="/settings" 
-                        onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-purple-500/20 transition-colors text-white"
-                      >
-                        <Settings className="h-5 w-5 text-purple-400" />
-                        <span className="text-body font-medium">Paramètres</span>
                       </Link>
                       
                       <Link 
@@ -220,6 +220,12 @@ export const MobileHeader = ({
       <FeedbackForm 
         isOpen={isFeedbackOpen} 
         onClose={() => setIsFeedbackOpen(false)} 
+      />
+
+      {/* Composant SettingsSheet */}
+      <SettingsSheet 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
       />
     </>
   );
