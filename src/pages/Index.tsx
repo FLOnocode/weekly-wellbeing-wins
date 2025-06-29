@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon } from "lucide-react";
+import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ChallengeCarousel } from "@/components/ChallengeCarousel";
@@ -315,18 +315,27 @@ const Index = () => {
             />
           </div>
 
-          {/* Bouton d'analyse - DÉPLACÉ ICI, au-dessus du carrousel */}
+          {/* Boutons d'analyse et classement - DÉPLACÉ ICI, au-dessus du carrousel */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
             className="mb-4 flex justify-center"
           >
-            <Link to="/analytics">
-              <FeyButton className="text-white">
-                + d'infos
-              </FeyButton>
-            </Link>
+            <div className="flex gap-3">
+              <Link to="/analytics">
+                <FeyButton className="text-white">
+                  + d'infos
+                </FeyButton>
+              </Link>
+              
+              <Link to="/rankings">
+                <FeyButton className="text-white flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  Mon classement
+                </FeyButton>
+              </Link>
+            </div>
           </motion.div>
 
           {/* Carrousel de défis - SANS marge bottom et padding réduit */}
