@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    /* Mode clair - nouvelles variables */
-    --background: 0 0% 100%;
+    /* Mode clair - fond blanc légèrement grisé */
+    --background: 0 0% 98%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -34,6 +34,9 @@
     --ring: 142 71% 45%;
 
     --radius: 0.75rem;
+
+    /* Variable pour les effets de fond - transparent en mode clair */
+    --page-background-overlay: transparent;
   }
 
   .dark {
@@ -64,6 +67,9 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 142 71% 45%;
+
+    /* Variable pour les effets de fond - dégradé en mode sombre */
+    --page-background-overlay: linear-gradient(to bottom, hsl(142 71% 45% / 0.2), hsl(142 69% 29% / 0.3), hsl(var(--background)));
   }
 }
 

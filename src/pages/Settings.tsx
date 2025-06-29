@@ -22,16 +22,18 @@ import { MobileHeader } from "@/components/MobileHeader";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "next-themes";
+import { useThemeContext } from "@/contexts/ThemeContext";
 import { useState, useEffect } from "react";
 import { toast } from "@/components/ui/sonner";
+import { preferencesService, UserPreferences } from "@/lib/supabase";
 
 const Settings = () => {
   const { profile, user } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, saveThemePreference } = useThemeContext();
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
   
-  // États pour les notifications futures (placeholders)
+  // États pour les notifications
   const [pushNotifications, setPushNotifications] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [challengeReminders, setChallengeReminders] = useState(true);
@@ -42,30 +44,81 @@ const Settings = () => {
     setMounted(true);
   }, []);
 
-  const handleThemeToggle = (checked: boolean) => {
+  // Charger les préférences utilisateur
+  useEffect(() => {
+    const loadUserPreferences = async () => {
+      if (!user) return;
+      
+      try {
+        setLoading(true);
+        const preferences = await preferencesService.getUserPreferences(user.id);
+        
+        if (preferences) {
+          setPushNotifications(preferences.push_notifications);
+          setEmailNotifications(preferences.email_notifications);
+          setChallengeReminders(preferences.challenge_reminders);
+          setWeeklyReports(preferences.weekly_reports);
+        } else {
+          // Créer des préférences par défaut si elles n'existent pas
+          await preferencesService.updateUserPreferences(user.id, {
+            theme: theme || 'dark',
+            push_notifications: false,
+            email_notifications: true,
+            challenge_reminders: true,
+            weekly_reports: true
+          });
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des préférences:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserPreferences();
+  }, [user, theme]);
+
+  const handleThemeToggle = async (checked: boolean) => {
     const newTheme = checked ? "light" : "dark";
     setTheme(newTheme);
+    
+    if (user) {
+      await saveThemePreference(newTheme);
+    }
+    
     toast.success(`Mode ${newTheme === "light" ? "clair" : "sombre"} activé`);
   };
 
-  const handleNotificationToggle = (type: string, checked: boolean) => {
-    switch (type) {
-      case 'push':
-        setPushNotifications(checked);
-        toast.success(`Notifications push ${checked ? 'activées' : 'désactivées'}`);
-        break;
-      case 'email':
-        setEmailNotifications(checked);
-        toast.success(`Notifications email ${checked ? 'activées' : 'désactivées'}`);
-        break;
-      case 'challenges':
-        setChallengeReminders(checked);
-        toast.success(`Rappels de défis ${checked ? 'activés' : 'désactivés'}`);
-        break;
-      case 'reports':
-        setWeeklyReports(checked);
-        toast.success(`Rapports hebdomadaires ${checked ? 'activés' : 'désactivés'}`);
-        break;
+  const handleNotificationToggle = async (type: string, checked: boolean) => {
+    if (!user) return;
+    
+    try {
+      let updatedPreferences: Partial<UserPreferences> = {};
+      
+      switch (type) {
+        case 'push':
+          setPushNotifications(checked);
+          updatedPreferences.push_notifications = checked;
+          break;
+        case 'email':
+          setEmailNotifications(checked);
+          updatedPreferences.email_notifications = checked;
+          break;
+        case 'challenges':
+          setChallengeReminders(checked);
+          updatedPreferences.challenge_reminders = checked;
+          break;
+        case 'reports':
+          setWeeklyReports(checked);
+          updatedPreferences.weekly_reports = checked;
+          break;
+      }
+      
+      await preferencesService.updateUserPreferences(user.id, updatedPreferences);
+      toast.success(`Notifications ${checked ? 'activées' : 'désactivées'}`);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des préférences:', error);
+      toast.error("Erreur lors de la mise à jour des préférences");
     }
   };
 
@@ -76,7 +129,7 @@ const Settings = () => {
     totalChallenges: 7
   };
 
-  if (!mounted) {
+  if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-foreground">Chargement des paramètres...</div>
@@ -87,7 +140,7 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Effets de fond adaptatifs */}
-      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-background" />
+      <div className="absolute inset-0 bg-[var(--page-background-overlay)]" />
       
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
         style={{

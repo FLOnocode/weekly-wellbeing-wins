@@ -268,9 +268,9 @@ const WeighIn = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Effets de fond similaires à la page principale */}
-      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Effets de fond adaptatifs */}
+      <div className="absolute inset-0 bg-[var(--page-background-overlay)]" />
       
       {/* Texture de bruit subtile */}
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
@@ -296,8 +296,8 @@ const WeighIn = () => {
       />
 
       {/* Spots lumineux animés */}
-      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40" />
-      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
+      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse opacity-40" />
+      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
 
       <div className="relative z-20">
         <MobileHeader 
@@ -312,13 +312,13 @@ const WeighIn = () => {
           {/* Header avec retour */}
           <div className="flex items-center gap-3 mb-6">
             <Link to="/">
-              <Button variant="ghost" size="icon" className="text-white">
+              <Button variant="ghost" size="icon" className="text-foreground">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div>
               <h1 className="text-heading-2 font-bold text-gradient">Mon Poids</h1>
-              <p className="text-body text-white/70">Suivez votre progression</p>
+              <p className="text-body text-muted-foreground">Suivez votre progression</p>
             </div>
           </div>
 
@@ -327,31 +327,31 @@ const WeighIn = () => {
             {profile && (
               <Card className="glassmorphism border-wellness-400/30">
                 <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
+                  <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
                     <Scale className="h-5 w-5 text-wellness-500" />
                     <span>Votre profil - {profile.nickname}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-wellness-400/30 rounded-lg">
-                      <div className="text-heading-3 font-bold text-wellness-300">
+                    <div className="text-center p-3 bg-muted border border-wellness-400/30 rounded-lg">
+                      <div className="text-heading-3 font-bold text-wellness-600 dark:text-wellness-300">
                         {profile.current_weight > 0 ? `${profile.current_weight}kg` : 'Non défini'}
                       </div>
-                      <div className="text-body-sm text-white/70">Poids actuel</div>
+                      <div className="text-body-sm text-muted-foreground">Poids actuel</div>
                     </div>
-                    <div className="text-center p-3 bg-white/10 backdrop-blur-sm border border-motivation-400/30 rounded-lg">
-                      <div className="text-heading-3 font-bold text-motivation-300">
+                    <div className="text-center p-3 bg-muted border border-motivation-400/30 rounded-lg">
+                      <div className="text-heading-3 font-bold text-motivation-600 dark:text-motivation-300">
                         {profile.goal_weight > 0 ? `${profile.goal_weight}kg` : 'Non défini'}
                       </div>
-                      <div className="text-body-sm text-white/70">Objectif</div>
+                      <div className="text-body-sm text-muted-foreground">Objectif</div>
                     </div>
                   </div>
                   
                   {profile.current_weight > 0 && profile.goal_weight > 0 && (
-                    <div className="mt-4 p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg text-center">
-                      <div className="text-body-sm text-white/70 mb-1">Reste à perdre</div>
-                      <div className="text-heading-4 font-bold text-white">
+                    <div className="mt-4 p-3 bg-muted border border-border rounded-lg text-center">
+                      <div className="text-body-sm text-muted-foreground mb-1">Reste à perdre</div>
+                      <div className="text-heading-4 font-bold text-foreground">
                         {Math.max(0, profile.current_weight - profile.goal_weight).toFixed(1)}kg
                       </div>
                     </div>
@@ -363,11 +363,11 @@ const WeighIn = () => {
             {/* Prochaine pesée */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
                   <Calendar className="h-5 w-5 text-motivation-500" />
                   <span>Pesée Hebdomadaire</span>
                 </CardTitle>
-                <CardDescription className="text-white/70">
+                <CardDescription className="text-muted-foreground">
                   Prochaine pesée : {" "}
                   {nextWeighInDate.toLocaleDateString("fr-FR", {
                     weekday: "long",
@@ -378,10 +378,10 @@ const WeighIn = () => {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <Badge className="bg-wellness-500/20 text-wellness-200 border-wellness-400/30">
+                  <Badge className="bg-wellness-500/20 text-wellness-600 dark:text-wellness-200 border-wellness-400/30">
                     Pesées le lundi
                   </Badge>
-                  <Badge className="bg-motivation-500/20 text-motivation-200 border-motivation-400/30">
+                  <Badge className="bg-motivation-500/20 text-motivation-600 dark:text-motivation-200 border-motivation-400/30">
                     Photo optionnelle
                   </Badge>
                 </div>
@@ -391,16 +391,16 @@ const WeighIn = () => {
             {/* Formulaire de pesée */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
                   <Scale className="h-5 w-5 text-wellness-500" />
                   <span>Enregistrer votre poids</span>
                 </CardTitle>
-                <CardDescription className="text-white/70">Soumettez votre pesée hebdomadaire</CardDescription>
+                <CardDescription className="text-muted-foreground">Soumettez votre pesée hebdomadaire</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="weight" className="text-body font-medium text-white">Poids actuel (kg) *</Label>
+                    <Label htmlFor="weight" className="text-body font-medium text-foreground">Poids actuel (kg) *</Label>
                     <Input
                       id="weight"
                       type="number"
@@ -411,31 +411,31 @@ const WeighIn = () => {
                       value={weight}
                       onChange={(e) => setWeight(e.target.value)}
                       required
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                     />
-                    <p className="text-xs text-white/50">
+                    <p className="text-xs text-muted-foreground">
                       Entre 30 et 300 kg
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="photo" className="text-body font-medium text-white">Photo de preuve (optionnel)</Label>
-                    <div className="border-2 border-dashed border-white/30 rounded-lg p-6 text-center">
+                    <Label htmlFor="photo" className="text-body font-medium text-foreground">Photo de preuve (optionnel)</Label>
+                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                       {photo ? (
                         <div className="space-y-2">
-                          <div className="text-body-sm text-wellness-300 font-medium">Photo sélectionnée : {photo.name}</div>
-                          <div className="text-xs text-white/60">Taille: {(photo.size / 1024 / 1024).toFixed(2)} MB</div>
-                          <Button type="button" variant="outline" size="sm" onClick={() => setPhoto(null)} className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                          <div className="text-body-sm text-wellness-600 dark:text-wellness-300 font-medium">Photo sélectionnée : {photo.name}</div>
+                          <div className="text-xs text-muted-foreground">Taille: {(photo.size / 1024 / 1024).toFixed(2)} MB</div>
+                          <Button type="button" variant="outline" size="sm" onClick={() => setPhoto(null)} className="bg-muted border-border text-foreground hover:bg-accent">
                             Supprimer la photo
                           </Button>
                         </div>
                       ) : (
                         <div className="space-y-2">
-                          <Camera className="h-8 w-8 text-white/60 mx-auto" />
-                          <div className="text-body-sm text-white/70">Prenez une photo de votre balance (optionnel)</div>
-                          <div className="text-xs text-white/50">Max 5MB - JPG, PNG acceptés</div>
+                          <Camera className="h-8 w-8 text-muted-foreground mx-auto" />
+                          <div className="text-body-sm text-muted-foreground">Prenez une photo de votre balance (optionnel)</div>
+                          <div className="text-xs text-muted-foreground">Max 5MB - JPG, PNG acceptés</div>
                           <label htmlFor="photo-input" className="cursor-pointer">
-                            <Button type="button" variant="outline" size="sm" asChild className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                            <Button type="button" variant="outline" size="sm" asChild className="bg-muted border-border text-foreground hover:bg-accent">
                               <span>
                                 <Upload className="h-4 w-4 mr-2" />
                                 Choisir une photo
@@ -456,14 +456,14 @@ const WeighIn = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="notes" className="text-body font-medium text-white">Notes (Optionnel)</Label>
+                    <Label htmlFor="notes" className="text-body font-medium text-foreground">Notes (Optionnel)</Label>
                     <Textarea
                       id="notes"
                       placeholder="Comment vous sentez-vous ? Des défis cette semaine ?"
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       rows={3}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
 
@@ -481,11 +481,11 @@ const WeighIn = () => {
             {/* Pesées récentes */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="text-heading-4 text-white">Pesées récentes</CardTitle>
+                <CardTitle className="text-heading-4 text-foreground">Pesées récentes</CardTitle>
               </CardHeader>
               <CardContent>
                 {loadingHistory ? (
-                  <div className="text-center text-white/70 py-4">
+                  <div className="text-center text-muted-foreground py-4">
                     Chargement de l'historique...
                   </div>
                 ) : recentWeighIns.length > 0 ? (
@@ -496,30 +496,30 @@ const WeighIn = () => {
                       const points = calculatePoints(weightChange);
 
                       return (
-                        <div key={entry.id} className="flex items-center justify-between p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
+                        <div key={entry.id} className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
                           <div>
-                            <div className="text-body font-medium text-white">{entry.weight}kg</div>
-                            <div className="text-body-sm text-white/70">
+                            <div className="text-body font-medium text-foreground">{entry.weight}kg</div>
+                            <div className="text-body-sm text-muted-foreground">
                               {new Date(entry.created_at).toLocaleDateString("fr-FR")}
                             </div>
                             {entry.notes && (
-                              <div className="text-xs text-white/60 mt-1 max-w-40 truncate">
+                              <div className="text-xs text-muted-foreground mt-1 max-w-40 truncate">
                                 {entry.notes}
                               </div>
                             )}
                           </div>
                           <div className="text-right">
                             {previousWeight && (
-                              <div className={`text-body font-medium ${weightChange < 0 ? "text-wellness-300" : weightChange > 0 ? "text-red-300" : "text-white/70"}`}>
+                              <div className={`text-body font-medium ${weightChange < 0 ? "text-wellness-600 dark:text-wellness-300" : weightChange > 0 ? "text-red-600 dark:text-red-300" : "text-muted-foreground"}`}>
                                 {weightChange > 0 ? "+" : ""}
                                 {weightChange.toFixed(1)}kg
                               </div>
                             )}
                             {points > 0 && (
-                              <div className="text-body-sm text-motivation-300">+{points} pts</div>
+                              <div className="text-body-sm text-motivation-600 dark:text-motivation-300">+{points} pts</div>
                             )}
                             {entry.photo_url && (
-                              <div className="text-xs text-wellness-300 mt-1">📸 Photo</div>
+                              <div className="text-xs text-wellness-600 dark:text-wellness-300 mt-1">📸 Photo</div>
                             )}
                           </div>
                         </div>
@@ -527,7 +527,7 @@ const WeighIn = () => {
                     })}
                   </div>
                 ) : (
-                  <div className="text-center text-white/70 py-4">
+                  <div className="text-center text-muted-foreground py-4">
                     Aucune pesée enregistrée pour le moment
                   </div>
                 )}

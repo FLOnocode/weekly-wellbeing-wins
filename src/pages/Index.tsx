@@ -233,8 +233,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Effets de fond adaptatifs */}
-      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-background" />
+      {/* Effets de fond adaptatifs - utilise la variable CSS */}
+      <div className="absolute inset-0 bg-[var(--page-background-overlay)]" />
       
       {/* Texture de bruit subtile */}
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
