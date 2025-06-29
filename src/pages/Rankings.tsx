@@ -42,7 +42,8 @@ const Rankings = () => {
           totalScore: entry.totalScore,
           isCurrentUser: entry.isCurrentUser,
           rank: entry.rank,
-          weeklyWeightChange: entry.weeklyWeightChange
+          weeklyWeightChange: entry.weeklyWeightChange,
+          hasAvatar: !!entry.avatar
         })));
 
         setLeaderboardData(leaderboard);
@@ -79,6 +80,16 @@ const Rankings = () => {
         .slice(0, 2);
     }
     return user?.email?.slice(0, 2).toUpperCase() || 'VP';
+  };
+
+  // Générer les initiales pour n'importe quel nom
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   const getRankIcon = (rank: number) => {
@@ -174,14 +185,11 @@ const Rankings = () => {
                 <CardContent>
                   <div className="flex items-center gap-4 flex-wrap">
                     <Avatar className="h-12 w-12 border-2 border-energy-300">
-                      <AvatarImage src={burnerOfWeek.avatar || "/placeholder.svg"} />
+                      <AvatarImage src={burnerOfWeek.avatar} />
                       <AvatarFallback className="bg-energy-500/20 text-energy-300">
                         {burnerOfWeek.isCurrentUser 
                           ? getUserInitials()
-                          : burnerOfWeek.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
+                          : getInitials(burnerOfWeek.name)
                         }
                       </AvatarFallback>
                     </Avatar>
@@ -229,14 +237,11 @@ const Rankings = () => {
                           </div>
 
                           <Avatar className="h-10 w-10 flex-shrink-0">
-                            <AvatarImage src={entry.avatar || "/placeholder.svg"} />
+                            <AvatarImage src={entry.avatar} />
                             <AvatarFallback className="bg-wellness-500/20 text-wellness-300">
                               {entry.isCurrentUser 
                                 ? getUserInitials()
-                                : entry.name
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .join("")
+                                : getInitials(entry.name)
                               }
                             </AvatarFallback>
                           </Avatar>

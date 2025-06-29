@@ -142,6 +142,12 @@ const Profile = () => {
     return user?.email?.slice(0, 2).toUpperCase() || 'VP';
   };
 
+  // Générer un avatar par défaut si aucune photo n'est disponible
+  const getDefaultAvatar = () => {
+    if (!user) return "/placeholder.svg";
+    return `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf&radius=50`;
+  };
+
   if (loadingStats) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -212,7 +218,7 @@ const Profile = () => {
                 <div className="flex items-center gap-4">
                   <div className="relative">
                     <Avatar className="h-16 w-16 border-2 border-wellness-300">
-                      <AvatarImage src={profile?.avatar_url || "/placeholder.svg"} />
+                      <AvatarImage src={profile?.avatar_url || getDefaultAvatar()} />
                       <AvatarFallback className="bg-wellness-500/20 text-wellness-300 text-heading-4">
                         {getInitials()}
                       </AvatarFallback>

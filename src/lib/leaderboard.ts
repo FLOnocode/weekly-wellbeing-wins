@@ -63,6 +63,21 @@ const findClosestWeightEntry = async (userId: string, targetDate: Date): Promise
   }
 };
 
+// Fonction pour générer un avatar par défaut aléatoire
+const getRandomDefaultAvatar = (userId: string): string => {
+  // Utiliser l'ID utilisateur pour générer un hash simple et consistant
+  let hash = 0;
+  for (let i = 0; i < userId.length; i++) {
+    const char = userId.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  
+  // Utiliser le hash pour sélectionner un avatar par défaut
+  const avatarNumber = Math.abs(hash) % 10 + 1; // 1 à 10
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf&radius=50`;
+};
+
 export const leaderboardService = {
   // Récupérer les règles du challenge
   async getChallengeRules(): Promise<ChallengeRule[]> {
@@ -262,15 +277,15 @@ export const leaderboardService = {
     }, {} as Record<string, any[]>);
   },
 
-  // Récupérer le classement complet - TOUS les profils maintenant
+  // Récupérer le classement complet - TOUS les profils maintenant avec avatars
   async getLeaderboard(currentUserId?: string): Promise<LeaderboardEntry[]> {
     try {
       console.log('🔍 Récupération de TOUS les profils pour le classement...');
       
-      // Récupérer TOUS les profils, même ceux sans données complètes
+      // Récupérer TOUS les profils avec leurs avatars
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, user_id, nickname, current_weight, goal_weight, created_at')
+        .select('id, user_id, nickname, current_weight, goal_weight, created_at, avatar_url')
         .order('created_at');
 
       if (profilesError) {
@@ -288,7 +303,8 @@ export const leaderboardService = {
           nickname: p.nickname || 'Non défini', 
           current_weight: p.current_weight || 0, 
           goal_weight: p.goal_weight || 0,
-          user_id: p.user_id.substring(0, 8) + '...'
+          user_id: p.user_id.substring(0, 8) + '...',
+          has_avatar: !!p.avatar_url
         }))
       );
 
@@ -308,9 +324,17 @@ export const leaderboardService = {
         console.log(`📊 Calcul des points pour ${displayName}...`);
         const stats = await this.calculateUserPoints(profile.user_id);
         
+        // Déterminer l'avatar à utiliser
+        let avatarUrl = profile.avatar_url;
+        if (!avatarUrl) {
+          // Générer un avatar par défaut basé sur l'ID utilisateur
+          avatarUrl = getRandomDefaultAvatar(profile.user_id);
+        }
+        
         return {
           id: profile.user_id,
           name: displayName,
+          avatar: avatarUrl, // Inclure l'URL de l'avatar (réel ou par défaut)
           totalScore: stats.totalPoints,
           weeklyScore: stats.weeklyPoints,
           weightLost: stats.totalWeightLost,
@@ -332,7 +356,8 @@ export const leaderboardService = {
           weeklyScore: entry.weeklyScore,
           weightLost: entry.weightLost,
           weeklyWeightChange: entry.weeklyWeightChange,
-          initialWeight: entry.initialWeight
+          initialWeight: entry.initialWeight,
+          hasAvatar: !!entry.avatar
         }))
       );
 
@@ -363,7 +388,8 @@ export const leaderboardService = {
           totalScore: entry.totalScore,
           weeklyWeightChange: entry.weeklyWeightChange,
           initialWeight: entry.initialWeight,
-          isBurnerOfWeek: entry.isBurnerOfWeek || false
+          isBurnerOfWeek: entry.isBurnerOfWeek || false,
+          hasAvatar: !!entry.avatar
         }))
       );
 
