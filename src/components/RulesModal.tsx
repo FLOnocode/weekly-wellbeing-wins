@@ -81,7 +81,7 @@ export const RulesModal = ({ trigger }: RulesModalProps) => {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl text-white">
             <Trophy className="h-6 w-6 text-yellow-500" />
-            Règles du Challenge Wellness Weekly
+            Règles du Challenge Fit Together
           </DialogTitle>
           <DialogDescription className="text-white/70">
             Découvrez comment gagner des points et maximiser votre score
