@@ -79,20 +79,54 @@ const getRandomDefaultAvatar = (userId: string): string => {
 };
 
 export const leaderboardService = {
-  // Récupérer les règles du challenge
+  // Récupérer les règles du challenge - AVEC DÉDUPLICATION
   async getChallengeRules(): Promise<ChallengeRule[]> {
-    const { data, error } = await supabase
-      .from('challenge_rules')
-      .select('*')
-      .eq('is_active', true)
-      .order('rule_type');
+    try {
+      console.log('🔍 Récupération des règles du challenge...');
+      
+      const { data, error } = await supabase
+        .from('challenge_rules')
+        .select('*')
+        .eq('is_active', true)
+        .order('rule_type');
 
-    if (error) {
-      console.error('Erreur lors de la récupération des règles:', error);
+      if (error) {
+        console.error('❌ Erreur lors de la récupération des règles:', error);
+        return [];
+      }
+
+      if (!data || data.length === 0) {
+        console.log('📋 Aucune règle trouvée');
+        return [];
+      }
+
+      console.log(`📋 ${data.length} règles récupérées avant déduplication:`, 
+        data.map(rule => ({ rule_type: rule.rule_type, points: rule.points }))
+      );
+
+      // DÉDUPLICATION : Garder seulement la première occurrence de chaque rule_type
+      const uniqueRules = new Map<string, ChallengeRule>();
+      
+      data.forEach(rule => {
+        if (!uniqueRules.has(rule.rule_type)) {
+          uniqueRules.set(rule.rule_type, rule);
+        } else {
+          console.log(`⚠️ Doublon détecté et ignoré pour rule_type: ${rule.rule_type}`);
+        }
+      });
+
+      const deduplicatedRules = Array.from(uniqueRules.values());
+      
+      console.log(`✅ ${deduplicatedRules.length} règles uniques après déduplication:`, 
+        deduplicatedRules.map(rule => ({ rule_type: rule.rule_type, points: rule.points }))
+      );
+
+      return deduplicatedRules;
+
+    } catch (error) {
+      console.error('💥 Exception lors de la récupération des règles:', error);
       return [];
     }
-
-    return data || [];
   },
 
   // Calculer les points pour un utilisateur
