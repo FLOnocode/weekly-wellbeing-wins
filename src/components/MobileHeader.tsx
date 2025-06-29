@@ -53,7 +53,7 @@ export const MobileHeader = ({
                 <Heart className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h1 className="text-heading-4 font-bold text-white">Fit Together</h1>
+                <h1 className="text-heading-4 font-bold text-white">Fit Together</h2>
                 <p className="text-caption text-white/70">SSM 2K25 Challenge</p>
               </div>
             </Link>
