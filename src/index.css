@@ -100,15 +100,11 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-oceanblue-500 to-motivation-500 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-wellness-500 to-motivation-500 bg-clip-text text-transparent;
   }
   
   .bg-gradient-wellness {
-    @apply bg-gradient-to-br from-oceanblue-400 to-oceanblue-600;
-  }
-  
-  .bg-gradient-oceanblue {
-    @apply bg-gradient-to-br from-oceanblue-400 to-oceanblue-600;
+    @apply bg-gradient-to-br from-wellness-400 to-wellness-600;
   }
   
   .bg-gradient-energy {

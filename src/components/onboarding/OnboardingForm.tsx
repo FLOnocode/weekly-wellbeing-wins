@@ -79,8 +79,8 @@ export const OnboardingForm = () => {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      {/* Effets de fond avec bleu marine */}
-      <div className="absolute inset-0 bg-gradient-to-b from-oceanblue-400/20 via-oceanblue-700/30 to-black" />
+      {/* Effets de fond */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
       
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
         style={{
@@ -89,9 +89,9 @@ export const OnboardingForm = () => {
         }}
       />
 
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-oceanblue-400/20 blur-[80px]" />
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-wellness-400/20 blur-[80px]" />
       <motion.div 
-        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-oceanblue-300/20 blur-[60px]"
+        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-wellness-300/20 blur-[60px]"
         animate={{ 
           opacity: [0.15, 0.3, 0.15],
           scale: [0.98, 1.02, 0.98]
@@ -114,7 +114,7 @@ export const OnboardingForm = () => {
           className="text-center mb-8"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-full text-sm font-medium mb-4">
-            <Heart className="h-4 w-4 text-oceanblue-400" />
+            <Heart className="h-4 w-4 text-wellness-400" />
             Challenge Wellness Weekly
           </div>
           
@@ -149,8 +149,8 @@ export const OnboardingForm = () => {
                   className="space-y-6"
                 >
                   <div className="text-center">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-oceanblue-500/20 rounded-full mb-4">
-                      <User className="h-8 w-8 text-oceanblue-400" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-wellness-500/20 rounded-full mb-4">
+                      <User className="h-8 w-8 text-wellness-400" />
                     </div>
                     <h2 className="text-xl font-semibold text-white mb-2">Votre surnom</h2>
                     <p className="text-white/70 text-sm">
@@ -286,7 +286,7 @@ export const OnboardingForm = () => {
                 <Button
                   onClick={handleNext}
                   disabled={!canProceed()}
-                  className="bg-gradient-to-r from-oceanblue-500 to-motivation-500 text-white"
+                  className="bg-gradient-to-r from-wellness-500 to-motivation-500 text-white"
                 >
                   Suivant
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -295,7 +295,7 @@ export const OnboardingForm = () => {
                 <Button
                   onClick={handleSubmit}
                   disabled={!canProceed() || loading}
-                  className="bg-gradient-to-r from-oceanblue-500 to-motivation-500 text-white"
+                  className="bg-gradient-to-r from-wellness-500 to-motivation-500 text-white"
                 >
                   {loading ? 'Finalisation...' : 'Commencer le défi !'}
                 </Button>

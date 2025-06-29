@@ -233,8 +233,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Effets de fond avec bleu marine */}
-      <div className="absolute inset-0 bg-gradient-to-b from-oceanblue-400/20 via-oceanblue-700/30 to-black" />
+      {/* Effets de fond similaires au sign-in-card */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
       
       {/* Texture de bruit subtile */}
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
@@ -245,9 +245,9 @@ const Index = () => {
       />
 
       {/* Lueur radiale du haut */}
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-oceanblue-400/20 blur-[80px]" />
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-wellness-400/20 blur-[80px]" />
       <motion.div 
-        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-oceanblue-300/20 blur-[60px]"
+        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-wellness-300/20 blur-[60px]"
         animate={{ 
           opacity: [0.15, 0.3, 0.15],
           scale: [0.98, 1.02, 0.98]
@@ -371,8 +371,8 @@ const Index = () => {
                 
                 {/* Message de motivation basé sur la progression */}
                 {completedChallenges.size === challenges.length && (
-                  <div className="mt-4 p-3 bg-oceanblue-500/20 border border-oceanblue-400/30 rounded-lg text-center">
-                    <p className="text-oceanblue-200 text-sm font-medium">
+                  <div className="mt-4 p-3 bg-wellness-500/20 border border-wellness-400/30 rounded-lg text-center">
+                    <p className="text-wellness-200 text-sm font-medium">
                       🎉 Félicitations ! Journée parfaite ! Vous avez gagné un bonus de {challengeRules.find(rule => rule.rule_type === 'daily_perfect_bonus')?.points || 10} points !
                     </p>
                   </div>

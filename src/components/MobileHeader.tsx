@@ -47,7 +47,7 @@ export const MobileHeader = ({
           <div className="flex items-center justify-between">
             {/* Logo et titre */}
             <Link to="/" className="flex items-center gap-2">
-              <div className="p-2 bg-gradient-oceanblue rounded-lg">
+              <div className="p-2 bg-gradient-wellness rounded-lg">
                 <Heart className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -59,7 +59,7 @@ export const MobileHeader = ({
             {/* Stats rapides et boutons */}
             <div className="flex items-center gap-3">
               <div className="text-center">
-                <div className="text-body font-bold text-oceanblue-300">{totalPoints}</div>
+                <div className="text-body font-bold text-wellness-300">{totalPoints}</div>
                 <div className="text-caption text-white/60">pts</div>
               </div>
               <div className="text-center">
@@ -107,9 +107,9 @@ export const MobileHeader = ({
                       <Link 
                         to="/" 
                         onClick={() => setIsMenuOpen(false)}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-oceanblue-500/20 transition-colors text-white"
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-wellness-500/20 transition-colors text-white"
                       >
-                        <Heart className="h-5 w-5 text-oceanblue-400" />
+                        <Heart className="h-5 w-5 text-wellness-400" />
                         <span className="text-body font-medium">Défis du jour</span>
                       </Link>
                       
@@ -192,12 +192,12 @@ export const MobileHeader = ({
                     <div className="pt-4 border-t border-white/20 space-y-3">
                       <h3 className="text-body-sm font-medium text-white/80 px-3">Vos Statistiques</h3>
                       
-                      <div className="p-4 bg-oceanblue-500/10 backdrop-blur-sm border border-oceanblue-400/20 rounded-lg">
+                      <div className="p-4 bg-wellness-500/10 backdrop-blur-sm border border-wellness-400/20 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-body-sm font-medium text-oceanblue-300">Points aujourd'hui</span>
-                          <Star className="h-4 w-4 text-oceanblue-400" />
+                          <span className="text-body-sm font-medium text-wellness-300">Points aujourd'hui</span>
+                          <Star className="h-4 w-4 text-wellness-400" />
                         </div>
-                        <div className="text-heading-2 font-bold text-oceanblue-300">{totalPoints}</div>
+                        <div className="text-heading-2 font-bold text-wellness-300">{totalPoints}</div>
                       </div>
                       
                       <div className="p-4 bg-motivation-500/10 backdrop-blur-sm border border-motivation-400/20 rounded-lg">
