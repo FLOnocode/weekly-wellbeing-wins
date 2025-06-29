@@ -78,9 +78,9 @@ export const OnboardingForm = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-      {/* Effets de fond */}
-      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
+    <div className="min-h-screen bg-background relative overflow-hidden flex items-center justify-center">
+      {/* Effets de fond adaptatifs */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-background" />
       
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
         style={{
@@ -103,8 +103,8 @@ export const OnboardingForm = () => {
         }}
       />
 
-      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40" />
-      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
+      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse opacity-40" />
+      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
 
       <div className="relative z-10 w-full max-w-md mx-auto px-4">
         <motion.div
@@ -113,25 +113,25 @@ export const OnboardingForm = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-8"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-full text-sm font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-foreground/10 backdrop-blur-sm border border-border text-foreground rounded-full text-sm font-medium mb-4">
             <Heart className="h-4 w-4 text-wellness-400" />
             Challenge Wellness Weekly
           </div>
           
-          <h1 className="text-3xl font-bold text-white mb-3">
+          <h1 className="text-3xl font-bold text-foreground mb-3">
             Configuration de votre profil
           </h1>
           
-          <p className="text-white/70 leading-relaxed mb-6">
+          <p className="text-muted-foreground leading-relaxed mb-6">
             Quelques informations pour personnaliser votre expérience de transformation
           </p>
 
           <div className="space-y-2">
-            <div className="flex justify-between text-sm text-white/70">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>Étape {currentStep} sur {totalSteps}</span>
               <span>{Math.round(progress)}%</span>
             </div>
-            <Progress value={progress} className="h-2 bg-white/20" />
+            <Progress value={progress} className="h-2 bg-muted" />
           </div>
         </motion.div>
 
@@ -152,24 +152,24 @@ export const OnboardingForm = () => {
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-wellness-500/20 rounded-full mb-4">
                       <User className="h-8 w-8 text-wellness-400" />
                     </div>
-                    <h2 className="text-xl font-semibold text-white mb-2">Votre surnom</h2>
-                    <p className="text-white/70 text-sm">
+                    <h2 className="text-xl font-semibold text-foreground mb-2">Votre surnom</h2>
+                    <p className="text-muted-foreground text-sm">
                       Choisissez un surnom qui vous représente dans le challenge
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="nickname" className="text-white">Surnom</Label>
+                    <Label htmlFor="nickname" className="text-foreground">Surnom</Label>
                     <Input
                       id="nickname"
                       type="text"
                       placeholder="Ex: SuperMotivé2025"
                       value={nickname}
                       onChange={(e) => setNickname(e.target.value)}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                       maxLength={20}
                     />
-                    <p className="text-xs text-white/50">
+                    <p className="text-xs text-muted-foreground">
                       {nickname.length}/20 caractères
                     </p>
                   </div>
@@ -190,14 +190,14 @@ export const OnboardingForm = () => {
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-motivation-500/20 rounded-full mb-4">
                       <Target className="h-8 w-8 text-motivation-400" />
                     </div>
-                    <h2 className="text-xl font-semibold text-white mb-2">Votre objectif</h2>
-                    <p className="text-white/70 text-sm">
+                    <h2 className="text-xl font-semibold text-foreground mb-2">Votre objectif</h2>
+                    <p className="text-muted-foreground text-sm">
                       Quel est votre poids objectif pour ce challenge ?
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="goalWeight" className="text-white">Poids objectif (kg)</Label>
+                    <Label htmlFor="goalWeight" className="text-foreground">Poids objectif (kg)</Label>
                     <Input
                       id="goalWeight"
                       type="number"
@@ -207,9 +207,9 @@ export const OnboardingForm = () => {
                       placeholder="Ex: 70.5"
                       value={goalWeight}
                       onChange={(e) => setGoalWeight(e.target.value)}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                     />
-                    <p className="text-xs text-white/50">
+                    <p className="text-xs text-muted-foreground">
                       Entre 30 et 300 kg
                     </p>
                   </div>
@@ -230,14 +230,14 @@ export const OnboardingForm = () => {
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-energy-500/20 rounded-full mb-4">
                       <Scale className="h-8 w-8 text-energy-400" />
                     </div>
-                    <h2 className="text-xl font-semibold text-white mb-2">Votre poids actuel</h2>
-                    <p className="text-white/70 text-sm">
+                    <h2 className="text-xl font-semibold text-foreground mb-2">Votre poids actuel</h2>
+                    <p className="text-muted-foreground text-sm">
                       Indiquez votre poids de départ pour suivre vos progrès
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="currentWeight" className="text-white">Poids actuel (kg)</Label>
+                    <Label htmlFor="currentWeight" className="text-foreground">Poids actuel (kg)</Label>
                     <Input
                       id="currentWeight"
                       type="number"
@@ -247,23 +247,23 @@ export const OnboardingForm = () => {
                       placeholder="Ex: 75.2"
                       value={currentWeight}
                       onChange={(e) => setCurrentWeight(e.target.value)}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      className="bg-background border-border text-foreground placeholder:text-muted-foreground"
                     />
-                    <p className="text-xs text-white/50">
+                    <p className="text-xs text-muted-foreground">
                       Entre 30 et 300 kg
                     </p>
                   </div>
 
                   {goalWeight && currentWeight && parseFloat(currentWeight) <= parseFloat(goalWeight) && (
                     <div className="p-3 bg-yellow-500/10 border border-yellow-400/30 rounded-lg">
-                      <p className="text-yellow-200 text-sm text-center">
+                      <p className="text-yellow-600 dark:text-yellow-200 text-sm text-center">
                         ⚠️ Votre poids actuel est inférieur ou égal à votre objectif. Assurez-vous que vos valeurs sont correctes.
                       </p>
                     </div>
                   )}
 
                   {error && (
-                    <div className="text-red-300 text-sm text-center p-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                    <div className="text-red-600 text-sm text-center p-2 bg-red-50 dark:bg-red-500/10 rounded-lg border border-red-200 dark:border-red-500/20">
                       {error}
                     </div>
                   )}
@@ -276,7 +276,7 @@ export const OnboardingForm = () => {
                 variant="outline"
                 onClick={handlePrevious}
                 disabled={currentStep === 1}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                className="bg-background border-border text-foreground hover:bg-muted"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Précédent

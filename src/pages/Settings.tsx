@@ -78,16 +78,16 @@ const Settings = () => {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Chargement des paramètres...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Chargement des paramètres...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Effets de fond similaires aux autres pages */}
-      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-black" />
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      {/* Effets de fond adaptatifs */}
+      <div className="absolute inset-0 bg-gradient-to-b from-wellness-500/20 via-wellness-700/30 to-background" />
       
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
         style={{
@@ -110,8 +110,8 @@ const Settings = () => {
         }}
       />
 
-      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse opacity-40" />
-      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-white/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
+      <div className="absolute left-1/4 top-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse opacity-40" />
+      <div className="absolute right-1/4 bottom-1/4 w-96 h-96 bg-foreground/5 rounded-full blur-[100px] animate-pulse delay-1000 opacity-40" />
 
       <div className="relative z-20">
         <MobileHeader 
@@ -126,13 +126,13 @@ const Settings = () => {
           {/* Header avec retour */}
           <div className="flex items-center gap-3 mb-6">
             <Link to="/">
-              <Button variant="ghost" size="icon" className="text-white">
+              <Button variant="ghost" size="icon" className="text-foreground">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div>
               <h1 className="text-heading-2 font-bold text-gradient">Paramètres</h1>
-              <p className="text-body text-white/70">Personnalisez votre expérience</p>
+              <p className="text-body text-muted-foreground">Personnalisez votre expérience</p>
             </div>
           </div>
 
@@ -140,27 +140,27 @@ const Settings = () => {
             {/* Informations sur l'application */}
             <Card className="glassmorphism border-wellness-400/30">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
                   <Info className="h-5 w-5 text-wellness-500" />
                   <span>À propos de l'application</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-body text-white/70">Nom de l'application</span>
-                  <span className="text-body font-medium text-white">Challenge Wellness Weekly</span>
+                  <span className="text-body text-muted-foreground">Nom de l'application</span>
+                  <span className="text-body font-medium text-foreground">Challenge Wellness Weekly</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-body text-white/70">Version</span>
-                  <Badge className="bg-wellness-500/20 text-wellness-200 border-wellness-400/30">v1.0.0</Badge>
+                  <span className="text-body text-muted-foreground">Version</span>
+                  <Badge className="bg-wellness-500/20 text-wellness-600 dark:text-wellness-200 border-wellness-400/30">v1.0.0</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-body text-white/70">Utilisateur connecté</span>
-                  <span className="text-body font-medium text-white">{profile?.nickname || 'Utilisateur'}</span>
+                  <span className="text-body text-muted-foreground">Utilisateur connecté</span>
+                  <span className="text-body font-medium text-foreground">{profile?.nickname || 'Utilisateur'}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-body text-white/70">Type de défi</span>
-                  <span className="text-body font-medium text-white">SSM 2K25 Challenge</span>
+                  <span className="text-body text-muted-foreground">Type de défi</span>
+                  <span className="text-body font-medium text-foreground">SSM 2K25 Challenge</span>
                 </div>
               </CardContent>
             </Card>
@@ -168,11 +168,11 @@ const Settings = () => {
             {/* Apparence */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
                   <Palette className="h-5 w-5 text-motivation-500" />
                   <span>Apparence</span>
                 </CardTitle>
-                <CardDescription className="text-white/70">
+                <CardDescription className="text-muted-foreground">
                   Personnalisez l'apparence de l'application
                 </CardDescription>
               </CardHeader>
@@ -185,10 +185,10 @@ const Settings = () => {
                       <Moon className="h-5 w-5 text-blue-400" />
                     )}
                     <div>
-                      <Label htmlFor="theme-toggle" className="text-body font-medium text-white">
+                      <Label htmlFor="theme-toggle" className="text-body font-medium text-foreground">
                         Mode clair
                       </Label>
-                      <p className="text-body-sm text-white/60">
+                      <p className="text-body-sm text-muted-foreground">
                         Basculer entre le mode sombre et clair
                       </p>
                     </div>
@@ -205,11 +205,11 @@ const Settings = () => {
             {/* Notifications */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
                   <Bell className="h-5 w-5 text-energy-500" />
                   <span>Notifications</span>
                 </CardTitle>
-                <CardDescription className="text-white/70">
+                <CardDescription className="text-muted-foreground">
                   Gérez vos préférences de notifications
                 </CardDescription>
               </CardHeader>
@@ -218,10 +218,10 @@ const Settings = () => {
                   <div className="flex items-center gap-3">
                     <Smartphone className="h-5 w-5 text-blue-400" />
                     <div>
-                      <Label htmlFor="push-notifications" className="text-body font-medium text-white">
+                      <Label htmlFor="push-notifications" className="text-body font-medium text-foreground">
                         Notifications push
                       </Label>
-                      <p className="text-body-sm text-white/60">
+                      <p className="text-body-sm text-muted-foreground">
                         Recevoir des notifications sur votre appareil
                       </p>
                     </div>
@@ -233,16 +233,16 @@ const Settings = () => {
                   />
                 </div>
 
-                <Separator className="bg-white/20" />
+                <Separator className="bg-border" />
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-green-400" />
                     <div>
-                      <Label htmlFor="email-notifications" className="text-body font-medium text-white">
+                      <Label htmlFor="email-notifications" className="text-body font-medium text-foreground">
                         Notifications email
                       </Label>
-                      <p className="text-body-sm text-white/60">
+                      <p className="text-body-sm text-muted-foreground">
                         Recevoir des emails de rappel
                       </p>
                     </div>
@@ -254,16 +254,16 @@ const Settings = () => {
                   />
                 </div>
 
-                <Separator className="bg-white/20" />
+                <Separator className="bg-border" />
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Heart className="h-5 w-5 text-wellness-400" />
                     <div>
-                      <Label htmlFor="challenge-reminders" className="text-body font-medium text-white">
+                      <Label htmlFor="challenge-reminders" className="text-body font-medium text-foreground">
                         Rappels de défis
                       </Label>
-                      <p className="text-body-sm text-white/60">
+                      <p className="text-body-sm text-muted-foreground">
                         Rappels quotidiens pour vos défis
                       </p>
                     </div>
@@ -275,16 +275,16 @@ const Settings = () => {
                   />
                 </div>
 
-                <Separator className="bg-white/20" />
+                <Separator className="bg-border" />
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Database className="h-5 w-5 text-purple-400" />
                     <div>
-                      <Label htmlFor="weekly-reports" className="text-body font-medium text-white">
+                      <Label htmlFor="weekly-reports" className="text-body font-medium text-foreground">
                         Rapports hebdomadaires
                       </Label>
-                      <p className="text-body-sm text-white/60">
+                      <p className="text-body-sm text-muted-foreground">
                         Résumé de vos progrès chaque semaine
                       </p>
                     </div>
@@ -301,23 +301,23 @@ const Settings = () => {
             {/* Confidentialité et sécurité */}
             <Card className="glassmorphism">
               <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-heading-4 text-white">
+                <CardTitle className="flex items-center gap-2 text-heading-4 text-foreground">
                   <Shield className="h-5 w-5 text-red-400" />
                   <span>Confidentialité et sécurité</span>
                 </CardTitle>
-                <CardDescription className="text-white/70">
+                <CardDescription className="text-muted-foreground">
                   Vos données sont protégées et sécurisées
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="p-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg">
-                  <p className="text-body-sm text-white/80 leading-relaxed">
+                <div className="p-3 bg-muted border border-border rounded-lg">
+                  <p className="text-body-sm text-foreground leading-relaxed">
                     🔒 Toutes vos données personnelles sont chiffrées et stockées de manière sécurisée. 
                     Nous ne partageons jamais vos informations avec des tiers.
                   </p>
                 </div>
                 <div className="p-3 bg-wellness-500/10 border border-wellness-400/30 rounded-lg">
-                  <p className="text-body-sm text-wellness-200 leading-relaxed">
+                  <p className="text-body-sm text-wellness-600 dark:text-wellness-200 leading-relaxed">
                     💡 Vos données de santé et de progression restent privées et ne sont utilisées 
                     que pour améliorer votre expérience dans le challenge.
                   </p>
@@ -328,10 +328,10 @@ const Settings = () => {
             {/* Support et aide */}
             <Card className="glassmorphism border-motivation-400/30">
               <CardHeader className="pb-4">
-                <CardTitle className="text-heading-4 text-white">
+                <CardTitle className="text-heading-4 text-foreground">
                   Support et aide
                 </CardTitle>
-                <CardDescription className="text-white/70">
+                <CardDescription className="text-muted-foreground">
                   Besoin d'aide ? Nous sommes là pour vous
                 </CardDescription>
               </CardHeader>
@@ -339,7 +339,7 @@ const Settings = () => {
                 <div className="space-y-3">
                   <Button
                     variant="outline"
-                    className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 justify-start"
+                    className="w-full bg-muted border-border text-foreground hover:bg-accent justify-start"
                   >
                     <Heart className="h-4 w-4 mr-2 text-wellness-400" />
                     Centre d'aide
@@ -347,7 +347,7 @@ const Settings = () => {
                   
                   <Button
                     variant="outline"
-                    className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20 justify-start"
+                    className="w-full bg-muted border-border text-foreground hover:bg-accent justify-start"
                   >
                     <Mail className="h-4 w-4 mr-2 text-motivation-400" />
                     Nous contacter
@@ -360,10 +360,10 @@ const Settings = () => {
             <Card className="glassmorphism border-wellness-400/30">
               <CardContent className="p-4 text-center">
                 <div className="text-2xl mb-2">⚙️</div>
-                <p className="text-white/80 text-sm">
+                <p className="text-foreground text-sm">
                   Personnalisez votre expérience pour tirer le meilleur parti de votre transformation !
                 </p>
-                <p className="text-wellness-300 text-xs mt-2">
+                <p className="text-wellness-600 dark:text-wellness-300 text-xs mt-2">
                   Vos paramètres sont sauvegardés automatiquement
                 </p>
               </CardContent>

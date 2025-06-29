@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    /* Mode clair - nouvelles variables */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -14,15 +15,15 @@
     --popover-foreground: 222.2 84% 4.9%;
 
     --primary: 142 71% 45%;
-    --primary-foreground: 355 100% 97%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 210 40% 98%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 142 69% 58%;
+    --accent: 210 40% 96%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -123,12 +124,25 @@
     @apply backdrop-blur-md bg-white/10 border border-white/20;
   }
 
+  /* Glassmorphism adaptatif pour les deux modes */
   .glassmorphism {
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10.5px);
     -webkit-backdrop-filter: blur(10.5px);
     border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+
+  /* Mode clair */
+  :root .glassmorphism {
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  /* Mode sombre */
+  .dark .glassmorphism {
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.18);
   }
 
