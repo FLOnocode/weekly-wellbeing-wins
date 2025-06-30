@@ -10,17 +10,14 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { leaderboardService, LeaderboardEntry, ChallengeRule } from "@/lib/leaderboard";
+import { useDailyStats } from "@/hooks/use-daily-stats";
 
 const Rankings = () => {
   const { profile, user } = useAuth();
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [rules, setRules] = useState<ChallengeRule[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentUserStats, setCurrentUserStats] = useState({
-    totalPoints: 0,
-    completedChallenges: 0,
-    totalChallenges: 7
-  });
+  const dailyStats = useDailyStats();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -48,17 +45,6 @@ const Rankings = () => {
 
         setLeaderboardData(leaderboard);
         setRules(challengeRules);
-
-        // Trouver les stats de l'utilisateur actuel
-        const currentUser = leaderboard.find(entry => entry.isCurrentUser);
-        if (currentUser) {
-          setCurrentUserStats({
-            totalPoints: currentUser.totalScore,
-            completedChallenges: currentUser.challengesCompleted,
-            totalChallenges: 7
-          });
-        }
-
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
       } finally {
@@ -149,9 +135,9 @@ const Rankings = () => {
 
       <div className="relative z-20">
         <MobileHeader 
-          totalPoints={currentUserStats.totalPoints}
-          completedChallenges={currentUserStats.completedChallenges}
-          totalChallenges={currentUserStats.totalChallenges}
+          totalPoints={dailyStats.totalPoints}
+          completedChallenges={dailyStats.completedChallenges}
+          totalChallenges={dailyStats.totalChallenges}
         />
       </div>
 

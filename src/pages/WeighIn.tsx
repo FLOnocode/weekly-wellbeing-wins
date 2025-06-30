@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase, WeightEntry } from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
+import { useDailyStats } from "@/hooks/use-daily-stats";
 
 const WeighIn = () => {
   const { profile, updateProfile, user, refreshProfile } = useAuth();
@@ -21,6 +22,7 @@ const WeighIn = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [recentWeighIns, setRecentWeighIns] = useState<WeightEntry[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const dailyStats = useDailyStats();
 
   // Charger l'historique des pesées
   useEffect(() => {
@@ -301,9 +303,9 @@ const WeighIn = () => {
 
       <div className="relative z-20">
         <MobileHeader 
-          totalPoints={0}
-          completedChallenges={0}
-          totalChallenges={7}
+          totalPoints={dailyStats.totalPoints}
+          completedChallenges={dailyStats.completedChallenges}
+          totalChallenges={dailyStats.totalChallenges}
         />
       </div>
 

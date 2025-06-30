@@ -30,6 +30,7 @@ import { challengeService, supabase } from "@/lib/supabase";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Heart, Footprints, Droplets, Utensils, Dumbbell, Ban, Apple, Moon } from "lucide-react";
+import { useDailyStats } from "@/hooks/use-daily-stats";
 
 // Types de graphiques disponibles
 type ChartType = 'bar' | 'line' | 'pie';
@@ -48,6 +49,7 @@ const Analytics = () => {
     averageDaily: 0,
     bestDay: 0
   });
+  const dailyStats = useDailyStats();
 
   // Définition des défis disponibles
   const challenges = [
@@ -404,9 +406,9 @@ const Analytics = () => {
 
       <div className="relative z-20">
         <MobileHeader
-          totalPoints={stats.totalPoints}
-          completedChallenges={stats.totalChallenges}
-          totalChallenges={7}
+          totalPoints={dailyStats.totalPoints}
+          completedChallenges={dailyStats.completedChallenges}
+          totalChallenges={dailyStats.totalChallenges}
         />
       </div>
 

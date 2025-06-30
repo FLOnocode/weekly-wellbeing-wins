@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { leaderboardService, LeaderboardEntry } from "@/lib/leaderboard";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/sonner";
+import { useDailyStats } from "@/hooks/use-daily-stats";
 
 const Profile = () => {
   const { signOut, profile, user, updateProfile, refreshProfile } = useAuth();
@@ -19,6 +20,7 @@ const Profile = () => {
   const [userLeaderboardStats, setUserLeaderboardStats] = useState<LeaderboardEntry | null>(null);
   const [loadingStats, setLoadingStats] = useState(true);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const dailyStats = useDailyStats();
 
   useEffect(() => {
     const fetchUserStats = async () => {
@@ -190,9 +192,9 @@ const Profile = () => {
 
       <div className="relative z-20">
         <MobileHeader 
-          totalPoints={totalPoints}
-          completedChallenges={challengesCompleted}
-          totalChallenges={7} // Nombre de défis par jour pour l'affichage du header
+          totalPoints={dailyStats.totalPoints}
+          completedChallenges={dailyStats.completedChallenges}
+          totalChallenges={dailyStats.totalChallenges}
         />
       </div>
 
